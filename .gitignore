@@ -1,0 +1,76 @@
+# ─── Secrets & local config ──────────────────────────────────────────────────
+local.properties
+*.keystore
+*.jks
+google-services.json
+GoogleService-Info.plist
+.env
+.env.*
+secrets.properties
+
+# ─── Gradle ───────────────────────────────────────────────────────────────────
+.gradle/
+**/build/
+!src/**/build/
+gradle/wrapper/gradle-wrapper.jar   # regenerated; keep .properties
+build-cache/
+
+# ─── Kotlin / KMP ─────────────────────────────────────────────────────────────
+.kotlin/
+**/.kotlin/
+kotlin-js-store/
+
+# ─── Android ──────────────────────────────────────────────────────────────────
+*.iml
+captures/
+.externalNativeBuild/
+.cxx/
+*.ap_
+*.apk
+*.aab
+*.dex
+
+# ─── iOS / Xcode ──────────────────────────────────────────────────────────────
+xcuserdata/
+**/xcuserdata/
+*.xcodeproj/*
+!*.xcodeproj/project.pbxproj
+!*.xcodeproj/xcshareddata/
+!*.xcodeproj/project.xcworkspace/
+!*.xcworkspace/contents.xcworkspacedata
+**/xcshareddata/WorkspaceSettings.xcsettings
+*.xccheckout
+*.xcscmblueprint
+DerivedData/
+*.moved-aside
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+Pods/
+Podfile.lock
+.build/                             # Swift PM cache
+
+# ─── IntelliJ / Android Studio ───────────────────────────────────────────────
+.idea/
+*.iws
+out/
+# Keep .idea/runConfigurations if shared with team — uncomment to un-ignore:
+# !.idea/runConfigurations/
+
+# ─── macOS ────────────────────────────────────────────────────────────────────
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# ─── Node (tooling only) ──────────────────────────────────────────────────────
+node_modules/
+
+# ─── Misc ─────────────────────────────────────────────────────────────────────
+*.log
+*.tmp
+*.swp
+*.orig
