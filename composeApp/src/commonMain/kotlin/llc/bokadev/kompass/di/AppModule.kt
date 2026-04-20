@@ -6,6 +6,7 @@ val appModule = module {
     includes(
         platformModule,
         networkModule,
+        placeModule,
         languagePickerModule,
         homeModule,
         categoriesModule,

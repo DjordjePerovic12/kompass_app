@@ -9,7 +9,8 @@
       "mcp__figma__use_figma",
       "mcp__figma__get_screenshot",
       "Bash(./gradlew :composeApp:compileKotlinAndroid)",
-      "Bash(./gradlew :composeApp:compileDebugKotlinAndroid)"
+      "Bash(./gradlew :composeApp:compileDebugKotlinAndroid)",
+      "Bash(curl *)"
     ]
   }
 }

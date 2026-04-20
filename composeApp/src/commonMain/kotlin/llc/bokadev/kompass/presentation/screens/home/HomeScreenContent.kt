@@ -17,9 +17,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,6 +32,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import llc.bokadev.kompass.domain.model.Place
 import llc.bokadev.kompass.presentation.screens.home.components.CompactPlaceCard
 import llc.bokadev.kompass.presentation.screens.home.components.EventCard
 import llc.bokadev.kompass.presentation.screens.home.components.FeaturedPlaceCard
@@ -50,12 +53,6 @@ private data class EventPreview(
     val venue: String,
     val day: String,
     val month: String
-)
-
-private val mustSeePlaces = listOf(
-    PlacePreview("1", "St. Tryphon Cathedral", "See & Visit", "Old Town"),
-    PlacePreview("2", "Kotor Old Town Walls", "See & Visit", "Old Town"),
-    PlacePreview("3", "Bastion Restaurant", "Eat & Drink", "Old Town"),
 )
 
 private val nearbyPlaces = listOf(
@@ -83,7 +80,7 @@ fun HomeScreenContent(
             .verticalScroll(rememberScrollState())
     ) {
         HeroHeader()
-        MustSeeSection(onPlaceClick = onPlaceClick)
+        MustSeeSection(places = state.mustSeePlaces, isLoading = state.isLoading, onPlaceClick = onPlaceClick)
         NearbyYouSection(onPlaceClick = onPlaceClick)
         UpcomingEventsSection(onEventClick = onEventClick)
         Spacer(
@@ -147,7 +144,11 @@ private fun HeroHeader() {
 }
 
 @Composable
-private fun MustSeeSection(onPlaceClick: (String) -> Unit) {
+private fun MustSeeSection(
+    places: List<Place>,
+    isLoading: Boolean,
+    onPlaceClick: (String) -> Unit
+) {
     val colors = KompassTheme.colors
     Column(
         modifier = Modifier
@@ -158,18 +159,26 @@ private fun MustSeeSection(onPlaceClick: (String) -> Unit) {
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         SectionHeader(title = "Must See", onSeeAll = {})
-        LazyRow(
-            contentPadding = PaddingValues(horizontal = 20.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            items(mustSeePlaces.size) { i ->
-                val place = mustSeePlaces[i]
-                FeaturedPlaceCard(
-                    name = place.name,
-                    category = place.category,
-                    zone = place.zone,
-                    onClick = { onPlaceClick(place.id) }
-                )
+        if (isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(horizontal = 20.dp),
+                color = colors.colorAmber
+            )
+        } else {
+            LazyRow(
+                contentPadding = PaddingValues(horizontal = 20.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                items(places) { place ->
+                    FeaturedPlaceCard(
+                        name = place.localizedName("en"),
+                        category = place.category.name,
+                        zone = place.zone ?: "",
+                        onClick = { onPlaceClick(place.id) }
+                    )
+                }
             }
         }
     }
