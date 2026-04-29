@@ -18,6 +18,6 @@ fun HomeScreen(
         state = state,
         onPlaceClick = onNavigateToPlaceDetail,
         onEventClick = onNavigateToEventDetail,
-        onIntent = vm::onIntent
+        onIntent = vm::onEvent
     )
 }

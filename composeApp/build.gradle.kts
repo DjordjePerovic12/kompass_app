@@ -61,6 +61,8 @@ kotlin {
             implementation(libs.supabase.storage)
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.kotlinx.serialization.json)
+            implementation(libs.napier)
+            implementation(libs.ktor.client.logging)
         }
 
         iosMain.dependencies {

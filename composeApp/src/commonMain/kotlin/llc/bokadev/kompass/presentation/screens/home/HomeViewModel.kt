@@ -10,15 +10,6 @@ import kotlinx.coroutines.launch
 import llc.bokadev.kompass.domain.model.Place
 import llc.bokadev.kompass.domain.usecase.GetMustSeePlacesUseCase
 
-data class HomeState(
-    val isLoading: Boolean = false,
-    val mustSeePlaces: List<Place> = emptyList(),
-    val error: String? = null
-)
-
-sealed interface HomeIntent {
-    data object LoadMustSeePlaces : HomeIntent
-}
 
 sealed interface HomeSideEffect
 
@@ -30,12 +21,12 @@ class HomeViewModel(
     val state: StateFlow<HomeState> = _state.asStateFlow()
 
     init {
-        onIntent(HomeIntent.LoadMustSeePlaces)
+        loadMustSeePlaces()
     }
 
-    fun onIntent(intent: HomeIntent) {
-        when (intent) {
-            HomeIntent.LoadMustSeePlaces -> loadMustSeePlaces()
+    fun onEvent(event: HomeEvent) {
+        when (event) {
+            HomeEvent.LoadMustSeePlaces -> loadMustSeePlaces()
         }
     }
 

@@ -198,3 +198,21 @@ Top-level: Eat & Drink, See & Visit, Activities, Hidden Gems, Practical. Sub-fil
 - CMP 1.10.3 requires Kotlin 2.2.20 — don't downgrade
 - Use @Preview (org.jetbrains.compose.ui.tooling.preview.Preview) — unified annotation
 - Never import raw color vals (colorNavy, colorAmber, etc.) in UI files — always use KompassTheme.colors.X
+
+## Related Projects
+
+### kompass-admin (CMS / Admin Panel)
+**Path:** /Users/djordjeperovic/Downloads/kompass-admin
+**Stack:** React 18 + TypeScript + Vite + Tailwind CSS + Supabase JS SDK
+**Purpose:** Web-based admin panel for managing all KOmpass content in Supabase
+**Key files:**
+- `src/types/` — TypeScript types that mirror the Supabase schema (canonical source)
+- `src/lib/supabase.ts` — Supabase JS client config
+- `src/pages/` — Dashboard, Places, Events, Experiences, Essentials, Itineraries
+- `src/hooks/useCrud.ts` — generic CRUD hook used by all pages
+**Run:** `npm run dev` (port 3000)
+
+### Adding a new feature / table
+When a new Supabase table or column is added, update BOTH projects:
+1. **kompass-admin:** `src/types/` (new TypeScript interface) + new page in `src/pages/`
+2. **kompass:** `data/remote/dto/` (new DTO) → `data/mapper/` (mapper extension) → `domain/model/` (domain class) → `domain/repository/` (interface) → `data/repository/` (impl) → `domain/usecase/` (use case) → presentation screen

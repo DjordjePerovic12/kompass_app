@@ -10,7 +10,8 @@
       "mcp__figma__get_screenshot",
       "Bash(./gradlew :composeApp:compileKotlinAndroid)",
       "Bash(./gradlew :composeApp:compileDebugKotlinAndroid)",
-      "Bash(curl *)"
+      "Bash(curl *)",
+      "Read(//Users/djordjeperovic/Downloads/kompass-admin/**)"
     ]
   }
 }
