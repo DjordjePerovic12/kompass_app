@@ -1,0 +1,17 @@
+package llc.bokadev.kompass.data.remote.dto
+
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class CityEssentialDto(
+    @SerialName("id") val id: String,
+    @SerialName("key") val key: String,
+    @SerialName("category") val category: String,
+    @SerialName("title") val title: Map<String, String>,
+    @SerialName("content") val content: Map<String, String>,
+    @SerialName("location") val location: Map<String, String>? = null,
+    @SerialName("links") val links: List<String>? = null,
+    @SerialName("sort_order") val sortOrder: Int = 0,
+    @SerialName("is_active") val isActive: Boolean = true
+)
