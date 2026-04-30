@@ -6,11 +6,24 @@ import io.github.jan.supabase.postgrest.query.Order
 import llc.bokadev.kompass.data.mapper.toDomain
 import llc.bokadev.kompass.data.remote.dto.PlaceDto
 import llc.bokadev.kompass.domain.model.Place
+import llc.bokadev.kompass.domain.model.PlaceCategory
 import llc.bokadev.kompass.domain.repository.PlaceRepository
 
 class PlaceRepositoryImpl(
     private val supabase: SupabaseClient
 ) : PlaceRepository {
+
+    override suspend fun getActivePlaces(): Result<List<Place>> = runCatching {
+        supabase.from("places")
+            .select {
+                filter {
+                    eq("is_active", true)
+                }
+                order(column = "sort_order", order = Order.ASCENDING)
+            }
+            .decodeList<PlaceDto>()
+            .map { it.toDomain() }
+    }
 
     override suspend fun getMustSeePlaces(): Result<List<Place>> = runCatching {
         supabase.from("places")
@@ -23,5 +36,25 @@ class PlaceRepositoryImpl(
             }
             .decodeList<PlaceDto>()
             .map { it.toDomain() }
+    }
+
+    override suspend fun getPlacesByCategory(category: PlaceCategory): Result<List<Place>> = runCatching {
+        supabase.from("places")
+            .select {
+                filter {
+                    eq("category", category.name.lowercase())
+                    eq("is_active", true)
+                }
+                order(column = "sort_order", order = Order.ASCENDING)
+            }
+            .decodeList<PlaceDto>()
+            .map { it.toDomain() }
+    }
+
+    override suspend fun getPlaceById(id: String): Result<Place> = runCatching {
+        supabase.from("places")
+            .select { filter { eq("id", id) } }
+            .decodeSingle<PlaceDto>()
+            .toDomain()
     }
 }

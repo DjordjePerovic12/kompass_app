@@ -1,24 +1,36 @@
 package llc.bokadev.kompass.presentation.screens.categories
 
-import androidx.lifecycle.ViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import llc.bokadev.kompass.core.presentation.base.BaseEvent
+import llc.bokadev.kompass.core.presentation.base.BaseViewModel
+import llc.bokadev.kompass.domain.usecase.GetCategoriesUseCase
 
-data class CategoriesState(
-    val isLoading: Boolean = false
-)
+sealed interface CategoriesEvent : BaseEvent {
+    data object Retry : CategoriesEvent
+}
 
-sealed interface CategoriesIntent
+class CategoriesViewModel(
+    private val getCategories: GetCategoriesUseCase
+) : BaseViewModel<CategoriesState, CategoriesEvent>() {
 
-sealed interface CategoriesSideEffect
+    override val initialState = CategoriesState()
 
-class CategoriesViewModel : ViewModel() {
+    init { loadCategories() }
 
-    private val _state = MutableStateFlow(CategoriesState())
-    val state: StateFlow<CategoriesState> = _state.asStateFlow()
+    override fun onIntent(event: CategoriesEvent) {
+        when (event) {
+            CategoriesEvent.Retry -> loadCategories()
+        }
+    }
 
-    fun onIntent(intent: CategoriesIntent) {
-        // Handle intents
+    private fun loadCategories() {
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true, error = null) }
+            getCategories()
+                .onSuccess { cats -> _state.update { it.copy(isLoading = false, categories = cats) } }
+                .onFailure { err -> _state.update { it.copy(isLoading = false, error = err.message) } }
+        }
     }
 }

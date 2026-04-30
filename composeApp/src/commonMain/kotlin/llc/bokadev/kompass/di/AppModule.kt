@@ -12,6 +12,11 @@ val appModule = module {
         categoriesModule,
         eventsModule,
         experiencesModule,
-        essentialsModule
+        essentialsModule,
+        servicesModule,
+        placesListModule,
+        nearbyPlacesModule,
+        placeDetailModule,
+        categoryModule
     )
 }

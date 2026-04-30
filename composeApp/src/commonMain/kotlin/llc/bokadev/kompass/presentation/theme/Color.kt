@@ -6,33 +6,38 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 
 // Brand — deep navy
-val colorNavy        = Color(0xFF102A43)
-val colorNavyMedium  = Color(0xFF243B53)
-val colorNavySubtle  = Color(0xFF334E68)
-val colorNavyMuted   = Color(0xFF486581)
-val colorSlate       = Color(0xFF627D98)
-val colorSlateLight  = Color(0xFF829AB1)
-val colorSlateSoft   = Color(0xFF9FB3C8)
-val colorSlatePale   = Color(0xFFBCCCDC)
-val colorSlateGhost  = Color(0xFFD9E2EC)
-val colorSlateFaint  = Color(0xFFF0F4F8)
+val colorNavy = Color(0xFF102A43)
+val colorNavyMedium = Color(0xFF243B53)
+val colorNavySubtle = Color(0xFF334E68)
+val colorNavyMuted = Color(0xFF486581)
+val colorSlate = Color(0xFF627D98)
+val colorSlateLight = Color(0xFF829AB1)
+val colorSlateSoft = Color(0xFF9FB3C8)
+val colorSlatePale = Color(0xFFBCCCDC)
+val colorSlateGhost = Color(0xFFD9E2EC)
+val colorSlateFaint = Color(0xFFF0F4F8)
 
 // Accent — warm amber
-val colorAmberDark   = Color(0xFFD97706)
-val colorAmber       = Color(0xFFF59E0B)
-val colorAmberLight  = Color(0xFFFBBF24)
+val colorAmberDark = Color(0xFFD97706)
+val colorAmber = Color(0xFFF59E0B)
+val colorAmberLight = Color(0xFFFBBF24)
 val colorAmberSubtle = Color(0xFFFEF3C7)
 
 // Surfaces
-val colorWhite         = Color(0xFFFFFFFF)
-val colorSurface       = Color(0xFFF8F9FB)
-val colorSurfaceMid    = Color(0xFFF1F3F7)
+val colorWhite = Color(0xFFFFFFFF)
+val colorSurface = Color(0xFFF8F9FB)
+val colorSurfaceMid = Color(0xFFF1F3F7)
 val colorSurfaceStrong = Color(0xFFE4E7ED)
 
 // Semantic
-val colorSuccess   = Color(0xFF059669)
-val colorError     = Color(0xFFDC2626)
+val colorSuccess = Color(0xFF059669)
+val colorError = Color(0xFFDC2626)
 val colorSponsored = Color(0xFFF59E0B)
+
+val filterUnselectedSurface = Color(0xFFF1F3F7)
+val filterUnselectedText = Color(0xFF627D98)
+val dateBoxBackground = Color(0xFFFEF3C7)
+val eventDateText = Color(0xFFF59E0B)
 
 @Immutable
 data class KompassColors(
@@ -57,6 +62,10 @@ data class KompassColors(
     val colorSuccess: Color,
     val colorError: Color,
     val colorSponsored: Color,
+    val filterUnselectedSurface: Color,
+    val filterUnselectedText: Color,
+    val dateBoxBackground: Color,
+    val eventDateText: Color,
 )
 
 val LocalKompassColors = staticCompositionLocalOf {
@@ -82,6 +91,10 @@ val LocalKompassColors = staticCompositionLocalOf {
         colorSuccess = Color.Unspecified,
         colorError = Color.Unspecified,
         colorSponsored = Color.Unspecified,
+        filterUnselectedSurface = Color.Unspecified,
+        filterUnselectedText = Color.Unspecified,
+        dateBoxBackground = Color.Unspecified,
+        eventDateText = Color.Unspecified,
     )
 }
 
@@ -107,6 +120,10 @@ val defaultKompassColors = KompassColors(
     colorSuccess = colorSuccess,
     colorError = colorError,
     colorSponsored = colorSponsored,
+    filterUnselectedSurface = filterUnselectedSurface,
+    filterUnselectedText = filterUnselectedText,
+    dateBoxBackground = dateBoxBackground,
+    eventDateText = eventDateText,
 )
 
 object KompassTheme {

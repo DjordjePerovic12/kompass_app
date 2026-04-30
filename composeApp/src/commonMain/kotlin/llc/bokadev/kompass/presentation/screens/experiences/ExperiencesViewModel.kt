@@ -1,24 +1,21 @@
 package llc.bokadev.kompass.presentation.screens.experiences
 
-import androidx.lifecycle.ViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import llc.bokadev.kompass.core.presentation.base.BaseEvent
+import llc.bokadev.kompass.core.presentation.base.BaseState
+import llc.bokadev.kompass.core.presentation.base.BaseViewModel
 
 data class ExperiencesState(
-    val isLoading: Boolean = false
-)
+    override val isLoading: Boolean = false,
+    override val error: String? = null
+) : BaseState()
 
-sealed interface ExperiencesIntent
+sealed interface ExperiencesEvent : BaseEvent
 
 sealed interface ExperiencesSideEffect
 
-class ExperiencesViewModel : ViewModel() {
+class ExperiencesViewModel : BaseViewModel<ExperiencesState, ExperiencesEvent>() {
 
-    private val _state = MutableStateFlow(ExperiencesState())
-    val state: StateFlow<ExperiencesState> = _state.asStateFlow()
+    override val initialState = ExperiencesState()
 
-    fun onIntent(intent: ExperiencesIntent) {
-        // Handle intents
-    }
+    override fun onIntent(event: ExperiencesEvent) {}
 }

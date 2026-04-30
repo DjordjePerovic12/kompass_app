@@ -1,11 +1,11 @@
 package llc.bokadev.kompass.domain.model
 
-enum class PlaceCategory {
-    EAT_AND_DRINK,
-    SEE_AND_VISIT,
-    ACTIVITIES,
-    HIDDEN_GEMS,
-    PRACTICAL
+enum class PlaceCategory(val uiText: String) {
+    EAT_AND_DRINK(uiText = "EAT AND DRINK"),
+    SEE_AND_VISIT("SEE AND VISIT"),
+    ACTIVITIES("ACTIVITIES"),
+    HIDDEN_GEMS("HIDDEN GEMS"),
+    PRACTICAL("PRACTICAL")
 }
 
 enum class PriceIndicator {

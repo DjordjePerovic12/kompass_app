@@ -10,6 +10,10 @@ import llc.bokadev.kompass.presentation.screens.experiencedetail.ExperienceDetai
 import llc.bokadev.kompass.presentation.screens.itinerarydetail.ItineraryDetailScreen
 import llc.bokadev.kompass.presentation.screens.languagepicker.LanguagePickerScreen
 import llc.bokadev.kompass.presentation.screens.placedetail.PlaceDetailScreen
+import llc.bokadev.kompass.presentation.screens.category_items_list.CategoryItemsListScreen
+import llc.bokadev.kompass.presentation.screens.essentials.EssentialsScreen
+import llc.bokadev.kompass.presentation.screens.nearby.NearbyPlacesScreen
+import llc.bokadev.kompass.presentation.screens.services.ServicesScreen
 
 @Composable
 fun KompassNavHost(isFirstLaunch: Boolean) {
@@ -35,7 +39,11 @@ fun KompassNavHost(isFirstLaunch: Boolean) {
                 onNavigateToPlaceDetail = { id -> navController.navigate(Route.PlaceDetail(id)) },
                 onNavigateToEventDetail = { id -> navController.navigate(Route.EventDetail(id)) },
                 onNavigateToExperienceDetail = { id -> navController.navigate(Route.ExperienceDetail(id)) },
-                onNavigateToItineraryDetail = { id -> navController.navigate(Route.ItineraryDetail(id)) }
+                onNavigateToItineraryDetail = { id -> navController.navigate(Route.ItineraryDetail(id)) },
+                onNavigateToPlacesList = { category -> navController.navigate(Route.CategoryItemsList(category)) },
+                onNavigateToNearbyPlaces = { navController.navigate(Route.NearbyPlaces) },
+                onNavigateToEssentials = { navController.navigate(Route.Essentials) },
+                onNavigateToServices = { navController.navigate(Route.Services) }
             )
         }
 
@@ -57,6 +65,30 @@ fun KompassNavHost(isFirstLaunch: Boolean) {
         composable<Route.ItineraryDetail> { backStackEntry ->
             val route: Route.ItineraryDetail = backStackEntry.toRoute()
             ItineraryDetailScreen(id = route.id, onBack = { navController.popBackStack() })
+        }
+
+        composable<Route.CategoryItemsList> { backStackEntry ->
+            val route: Route.CategoryItemsList = backStackEntry.toRoute()
+            CategoryItemsListScreen(
+                category = route.category,
+                onBack = { navController.popBackStack() },
+                onPlaceClick = { id -> navController.navigate(Route.PlaceDetail(id)) }
+            )
+        }
+
+        composable<Route.NearbyPlaces> {
+            NearbyPlacesScreen(
+                onBack = { navController.popBackStack() },
+                onPlaceClick = { id -> navController.navigate(Route.PlaceDetail(id)) }
+            )
+        }
+
+        composable<Route.Essentials> {
+            EssentialsScreen(onBack = { navController.popBackStack() })
+        }
+
+        composable<Route.Services> {
+            ServicesScreen(onBack = { navController.popBackStack() })
         }
     }
 }

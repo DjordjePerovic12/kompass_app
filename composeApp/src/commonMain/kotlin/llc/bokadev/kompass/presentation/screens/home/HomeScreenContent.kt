@@ -22,6 +22,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,47 +34,32 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import llc.bokadev.kompass.core.util.buildPhotoUrl
+import llc.bokadev.kompass.core.util.currentAppLanguage
+import llc.bokadev.kompass.domain.model.Event
+import llc.bokadev.kompass.domain.model.NearbyPlace
 import llc.bokadev.kompass.domain.model.Place
 import llc.bokadev.kompass.presentation.screens.home.components.CompactPlaceCard
 import llc.bokadev.kompass.presentation.screens.home.components.EventCard
 import llc.bokadev.kompass.presentation.screens.home.components.FeaturedPlaceCard
 import llc.bokadev.kompass.presentation.screens.home.components.SectionHeader
 import llc.bokadev.kompass.presentation.theme.KompassTheme
-
-private data class PlacePreview(
-    val id: String,
-    val name: String,
-    val category: String,
-    val zone: String,
-    val distance: String = ""
-)
-
-private data class EventPreview(
-    val id: String,
-    val name: String,
-    val venue: String,
-    val day: String,
-    val month: String
-)
-
-private val nearbyPlaces = listOf(
-    PlacePreview("4", "Luna Restaurant", "Eat & Drink", "Old Town", "0.3 km"),
-    PlacePreview("5", "Kotor Bay Kayaking", "Activities", "Marina", "0.8 km"),
-)
-
-private val upcomingEvents = listOf(
-    EventPreview("1", "Kotor Carnival", "Old Town Square", "14", "FEB"),
-    EventPreview("2", "Summer Jazz Night", "City Ramparts", "12", "JUL"),
-)
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
+import kotlin.math.roundToInt
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 @Composable
 fun HomeScreenContent(
     state: HomeState,
     onPlaceClick: (String) -> Unit,
     onEventClick: (String) -> Unit,
-    onIntent: (HomeIntent) -> Unit
+    onNearbySeeAll: () -> Unit,
+    onIntent: (HomeEvent) -> Unit
 ) {
     val colors = KompassTheme.colors
+    val lang = currentAppLanguage()
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -80,9 +67,28 @@ fun HomeScreenContent(
             .verticalScroll(rememberScrollState())
     ) {
         HeroHeader()
-        MustSeeSection(places = state.mustSeePlaces, isLoading = state.isLoading, onPlaceClick = onPlaceClick)
-        NearbyYouSection(onPlaceClick = onPlaceClick)
-        UpcomingEventsSection(onEventClick = onEventClick)
+        MustSeeSection(
+            places = state.mustSeePlaces,
+            isLoading = state.isLoading,
+            lang = lang,
+            onPlaceClick = onPlaceClick
+        )
+        if (state.nearbyPlaces.isNotEmpty()) {
+            NearbyYouSection(
+                nearbyPlaces = state.nearbyPlaces,
+                isLoading = state.isLoading,
+                isUsingCurrentLocation = state.isUsingCurrentLocation,
+                lang = lang,
+                onPlaceClick = onPlaceClick,
+                onSeeAll = onNearbySeeAll
+            )
+        }
+        UpcomingEventsSection(
+            events = state.upcomingEvents,
+            isLoading = state.isLoading,
+            lang = lang,
+            onEventClick = onEventClick
+        )
         Spacer(
             Modifier
                 .fillMaxWidth()
@@ -147,6 +153,7 @@ private fun HeroHeader() {
 private fun MustSeeSection(
     places: List<Place>,
     isLoading: Boolean,
+    lang: String,
     onPlaceClick: (String) -> Unit
 ) {
     val colors = KompassTheme.colors
@@ -173,9 +180,10 @@ private fun MustSeeSection(
             ) {
                 items(places) { place ->
                     FeaturedPlaceCard(
-                        name = place.localizedName("en"),
-                        category = place.category.name,
+                        name = place.localizedName(lang),
+                        category = place.category.uiText,
                         zone = place.zone ?: "",
+                        imageUrl = place.photos.firstOrNull()?.let { buildPhotoUrl(it) },
                         onClick = { onPlaceClick(place.id) }
                     )
                 }
@@ -185,7 +193,14 @@ private fun MustSeeSection(
 }
 
 @Composable
-private fun NearbyYouSection(onPlaceClick: (String) -> Unit) {
+private fun NearbyYouSection(
+    nearbyPlaces: List<NearbyPlace>,
+    isLoading: Boolean,
+    isUsingCurrentLocation: Boolean,
+    lang: String,
+    onPlaceClick: (String) -> Unit,
+    onSeeAll: () -> Unit
+) {
     val colors = KompassTheme.colors
     Column(
         modifier = Modifier
@@ -194,26 +209,56 @@ private fun NearbyYouSection(onPlaceClick: (String) -> Unit) {
             .padding(vertical = 20.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        SectionHeader(title = "Nearby You", onSeeAll = {})
+        SectionHeader(title = "Nearby You", onSeeAll = onSeeAll)
         Column(
             modifier = Modifier.padding(horizontal = 20.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            nearbyPlaces.forEach { place ->
-                CompactPlaceCard(
-                    name = place.name,
-                    category = place.category,
-                    zone = place.zone,
-                    distance = place.distance,
-                    onClick = { onPlaceClick(place.id) }
+            if (!isUsingCurrentLocation) {
+                Text(
+                    text = "Location unavailable, showing closest curated spots around Old Town.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = colors.colorSlate
                 )
+            }
+
+            if (isLoading && nearbyPlaces.isEmpty()) {
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                    color = colors.colorAmber
+                )
+            } else if (nearbyPlaces.isEmpty()) {
+                Text(
+                    text = "No nearby places available right now.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = colors.colorSlate
+                )
+            } else {
+                nearbyPlaces.forEach { nearbyPlace ->
+                    val place = nearbyPlace.place
+                    CompactPlaceCard(
+                        name = place.localizedName(lang),
+                        category = place.category.uiText,
+                        zone = place.zone ?: "Kotor",
+                        distance = nearbyPlace.distanceKm.toDistanceLabel(),
+                        meta = nearbyPlace.toNearbyMeta(),
+                        imageUrl = place.photos.firstOrNull()?.let { buildPhotoUrl(it) },
+                        onClick = { onPlaceClick(place.id) }
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
-private fun UpcomingEventsSection(onEventClick: (String) -> Unit) {
+@OptIn(ExperimentalTime::class)
+private fun UpcomingEventsSection(
+    events: List<Event>,
+    isLoading: Boolean,
+    lang: String,
+    onEventClick: (String) -> Unit
+) {
     val colors = KompassTheme.colors
     Column(
         modifier = Modifier
@@ -227,15 +272,88 @@ private fun UpcomingEventsSection(onEventClick: (String) -> Unit) {
             modifier = Modifier.padding(horizontal = 20.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            upcomingEvents.forEach { event ->
-                EventCard(
-                    name = event.name,
-                    venue = event.venue,
-                    day = event.day,
-                    month = event.month,
-                    onClick = { onEventClick(event.id) }
+            if (isLoading && events.isEmpty()) {
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                    color = colors.colorAmber
                 )
+            } else {
+                events.forEach { event ->
+                    EventCard(
+                        name = event.localizedName(lang),
+                        venue = event.localizedVenue(lang),
+                        day = event.startTime.toHomeEventDay(),
+                        month = event.startTime.toHomeEventMonth(),
+                        meta = event.toHomeEventMeta(),
+                        onClick = { onEventClick(event.id) }
+                    )
+                }
             }
         }
     }
 }
+
+@OptIn(ExperimentalTime::class)
+private fun String.toHomeEventDay(): String = runCatching {
+    Instant.parse(this)
+        .toLocalDateTime(TimeZone.currentSystemDefault())
+        .date
+        .day
+        .toString()
+}.getOrDefault("--")
+
+@OptIn(ExperimentalTime::class)
+private fun String.toHomeEventMonth(): String = runCatching {
+    Instant.parse(this)
+        .toLocalDateTime(TimeZone.currentSystemDefault())
+        .date
+        .month
+        .name
+        .take(3)
+}.getOrDefault("---")
+
+private fun Double.toDistanceLabel(): String {
+    return if (this < 1.0) {
+        "${(this * 1000).roundToInt()} m"
+    } else {
+        "${((this * 10).roundToInt() / 10.0)} km"
+    }
+}
+
+private fun NearbyPlace.toNearbyMeta(): String {
+    val distanceText = when {
+        distanceKm < 1.0 -> "${(distanceKm * 12).roundToInt()} min walk"
+        distanceKm <= 5.0 -> "${(distanceKm * 3).roundToInt()} min drive"
+        else -> "${(distanceKm * 2.2).roundToInt()} min drive"
+    }
+
+    val bestTimeText = when (place.bestTime.name.lowercase()) {
+        "morning" -> "Best in morning"
+        "afternoon" -> "Best in afternoon"
+        "evening" -> "Best in evening"
+        "night" -> "Best at night"
+        else -> null
+    }
+
+    return listOfNotNull(distanceText, bestTimeText).joinToString(" · ")
+}
+
+private fun Event.toHomeEventMeta(): String {
+    val start = startTime.toHomeEventTime()
+    val end = endTime?.toHomeEventTime()
+    return when {
+        start != null && end != null -> "$start – $end"
+        start != null -> start
+        else -> ""
+    }
+}
+
+@OptIn(ExperimentalTime::class)
+private fun String.toHomeEventTime(): String? = runCatching {
+    Instant.parse(this)
+        .toLocalDateTime(TimeZone.currentSystemDefault())
+        .time
+        .let { time ->
+            "${time.hour.toString().padStart(2, '0')}:${time.minute.toString().padStart(2, '0')}"
+        }
+}.getOrNull()

@@ -18,10 +18,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil3.compose.AsyncImage
 import llc.bokadev.kompass.presentation.theme.KompassTheme
 
 @Composable
@@ -29,6 +31,7 @@ fun FeaturedPlaceCard(
     name: String,
     category: String,
     zone: String,
+    imageUrl: String? = null,
     onClick: () -> Unit
 ) {
     val colors = KompassTheme.colors
@@ -39,7 +42,16 @@ fun FeaturedPlaceCard(
             .clip(RoundedCornerShape(16.dp))
             .clickable(onClick = onClick)
     ) {
-        Box(modifier = Modifier.fillMaxSize().background(colors.colorSlateLight))
+        if (imageUrl != null) {
+            AsyncImage(
+                model = imageUrl,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
+        } else {
+            Box(modifier = Modifier.fillMaxSize().background(colors.colorSlateLight))
+        }
 
         Box(
             modifier = Modifier

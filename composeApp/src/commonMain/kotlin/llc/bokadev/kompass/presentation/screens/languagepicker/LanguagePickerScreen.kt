@@ -66,7 +66,7 @@ fun LanguagePickerScreen(onLanguageSelected: () -> Unit) {
 
         languages.forEach { (code, label) ->
             LanguageButton(label = label) {
-                vm.onIntent(LanguagePickerIntent.SelectLanguage(code))
+                vm.onIntent(LanguagePickerEvent.SelectLanguage(code))
                 onLanguageSelected()
             }
             Spacer(Modifier.height(12.dp))

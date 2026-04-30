@@ -18,10 +18,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil3.compose.AsyncImage
 import llc.bokadev.kompass.presentation.theme.KompassTheme
 
 @Composable
@@ -30,6 +32,8 @@ fun CompactPlaceCard(
     category: String,
     zone: String,
     distance: String,
+    meta: String? = null,
+    imageUrl: String? = null,
     onClick: () -> Unit
 ) {
     val colors = KompassTheme.colors
@@ -50,7 +54,16 @@ fun CompactPlaceCard(
                 .size(44.dp)
                 .clip(RoundedCornerShape(10.dp))
                 .background(colors.colorSlateGhost)
-        )
+        ) {
+            if (imageUrl != null) {
+                AsyncImage(
+                    model = imageUrl,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.matchParentSize()
+                )
+            }
+        }
         Column(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(3.dp)
@@ -71,6 +84,14 @@ fun CompactPlaceCard(
                 color = colors.colorSlate,
                 maxLines = 1
             )
+            meta?.takeIf { it.isNotBlank() }?.let {
+                Text(
+                    text = it,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = colors.colorSlateLight,
+                    maxLines = 1
+                )
+            }
         }
         Text(
             text = distance,

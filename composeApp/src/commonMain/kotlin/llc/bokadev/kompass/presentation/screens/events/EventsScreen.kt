@@ -15,34 +15,41 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import llc.bokadev.kompass.core.presentation.base.BaseContentView
+import llc.bokadev.kompass.presentation.shared.KompassSharedTopBar
 import llc.bokadev.kompass.presentation.theme.KompassTheme
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun EventsScreen(
+    vmKey: String = "events",
     onNavigateToEventDetail: (String) -> Unit = {}
 ) {
-    val vm: EventsViewModel = koinViewModel()
+    val vm: EventsViewModel = koinViewModel(key = vmKey)
     val state by vm.state.collectAsState()
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(KompassTheme.colors.colorSurface)
-            .padding(horizontal = 16.dp, vertical = 24.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+    BaseContentView(
+        state = state,
+        topBar = {
+            KompassSharedTopBar(
+                slug = "Whats on in Kotor",
+                title = "Events",
+                onBackClick = {
+
+                }
+            )
+        }
     ) {
-        Text(
-            text = "Events",
-            style = MaterialTheme.typography.headlineLarge,
-            color = MaterialTheme.colorScheme.onBackground
-        )
-        Spacer(Modifier.height(8.dp))
-        Text(
-            text = "Coming soon",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+        EventsScreenContent(
+            state = state,
+            onDateFilterSelected = {
+                vm.onIntent(EventsEvent.SelectDateFilter(it))
+            },
+            onTypeFilterSelected = {
+                vm.onIntent(EventsEvent.SelectTypeFilter(it))
+            },
+            onEventClick = {},
+            onBack = {},
         )
     }
 }

@@ -22,4 +22,16 @@ sealed interface Route {
 
     @Serializable
     data class ItineraryDetail(val id: String) : Route
+
+    @Serializable
+    data class CategoryItemsList(val category: String) : Route
+
+    @Serializable
+    data object NearbyPlaces : Route
+
+    @Serializable
+    data object Essentials : Route
+
+    @Serializable
+    data object Services : Route
 }

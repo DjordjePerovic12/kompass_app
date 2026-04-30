@@ -11,7 +11,10 @@
       "Bash(./gradlew :composeApp:compileKotlinAndroid)",
       "Bash(./gradlew :composeApp:compileDebugKotlinAndroid)",
       "Bash(curl *)",
-      "Read(//Users/djordjeperovic/Downloads/kompass-admin/**)"
+      "Read(//Users/djordjeperovic/Downloads/kompass-admin/**)",
+      "Bash(xargs cat *)",
+      "mcp__figma__get_metadata",
+      "mcp__figma__get_design_context"
     ]
   }
 }

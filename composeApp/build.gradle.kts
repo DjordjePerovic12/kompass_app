@@ -60,6 +60,7 @@ kotlin {
             implementation(libs.supabase.auth)
             implementation(libs.supabase.storage)
             implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.kotlinx.datetime)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.napier)
             implementation(libs.ktor.client.logging)

@@ -29,6 +29,7 @@ fun EventCard(
     venue: String,
     day: String,
     month: String,
+    meta: String? = null,
     onClick: () -> Unit
 ) {
     val colors = KompassTheme.colors
@@ -87,6 +88,14 @@ fun EventCard(
                 color = colors.colorSlate,
                 maxLines = 1
             )
+            meta?.takeIf { it.isNotBlank() }?.let {
+                Text(
+                    text = it,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = colors.colorSlateLight,
+                    maxLines = 1
+                )
+            }
         }
     }
 }

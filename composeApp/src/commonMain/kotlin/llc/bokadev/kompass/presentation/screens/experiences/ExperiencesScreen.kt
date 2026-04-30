@@ -20,9 +20,10 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun ExperiencesScreen(
+    vmKey: String = "experiences",
     onNavigateToExperienceDetail: (String) -> Unit = {}
 ) {
-    val vm: ExperiencesViewModel = koinViewModel()
+    val vm: ExperiencesViewModel = koinViewModel(key = vmKey)
     val state by vm.state.collectAsState()
 
     Column(

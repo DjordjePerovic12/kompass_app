@@ -24,8 +24,7 @@ enum class BottomTab(val label: String) {
     Home("Home"),
     Categories("Categories"),
     Events("Events"),
-    Experiences("Experiences"),
-    Essentials("Essentials")
+    Experiences("Experiences")
 }
 
 @Composable
@@ -79,7 +78,6 @@ private fun TabIcon(tab: BottomTab, color: Color) {
             BottomTab.Categories  -> drawCategories(color)
             BottomTab.Events      -> drawEvents(color)
             BottomTab.Experiences -> drawExperiences(color)
-            BottomTab.Essentials  -> drawEssentials(color)
         }
     }
 }
@@ -179,12 +177,3 @@ private fun DrawScope.drawExperiences(color: Color) {
     drawPath(path, color)
 }
 
-private fun DrawScope.drawEssentials(color: Color) {
-    val w = size.width
-    val h = size.height
-    val lineHeight = h * 0.11f
-    val cr = CornerRadius(lineHeight / 2)
-    drawRoundRect(color = color, topLeft = Offset(w * 0.1f, h * 0.2f),  size = Size(w * 0.8f, lineHeight), cornerRadius = cr)
-    drawRoundRect(color = color, topLeft = Offset(w * 0.1f, h * 0.46f), size = Size(w * 0.65f, lineHeight), cornerRadius = cr)
-    drawRoundRect(color = color, topLeft = Offset(w * 0.1f, h * 0.72f), size = Size(w * 0.48f, lineHeight), cornerRadius = cr)
-}
