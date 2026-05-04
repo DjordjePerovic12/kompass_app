@@ -33,6 +33,7 @@ kotlin {
         androidMain.dependencies {
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.androidx.activity.compose)
+            implementation(libs.androidx.media)
             implementation(libs.koin.android)
             implementation(libs.ktor.client.okhttp)
             implementation(libs.kotlinx.coroutines.android)
@@ -122,6 +123,8 @@ buildkonfig {
         buildConfigField(BOOLEAN, "USE_LOCAL_SUPABASE", localProps.getProperty("USE_LOCAL_SUPABASE", "false"))
         buildConfigField(STRING, "SUPABASE_ANON_KEY_LOCAL", localProps.getProperty("SUPABASE_ANON_KEY_LOCAL", ""))
         buildConfigField(STRING, "SUPABASE_LOCAL_HOST", "localhost")
+        buildConfigField(STRING, "PAYMENT_BACKEND_BASE_URL", localProps.getProperty("PAYMENT_BACKEND_BASE_URL", ""))
+        buildConfigField(STRING, "PAYMENT_RETURN_URL_BASE", localProps.getProperty("PAYMENT_RETURN_URL_BASE", "https://kompass.app/payments"))
     }
 
     targetConfigs {

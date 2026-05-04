@@ -33,6 +33,7 @@ class EventRepositoryImpl(
             .decodeList<EventDto>()
             .map { it.toDomain() }
             .filter { event ->
+                isUpcoming(event) &&
                 matchesDateFilter(event, dateFilter) &&
                 (normalizedEventType == "all" || event.category.normalizedFilterValue() == normalizedEventType)
             }
@@ -65,6 +66,7 @@ class EventRepositoryImpl(
             }
             .decodeList<EventDto>()
             .map { it.toDomain() }
+            .filter(::isUpcoming)
     }
 
     override suspend fun getEventById(id: String): Result<Event> = runCatching {
@@ -97,6 +99,18 @@ class EventRepositoryImpl(
 
         return EventDateRange(start = start, endExclusive = end)
     }
+
+    private fun isUpcoming(event: Event): Boolean {
+        val comparisonInstant = event.endTime?.let(::parseInstantOrNull)
+            ?: parseInstantOrNull(event.startTime)
+            ?: return true
+
+        return comparisonInstant >= Clock.System.now()
+    }
+
+    private fun parseInstantOrNull(value: String): Instant? = runCatching {
+        Instant.parse(value)
+    }.getOrNull()
 }
 
 private data class EventDateRange(

@@ -17,6 +17,7 @@ val appModule = module {
         placesListModule,
         nearbyPlacesModule,
         placeDetailModule,
-        categoryModule
+        categoryModule,
+        premiumModule
     )
 }

@@ -7,12 +7,16 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import llc.bokadev.kompass.presentation.screens.eventdetail.EventDetailScreen
 import llc.bokadev.kompass.presentation.screens.experiencedetail.ExperienceDetailScreen
+import llc.bokadev.kompass.presentation.screens.experiencedetail.ExperienceGuideScreen
+import llc.bokadev.kompass.presentation.screens.experiences.ExperiencesScreen
 import llc.bokadev.kompass.presentation.screens.itinerarydetail.ItineraryDetailScreen
 import llc.bokadev.kompass.presentation.screens.languagepicker.LanguagePickerScreen
 import llc.bokadev.kompass.presentation.screens.placedetail.PlaceDetailScreen
 import llc.bokadev.kompass.presentation.screens.category_items_list.CategoryItemsListScreen
 import llc.bokadev.kompass.presentation.screens.essentials.EssentialsScreen
 import llc.bokadev.kompass.presentation.screens.nearby.NearbyPlacesScreen
+import llc.bokadev.kompass.presentation.screens.payment.PaymentCheckoutScreen
+import llc.bokadev.kompass.presentation.screens.premium.PremiumBundlesScreen
 import llc.bokadev.kompass.presentation.screens.services.ServicesScreen
 
 @Composable
@@ -41,6 +45,7 @@ fun KompassNavHost(isFirstLaunch: Boolean) {
                 onNavigateToExperienceDetail = { id -> navController.navigate(Route.ExperienceDetail(id)) },
                 onNavigateToItineraryDetail = { id -> navController.navigate(Route.ItineraryDetail(id)) },
                 onNavigateToPlacesList = { category -> navController.navigate(Route.CategoryItemsList(category)) },
+                onNavigateToActivities = { navController.navigate(Route.Activities) },
                 onNavigateToNearbyPlaces = { navController.navigate(Route.NearbyPlaces) },
                 onNavigateToEssentials = { navController.navigate(Route.Essentials) },
                 onNavigateToServices = { navController.navigate(Route.Services) }
@@ -59,7 +64,20 @@ fun KompassNavHost(isFirstLaunch: Boolean) {
 
         composable<Route.ExperienceDetail> { backStackEntry ->
             val route: Route.ExperienceDetail = backStackEntry.toRoute()
-            ExperienceDetailScreen(id = route.id, onBack = { navController.popBackStack() })
+            ExperienceDetailScreen(
+                id = route.id,
+                onBack = { navController.popBackStack() },
+                onLearnMore = { navController.navigate(Route.PremiumBundles(route.id)) },
+                onOpenGuide = { id -> navController.navigate(Route.ExperienceGuide(id)) }
+            )
+        }
+
+        composable<Route.ExperienceGuide> { backStackEntry ->
+            val route: Route.ExperienceGuide = backStackEntry.toRoute()
+            ExperienceGuideScreen(
+                id = route.id,
+                onBack = { navController.popBackStack() }
+            )
         }
 
         composable<Route.ItineraryDetail> { backStackEntry ->
@@ -83,12 +101,44 @@ fun KompassNavHost(isFirstLaunch: Boolean) {
             )
         }
 
+        composable<Route.Activities> {
+            ExperiencesScreen(
+                vmKey = "activities-route",
+                onNavigateToExperienceDetail = { id -> navController.navigate(Route.ExperienceDetail(id)) },
+                onBack = { navController.popBackStack() }
+            )
+        }
+
         composable<Route.Essentials> {
             EssentialsScreen(onBack = { navController.popBackStack() })
         }
 
         composable<Route.Services> {
             ServicesScreen(onBack = { navController.popBackStack() })
+        }
+
+        composable<Route.PremiumBundles> { backStackEntry ->
+            val route: Route.PremiumBundles = backStackEntry.toRoute()
+            PremiumBundlesScreen(
+                onBack = { navController.popBackStack() },
+                onNavigateToCheckout = { sessionId ->
+                    navController.navigate(Route.PaymentCheckout(sessionId))
+                },
+                unlockTargetActivityId = route.activityId,
+                onNavigateToGuide = { id ->
+                    navController.navigate(Route.ExperienceGuide(id)) {
+                        popUpTo<Route.PremiumBundles> { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable<Route.PaymentCheckout> { backStackEntry ->
+            val route: Route.PaymentCheckout = backStackEntry.toRoute()
+            PaymentCheckoutScreen(
+                sessionId = route.sessionId,
+                onBack = { navController.popBackStack() }
+            )
         }
     }
 }

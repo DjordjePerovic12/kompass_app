@@ -6,5 +6,9 @@
 	<true/>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>KOmpass uses your location to show the closest landmarks, places, and local services around you.</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>audio</string>
+	</array>
 </dict>
 </plist>

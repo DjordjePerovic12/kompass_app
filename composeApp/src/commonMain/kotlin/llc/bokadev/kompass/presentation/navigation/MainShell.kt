@@ -24,6 +24,7 @@ fun MainShell(
     onNavigateToExperienceDetail: (String) -> Unit,
     onNavigateToItineraryDetail: (String) -> Unit,
     onNavigateToPlacesList: (String) -> Unit,
+    onNavigateToActivities: () -> Unit,
     onNavigateToNearbyPlaces: () -> Unit,
     onNavigateToEssentials: () -> Unit,
     onNavigateToServices: () -> Unit
@@ -64,6 +65,7 @@ fun MainShell(
                 BottomTab.Categories -> CategoriesScreen(
                     vmKey = "categories-$categoriesVersion",
                     onNavigateToPlacesList = onNavigateToPlacesList,
+                    onNavigateToActivities = onNavigateToActivities,
                     onNavigateToEssentials = onNavigateToEssentials,
                     onNavigateToServices = onNavigateToServices
                 )

@@ -24,7 +24,7 @@ enum class BottomTab(val label: String) {
     Home("Home"),
     Categories("Categories"),
     Events("Events"),
-    Experiences("Experiences")
+    Experiences("Activities")
 }
 
 @Composable
@@ -176,4 +176,3 @@ private fun DrawScope.drawExperiences(color: Color) {
     path.close()
     drawPath(path, color)
 }
-

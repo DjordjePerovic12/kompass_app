@@ -11,6 +11,7 @@ import org.koin.compose.viewmodel.koinViewModel
 fun CategoriesScreen(
     vmKey: String = "categories",
     onNavigateToPlacesList: (String) -> Unit = {},
+    onNavigateToActivities: () -> Unit = {},
     onNavigateToEssentials: () -> Unit = {},
     onNavigateToServices: () -> Unit = {}
 ) {
@@ -33,6 +34,8 @@ fun CategoriesScreen(
             onCategoryClick = { category ->
                 if (category.id == "practical") {
                     onNavigateToEssentials()
+                } else if (category.id == "activities") {
+                    onNavigateToActivities()
                 } else {
                     onNavigateToPlacesList(category.id.uppercase())
                 }

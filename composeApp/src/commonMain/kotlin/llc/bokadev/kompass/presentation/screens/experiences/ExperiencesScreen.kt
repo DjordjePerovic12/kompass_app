@@ -1,49 +1,36 @@
 package llc.bokadev.kompass.presentation.screens.experiences
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import llc.bokadev.kompass.presentation.theme.KompassTheme
+import llc.bokadev.kompass.core.presentation.base.BaseContentView
+import llc.bokadev.kompass.presentation.shared.KompassSharedTopBar
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun ExperiencesScreen(
     vmKey: String = "experiences",
-    onNavigateToExperienceDetail: (String) -> Unit = {}
+    onNavigateToExperienceDetail: (String) -> Unit = {},
+    onBack: (() -> Unit)? = null
 ) {
     val vm: ExperiencesViewModel = koinViewModel(key = vmKey)
     val state by vm.state.collectAsState()
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(KompassTheme.colors.colorSurface)
-            .padding(horizontal = 16.dp, vertical = 24.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+    BaseContentView(
+        state = state,
+        topBar = {
+            KompassSharedTopBar(
+                slug = "Go beyond the old town",
+                title = "Activities",
+                showBack = onBack != null,
+                onBackClick = { onBack?.invoke() }
+            )
+        }
     ) {
-        Text(
-            text = "Experiences",
-            style = MaterialTheme.typography.headlineLarge,
-            color = MaterialTheme.colorScheme.onBackground
-        )
-        Spacer(Modifier.height(8.dp))
-        Text(
-            text = "Coming soon",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+        ExperiencesScreenContent(
+            state = state,
+            onIntent = vm::onIntent,
+            onActivityClick = onNavigateToExperienceDetail
         )
     }
 }

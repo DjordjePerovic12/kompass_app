@@ -21,4 +21,25 @@ class IosAppPreferences : AppPreferences {
     override fun setFirstLaunch(value: Boolean) {
         defaults.setBool(value, forKey = "is_first_launch")
     }
+
+    override fun hasAudioPass(): Boolean =
+        defaults.boolForKey("has_audio_pass")
+
+    override fun setAudioPass(value: Boolean) {
+        defaults.setBool(value, forKey = "has_audio_pass")
+    }
+
+    override fun hasExplorerPass(): Boolean =
+        defaults.boolForKey("has_explorer_pass")
+
+    override fun setExplorerPass(value: Boolean) {
+        defaults.setBool(value, forKey = "has_explorer_pass")
+    }
+
+    override fun hasPerksPass(): Boolean =
+        defaults.boolForKey("has_perks_pass")
+
+    override fun setPerksPass(value: Boolean) {
+        defaults.setBool(value, forKey = "has_perks_pass")
+    }
 }
