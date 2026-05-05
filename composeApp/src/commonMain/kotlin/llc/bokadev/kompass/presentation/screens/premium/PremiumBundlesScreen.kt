@@ -22,8 +22,10 @@ import androidx.compose.ui.unit.dp
 import llc.bokadev.kompass.core.presentation.base.BaseContentView
 import llc.bokadev.kompass.core.util.currentAppLanguage
 import llc.bokadev.kompass.domain.model.PremiumProduct
+import llc.bokadev.kompass.domain.repository.AnalyticsRepository
 import llc.bokadev.kompass.presentation.shared.KompassSharedTopBar
 import llc.bokadev.kompass.presentation.theme.KompassTheme
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -37,9 +39,12 @@ fun PremiumBundlesScreen(
     val state by vm.state.collectAsState()
     val locale = currentAppLanguage()
     val colors = KompassTheme.colors
+    val analytics = koinInject<AnalyticsRepository>()
 
     LaunchedEffect(Unit) {
         vm.onIntent(PremiumBundlesEvent.RefreshEntitlements)
+        analytics.trackScreenView("premium_bundles")
+        analytics.trackPremiumBundleOpen(contentOrigin = if (unlockTargetActivityId != null) "activity_upsell" else "premium")
     }
 
     LaunchedEffect(state.pendingCheckoutSession?.sessionId) {

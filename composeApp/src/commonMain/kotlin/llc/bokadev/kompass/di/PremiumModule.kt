@@ -8,6 +8,7 @@ import llc.bokadev.kompass.domain.repository.PremiumRepository
 import llc.bokadev.kompass.domain.usecase.HasPremiumAccessUseCase
 import llc.bokadev.kompass.domain.usecase.StartPremiumCheckoutUseCase
 import llc.bokadev.kompass.domain.usecase.VerifyPremiumCheckoutUseCase
+import llc.bokadev.kompass.presentation.screens.myguides.MyGuidesViewModel
 import llc.bokadev.kompass.presentation.screens.payment.PaymentCheckoutViewModel
 import llc.bokadev.kompass.presentation.screens.premium.PremiumBundlesViewModel
 import org.koin.core.module.dsl.viewModel
@@ -22,5 +23,6 @@ val premiumModule = module {
     factory { StartPremiumCheckoutUseCase(get()) }
     factory { VerifyPremiumCheckoutUseCase(get()) }
     viewModel { PremiumBundlesViewModel(get(), get(), get()) }
+    viewModel { MyGuidesViewModel(get(), get()) }
     viewModel { (sessionId: String) -> PaymentCheckoutViewModel(sessionId, get(), get(), get()) }
 }

@@ -55,7 +55,9 @@ fun CategoriesScreenContent(
     state: CategoriesState,
     onIntent: (CategoriesEvent) -> Unit,
     onCategoryClick: (Category) -> Unit,
-    onServicesClick: () -> Unit = {}
+    onServicesClick: () -> Unit = {},
+    onEventsClick: () -> Unit = {},
+    onInfoCenterClick: () -> Unit = {}
 ) {
     val colors = KompassTheme.colors
 
@@ -90,11 +92,37 @@ fun CategoriesScreenContent(
                         .fillMaxSize()
                         .background(colors.colorWhite)
                 ) {
+                    item {
+                        UtilityRow(
+                            letter = "E",
+                            title = "Events",
+                            subtitle = "What is happening today, this week, and this month",
+                            accent = Color(0xFF243B53),
+                            onClick = onEventsClick
+                        )
+                        HorizontalDivider(
+                            modifier = Modifier.padding(start = 76.dp, end = 20.dp),
+                            color = colors.colorSlateGhost
+                        )
+                    }
                     itemsIndexed(state.categories) { index, category ->
                         CategoryRow(
                             category = category,
                             fallbackColor = FALLBACK_COLORS.getOrElse(index) { Color.Gray },
                             onClick = { onCategoryClick(category) }
+                        )
+                        HorizontalDivider(
+                            modifier = Modifier.padding(start = 76.dp, end = 20.dp),
+                            color = colors.colorSlateGhost
+                        )
+                    }
+                    item {
+                        UtilityRow(
+                            letter = "I",
+                            title = "Info Center",
+                            subtitle = "Town notices, disruptions, and practical updates",
+                            accent = Color(0xFF9F1239),
+                            onClick = onInfoCenterClick
                         )
                         HorizontalDivider(
                             modifier = Modifier.padding(start = 76.dp, end = 20.dp),
@@ -112,6 +140,23 @@ fun CategoriesScreenContent(
 
 @Composable
 private fun ServicesRow(onClick: () -> Unit) {
+    UtilityRow(
+        letter = "S",
+        title = "Services",
+        subtitle = "Rent-a-car, boat rentals & more",
+        accent = Color(0xFF334E68),
+        onClick = onClick
+    )
+}
+
+@Composable
+private fun UtilityRow(
+    letter: String,
+    title: String,
+    subtitle: String,
+    accent: Color,
+    onClick: () -> Unit
+) {
     val colors = KompassTheme.colors
     Row(
         modifier = Modifier
@@ -125,23 +170,23 @@ private fun ServicesRow(onClick: () -> Unit) {
             modifier = Modifier
                 .size(44.dp)
                 .clip(CircleShape)
-                .background(Color(0xFF334E68).copy(alpha = 0.12f)),
+                .background(accent.copy(alpha = 0.12f)),
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = "S",
+                text = letter,
                 style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                color = Color(0xFF334E68)
+                color = accent
             )
         }
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(
-                text = "Services",
+                text = title,
                 style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold),
                 color = colors.colorNavy
             )
             Text(
-                text = "Rent-a-car, boat rentals & more",
+                text = subtitle,
                 style = MaterialTheme.typography.bodySmall,
                 color = colors.colorSlate
             )

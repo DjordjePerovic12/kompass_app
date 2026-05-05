@@ -23,7 +23,7 @@ fun EventsScreenContent(
     state: EventsState,
     onDateFilterSelected: (String) -> Unit,
     onTypeFilterSelected: (String) -> Unit,
-    onEventClick: (Int) -> Unit,
+    onEventClick: (String) -> Unit,
     onBack: () -> Unit
 ) {
     val colors = KompassTheme.colors
@@ -108,7 +108,7 @@ fun EventsScreenContent(
             }
 
             else -> items(state.events) {
-                EventItem(event = it, lang = lang)
+                EventItem(event = it, lang = lang, onClick = { onEventClick(it.id) })
             }
         }
     }

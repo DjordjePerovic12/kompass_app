@@ -6,11 +6,15 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import llc.bokadev.kompass.presentation.screens.eventdetail.EventDetailScreen
+import llc.bokadev.kompass.presentation.screens.events.EventsScreen
 import llc.bokadev.kompass.presentation.screens.experiencedetail.ExperienceDetailScreen
 import llc.bokadev.kompass.presentation.screens.experiencedetail.ExperienceGuideScreen
 import llc.bokadev.kompass.presentation.screens.experiences.ExperiencesScreen
+import llc.bokadev.kompass.presentation.screens.infocenter.InfoCenterDetailScreen
+import llc.bokadev.kompass.presentation.screens.infocenter.InfoCenterScreen
 import llc.bokadev.kompass.presentation.screens.itinerarydetail.ItineraryDetailScreen
 import llc.bokadev.kompass.presentation.screens.languagepicker.LanguagePickerScreen
+import llc.bokadev.kompass.presentation.screens.myguides.MyGuidesScreen
 import llc.bokadev.kompass.presentation.screens.placedetail.PlaceDetailScreen
 import llc.bokadev.kompass.presentation.screens.category_items_list.CategoryItemsListScreen
 import llc.bokadev.kompass.presentation.screens.essentials.EssentialsScreen
@@ -42,13 +46,24 @@ fun KompassNavHost(isFirstLaunch: Boolean) {
             MainShell(
                 onNavigateToPlaceDetail = { id -> navController.navigate(Route.PlaceDetail(id)) },
                 onNavigateToEventDetail = { id -> navController.navigate(Route.EventDetail(id)) },
+                onNavigateToEvents = { navController.navigate(Route.Events) },
                 onNavigateToExperienceDetail = { id -> navController.navigate(Route.ExperienceDetail(id)) },
+                onNavigateToInfoCenterDetail = { id -> navController.navigate(Route.InfoCenterDetail(id)) },
                 onNavigateToItineraryDetail = { id -> navController.navigate(Route.ItineraryDetail(id)) },
                 onNavigateToPlacesList = { category -> navController.navigate(Route.CategoryItemsList(category)) },
                 onNavigateToActivities = { navController.navigate(Route.Activities) },
                 onNavigateToNearbyPlaces = { navController.navigate(Route.NearbyPlaces) },
                 onNavigateToEssentials = { navController.navigate(Route.Essentials) },
-                onNavigateToServices = { navController.navigate(Route.Services) }
+                onNavigateToServices = { navController.navigate(Route.Services) },
+                onNavigateToInfoCenter = { navController.navigate(Route.InfoCenter) },
+                onNavigateToMyGuides = { navController.navigate(Route.MyGuides) }
+            )
+        }
+
+        composable<Route.Events> {
+            EventsScreen(
+                onBack = { navController.popBackStack() },
+                onNavigateToEventDetail = { id -> navController.navigate(Route.EventDetail(id)) }
             )
         }
 
@@ -115,6 +130,30 @@ fun KompassNavHost(isFirstLaunch: Boolean) {
 
         composable<Route.Services> {
             ServicesScreen(onBack = { navController.popBackStack() })
+        }
+
+        composable<Route.MyGuides> {
+            MyGuidesScreen(
+                onBack = { navController.popBackStack() },
+                onOpenGuide = { id -> navController.navigate(Route.ExperienceGuide(id)) },
+                onOpenActivity = { id -> navController.navigate(Route.ExperienceDetail(id)) },
+                onOpenItineraries = { navController.navigate(Route.ItineraryDetail("my-guides")) }
+            )
+        }
+
+        composable<Route.InfoCenter> {
+            InfoCenterScreen(
+                onBack = { navController.popBackStack() },
+                onNoticeClick = { id -> navController.navigate(Route.InfoCenterDetail(id)) }
+            )
+        }
+
+        composable<Route.InfoCenterDetail> { backStackEntry ->
+            val route: Route.InfoCenterDetail = backStackEntry.toRoute()
+            InfoCenterDetailScreen(
+                id = route.id,
+                onBack = { navController.popBackStack() }
+            )
         }
 
         composable<Route.PremiumBundles> { backStackEntry ->

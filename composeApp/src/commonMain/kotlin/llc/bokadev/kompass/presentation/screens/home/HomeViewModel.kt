@@ -8,15 +8,19 @@ import llc.bokadev.kompass.core.presentation.base.BaseViewModel
 import llc.bokadev.kompass.domain.location.UserLocationProvider
 import llc.bokadev.kompass.domain.model.GeoPoint
 import llc.bokadev.kompass.domain.model.NearbyPlace
+import llc.bokadev.kompass.domain.repository.PremiumRepository
 import llc.bokadev.kompass.domain.usecase.GetNearbyPlacesUseCase
+import llc.bokadev.kompass.domain.usecase.GetCurrentInfoNoticesUseCase
 import llc.bokadev.kompass.domain.usecase.GetMustSeePlacesUseCase
 import llc.bokadev.kompass.domain.usecase.GetUpcomingEventsUseCase
 
 class HomeViewModel(
     private val getMustSeePlaces: GetMustSeePlacesUseCase,
     private val getUpcomingEvents: GetUpcomingEventsUseCase,
+    private val getCurrentInfoNotices: GetCurrentInfoNoticesUseCase,
     private val getNearbyPlaces: GetNearbyPlacesUseCase,
-    private val userLocationProvider: UserLocationProvider
+    private val userLocationProvider: UserLocationProvider,
+    private val premiumRepository: PremiumRepository
 ) : BaseViewModel<HomeState, HomeEvent>() {
 
     override val initialState = HomeState()
@@ -33,10 +37,20 @@ class HomeViewModel(
 
     private fun loadHomeData() {
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true, error = null) }
+            val entitlements = premiumRepository.getEntitlements()
+            _state.update {
+                it.copy(
+                    isLoading = true,
+                    error = null,
+                    hasPremiumAccess = entitlements.audioPass ||
+                        entitlements.explorerPass ||
+                        entitlements.perksPass
+                )
+            }
 
             val placesResult = async { getMustSeePlaces() }
             val eventsResult = async { getUpcomingEvents() }
+            val noticesResult = async { getCurrentInfoNotices() }
             val nearbyResult = async { loadNearbyPlaces() }
 
             placesResult.await()
@@ -51,6 +65,14 @@ class HomeViewModel(
                 .onFailure { err ->
                     _state.update { it.copy(isLoading = false, error = err.message) }
                     return@launch
+                }
+
+            noticesResult.await()
+                .onSuccess { notices ->
+                    _state.update { it.copy(infoCenterNotices = notices.take(4)) }
+                }
+                .onFailure { err ->
+                    _state.update { it.copy(infoCenterNotices = emptyList(), error = it.error ?: err.message) }
                 }
 
             nearbyResult.await()

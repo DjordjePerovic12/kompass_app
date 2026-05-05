@@ -12,7 +12,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import llc.bokadev.kompass.presentation.screens.categories.CategoriesScreen
-import llc.bokadev.kompass.presentation.screens.events.EventsScreen
 import llc.bokadev.kompass.presentation.screens.experiences.ExperiencesScreen
 import llc.bokadev.kompass.presentation.screens.home.HomeScreen
 import llc.bokadev.kompass.presentation.theme.KompassTheme
@@ -21,19 +20,23 @@ import llc.bokadev.kompass.presentation.theme.KompassTheme
 fun MainShell(
     onNavigateToPlaceDetail: (String) -> Unit,
     onNavigateToEventDetail: (String) -> Unit,
+    onNavigateToEvents: () -> Unit,
     onNavigateToExperienceDetail: (String) -> Unit,
+    onNavigateToInfoCenterDetail: (String) -> Unit,
     onNavigateToItineraryDetail: (String) -> Unit,
     onNavigateToPlacesList: (String) -> Unit,
     onNavigateToActivities: () -> Unit,
     onNavigateToNearbyPlaces: () -> Unit,
     onNavigateToEssentials: () -> Unit,
-    onNavigateToServices: () -> Unit
+    onNavigateToServices: () -> Unit,
+    onNavigateToInfoCenter: () -> Unit,
+    onNavigateToMyGuides: () -> Unit
 ) {
     var selectedTab by remember { mutableStateOf(BottomTab.Home) }
     var homeVersion by remember { mutableIntStateOf(0) }
     var categoriesVersion by remember { mutableIntStateOf(0) }
-    var eventsVersion by remember { mutableIntStateOf(0) }
-    var experiencesVersion by remember { mutableIntStateOf(0) }
+    var activitiesVersion by remember { mutableIntStateOf(0) }
+    var essentialsVersion by remember { mutableIntStateOf(0) }
 
     Scaffold(
         containerColor = KompassTheme.colors.colorSurface,
@@ -43,10 +46,10 @@ fun MainShell(
                 selectedTab = selectedTab,
                 onTabSelected = {
                     when (it) {
-                        BottomTab.Home        -> homeVersion += 1
-                        BottomTab.Categories  -> categoriesVersion += 1
-                        BottomTab.Events      -> eventsVersion += 1
-                        BottomTab.Experiences -> experiencesVersion += 1
+                        BottomTab.Home -> homeVersion += 1
+                        BottomTab.Categories -> categoriesVersion += 1
+                        BottomTab.Activities -> activitiesVersion += 1
+                        BottomTab.Essentials -> essentialsVersion += 1
                     }
                     selectedTab = it
                 }
@@ -59,23 +62,32 @@ fun MainShell(
                     vmKey = "home-$homeVersion",
                     onNavigateToPlaceDetail = onNavigateToPlaceDetail,
                     onNavigateToEventDetail = onNavigateToEventDetail,
+                    onNavigateToInfoCenterDetail = onNavigateToInfoCenterDetail,
+                    onNavigateToEvents = onNavigateToEvents,
                     onNavigateToItineraryDetail = onNavigateToItineraryDetail,
-                    onNavigateToNearbyPlaces = onNavigateToNearbyPlaces
+                    onNavigateToNearbyPlaces = onNavigateToNearbyPlaces,
+                    onNavigateToInfoCenter = onNavigateToInfoCenter,
+                    onNavigateToMyGuides = onNavigateToMyGuides
                 )
+
                 BottomTab.Categories -> CategoriesScreen(
                     vmKey = "categories-$categoriesVersion",
                     onNavigateToPlacesList = onNavigateToPlacesList,
                     onNavigateToActivities = onNavigateToActivities,
                     onNavigateToEssentials = onNavigateToEssentials,
-                    onNavigateToServices = onNavigateToServices
+                    onNavigateToServices = onNavigateToServices,
+                    onNavigateToEvents = onNavigateToEvents,
+                    onNavigateToInfoCenter = onNavigateToInfoCenter
                 )
-                BottomTab.Events -> EventsScreen(
-                    vmKey = "events-$eventsVersion",
-                    onNavigateToEventDetail = onNavigateToEventDetail
-                )
-                BottomTab.Experiences -> ExperiencesScreen(
-                    vmKey = "experiences-$experiencesVersion",
+
+                BottomTab.Activities -> ExperiencesScreen(
+                    vmKey = "activities-$activitiesVersion",
                     onNavigateToExperienceDetail = onNavigateToExperienceDetail
+                )
+
+                BottomTab.Essentials -> llc.bokadev.kompass.presentation.screens.essentials.EssentialsScreen(
+                    vmKey = "essentials-$essentialsVersion",
+                    showBack = false
                 )
             }
         }

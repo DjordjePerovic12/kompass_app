@@ -15,6 +15,13 @@ class AndroidAppPreferences(private val context: Context) : AppPreferences {
         prefs.edit().putString("selected_language", language).apply()
     }
 
+    override fun getAnonymousUserId(): String? =
+        prefs.getString("anonymous_user_id", null)
+
+    override fun setAnonymousUserId(value: String) {
+        prefs.edit().putString("anonymous_user_id", value).apply()
+    }
+
     override fun isFirstLaunch(): Boolean =
         prefs.getBoolean("is_first_launch", true)
 

@@ -53,6 +53,7 @@ import llc.bokadev.kompass.core.util.buildPhotoUrl
 import llc.bokadev.kompass.core.util.currentAppLanguage
 import llc.bokadev.kompass.domain.model.Experience
 import llc.bokadev.kompass.domain.model.GeoPoint
+import llc.bokadev.kompass.domain.repository.AnalyticsRepository
 import llc.bokadev.kompass.presentation.permissions.NotificationPermissionEffect
 import llc.bokadev.kompass.presentation.permissions.rememberShouldShowNotificationPrompt
 import llc.bokadev.kompass.presentation.screens.placedetail.components.InfoChip
@@ -60,6 +61,7 @@ import llc.bokadev.kompass.presentation.screens.placedetail.components.PlacePhot
 import llc.bokadev.kompass.presentation.shared.InlineHtmlMapView
 import llc.bokadev.kompass.presentation.shared.KompassSharedTopBar
 import llc.bokadev.kompass.presentation.theme.KompassTheme
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -70,6 +72,15 @@ fun ExperienceGuideScreen(
 ) {
     val vm: ExperienceGuideViewModel = koinViewModel(parameters = { parametersOf(id) })
     val state by vm.state.collectAsState()
+    val analytics = koinInject<AnalyticsRepository>()
+
+    LaunchedEffect(id) {
+        analytics.trackScreenView("guide")
+    }
+
+    LaunchedEffect(state.activity?.id) {
+        state.activity?.let { analytics.trackGuideOpen(it.id, it.cityId) }
+    }
 
     BaseContentView(
         state = state,
@@ -84,7 +95,10 @@ fun ExperienceGuideScreen(
     ) {
         ExperienceGuideScreenContent(
             state = state,
-            onIntent = vm::onIntent
+            onIntent = vm::onIntent,
+            onAudioStarted = { activity ->
+                analytics.trackAudioPlay(activity.id, activity.cityId)
+            }
         )
     }
 }
@@ -92,7 +106,8 @@ fun ExperienceGuideScreen(
 @Composable
 private fun ExperienceGuideScreenContent(
     state: ExperienceGuideState,
-    onIntent: (ExperienceGuideEvent) -> Unit
+    onIntent: (ExperienceGuideEvent) -> Unit,
+    onAudioStarted: (Experience) -> Unit
 ) {
     val colors = KompassTheme.colors
     val lang = currentAppLanguage()
@@ -257,7 +272,12 @@ private fun ExperienceGuideScreenContent(
                         activity = activity,
                         playback = state.playback,
                         audioReady = state.audioUrl != null,
-                        onTogglePlayPause = { onIntent(ExperienceGuideEvent.TogglePlayPause) },
+                        onTogglePlayPause = {
+                            if (!state.playback.isPlaying && state.audioUrl != null) {
+                                onAudioStarted(activity)
+                            }
+                            onIntent(ExperienceGuideEvent.TogglePlayPause)
+                        },
                         onSeek = { onIntent(ExperienceGuideEvent.SeekTo(it)) }
                     )
 

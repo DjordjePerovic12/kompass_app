@@ -4,6 +4,7 @@ package llc.bokadev.kompass.presentation.screens.events
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,7 +30,8 @@ import kotlin.time.ExperimentalTime
 fun EventItem(
     modifier: Modifier = Modifier,
     event: Event,
-    lang: String = "en"
+    lang: String = "en",
+    onClick: () -> Unit = {}
 ) {
     val eventDay = event.startTime.toEventDay()
     val eventMonth = event.startTime.toEventMonth()
@@ -47,6 +49,7 @@ fun EventItem(
             .fillMaxWidth()
             .clip(cardShape)
             .background(Color.White)
+            .clickable(onClick = onClick)
             .border(
                 width = 1.dp,
                 shape = cardShape,

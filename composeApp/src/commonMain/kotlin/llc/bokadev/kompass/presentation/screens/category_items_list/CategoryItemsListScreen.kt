@@ -6,7 +6,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import llc.bokadev.kompass.core.presentation.base.BaseContentView
 import llc.bokadev.kompass.domain.model.PlaceCategory
+import llc.bokadev.kompass.domain.repository.AnalyticsRepository
 import llc.bokadev.kompass.presentation.shared.KompassSharedTopBar
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -17,8 +19,12 @@ fun CategoryItemsListScreen(
 ) {
     val vm: CategoryItemsListViewModel = koinViewModel()
     val state by vm.state.collectAsState()
+    val analytics = koinInject<AnalyticsRepository>()
 
-    LaunchedEffect(category) { vm.init(category) }
+    LaunchedEffect(category) {
+        vm.init(category)
+        analytics.trackScreenView("category_items_list")
+    }
 
     BaseContentView(
         state = state,
@@ -34,7 +40,18 @@ fun CategoryItemsListScreen(
         CategoryItemsListScreenContent(
             state = state,
             onIntent = vm::onIntent,
-            onPlaceClick = onPlaceClick,
+            onPlaceClick = { id ->
+                state.places.firstOrNull { it.id == id }?.let { place ->
+                    analytics.trackPlaceView(
+                        placeId = place.id,
+                        cityId = place.cityId,
+                        zone = place.zone,
+                        placeCategory = place.category.name.lowercase(),
+                        contentOrigin = "browse"
+                    )
+                }
+                onPlaceClick(id)
+            },
             onBack = onBack
         )
     }

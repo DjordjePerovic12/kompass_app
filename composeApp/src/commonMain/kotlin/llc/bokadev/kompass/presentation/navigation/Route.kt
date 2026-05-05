@@ -18,6 +18,9 @@ sealed interface Route {
     data class EventDetail(val id: String) : Route
 
     @Serializable
+    data object Events : Route
+
+    @Serializable
     data class ExperienceDetail(val id: String) : Route
 
     @Serializable
@@ -40,6 +43,15 @@ sealed interface Route {
 
     @Serializable
     data object Services : Route
+
+    @Serializable
+    data object MyGuides : Route
+
+    @Serializable
+    data object InfoCenter : Route
+
+    @Serializable
+    data class InfoCenterDetail(val id: String) : Route
 
     @Serializable
     data class PremiumBundles(val activityId: String? = null) : Route

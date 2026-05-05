@@ -3,8 +3,10 @@ package llc.bokadev.kompass.presentation.screens.home
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -23,6 +25,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -37,6 +40,7 @@ import androidx.compose.ui.unit.sp
 import llc.bokadev.kompass.core.util.buildPhotoUrl
 import llc.bokadev.kompass.core.util.currentAppLanguage
 import llc.bokadev.kompass.domain.model.Event
+import llc.bokadev.kompass.domain.model.InfoNotice
 import llc.bokadev.kompass.domain.model.NearbyPlace
 import llc.bokadev.kompass.domain.model.Place
 import llc.bokadev.kompass.presentation.screens.home.components.CompactPlaceCard
@@ -55,18 +59,36 @@ fun HomeScreenContent(
     state: HomeState,
     onPlaceClick: (String) -> Unit,
     onEventClick: (String) -> Unit,
+    onNoticeClick: (String) -> Unit,
+    onEventsSeeAll: () -> Unit,
     onNearbySeeAll: () -> Unit,
+    onInfoCenterSeeAll: () -> Unit,
+    onMyGuidesClick: () -> Unit,
     onIntent: (HomeEvent) -> Unit
 ) {
     val colors = KompassTheme.colors
     val lang = currentAppLanguage()
+
+    if (state.isLoading &&
+        state.mustSeePlaces.isEmpty() &&
+        state.upcomingEvents.isEmpty() &&
+        state.infoCenterNotices.isEmpty() &&
+        state.nearbyPlaces.isEmpty()
+    ) {
+        HomeSplashLoader()
+        return
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(colors.colorNavy)
             .verticalScroll(rememberScrollState())
     ) {
-        HeroHeader()
+        HeroHeader(
+            showMyGuides = state.hasPremiumAccess,
+            onMyGuidesClick = onMyGuidesClick
+        )
         MustSeeSection(
             places = state.mustSeePlaces,
             isLoading = state.isLoading,
@@ -83,11 +105,20 @@ fun HomeScreenContent(
                 onSeeAll = onNearbySeeAll
             )
         }
+        if (state.infoCenterNotices.isNotEmpty()) {
+            InfoCenterPreviewSection(
+                notices = state.infoCenterNotices,
+                lang = lang,
+                onNoticeClick = onNoticeClick,
+                onSeeAll = onInfoCenterSeeAll
+            )
+        }
         UpcomingEventsSection(
             events = state.upcomingEvents,
             isLoading = state.isLoading,
             lang = lang,
-            onEventClick = onEventClick
+            onEventClick = onEventClick,
+            onSeeAll = onEventsSeeAll
         )
         Spacer(
             Modifier
@@ -99,7 +130,58 @@ fun HomeScreenContent(
 }
 
 @Composable
-private fun HeroHeader() {
+private fun HomeSplashLoader() {
+    val colors = KompassTheme.colors
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(colors.colorNavy)
+            .windowInsetsPadding(WindowInsets.statusBars),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(18.dp)
+        ) {
+            Canvas(
+                modifier = Modifier
+                    .size(72.dp)
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(Color.White.copy(alpha = 0.1f))
+                    .border(1.dp, Color.White.copy(alpha = 0.14f), RoundedCornerShape(24.dp))
+                    .padding(16.dp)
+            ) {
+                drawCircle(
+                    color = Color.White.copy(alpha = 0.92f),
+                    radius = size.minDimension * 0.12f,
+                    center = center
+                )
+                drawCircle(
+                    color = Color.White.copy(alpha = 0.92f),
+                    radius = size.minDimension * 0.28f,
+                    center = center,
+                    style = Stroke(width = 2.dp.toPx())
+                )
+            }
+            Text(
+                text = "KOmpass",
+                style = MaterialTheme.typography.headlineSmall,
+                color = Color.White
+            )
+            Text(
+                text = "Loading Kotor for you…",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.White.copy(alpha = 0.68f)
+            )
+        }
+    }
+}
+
+@Composable
+private fun HeroHeader(
+    showMyGuides: Boolean,
+    onMyGuidesClick: () -> Unit
+) {
     val colors = KompassTheme.colors
     Column(
         modifier = Modifier
@@ -110,17 +192,49 @@ private fun HeroHeader() {
             .padding(top = 24.dp, bottom = 20.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Text(
-            text = "Kotor, Montenegro",
-            style = MaterialTheme.typography.bodySmall,
-            color = Color.White.copy(alpha = 0.6f)
-        )
-        Text(
-            text = "Explore\nthe Old Town",
-            style = MaterialTheme.typography.displayLarge,
-            lineHeight = 38.sp,
-            color = Color.White
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.Top
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    text = "Kotor, Montenegro",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.White.copy(alpha = 0.6f)
+                )
+                Text(
+                    text = "Explore\nthe Old Town",
+                    style = MaterialTheme.typography.displayLarge,
+                    lineHeight = 38.sp,
+                    color = Color.White
+                )
+            }
+
+            if (showMyGuides) {
+                IconButton(
+                    onClick = onMyGuidesClick,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(Color.White.copy(alpha = 0.12f))
+                        .border(1.dp, Color.White.copy(alpha = 0.18f), RoundedCornerShape(16.dp))
+                ) {
+                    Canvas(modifier = Modifier.size(22.dp)) {
+                        drawCircle(
+                            color = Color.White.copy(alpha = 0.92f),
+                            radius = size.minDimension * 0.18f,
+                            center = center
+                        )
+                        drawCircle(
+                            color = Color.White.copy(alpha = 0.92f),
+                            radius = size.minDimension * 0.36f,
+                            center = center,
+                            style = Stroke(width = 2.dp.toPx())
+                        )
+                    }
+                }
+            }
+        }
         Spacer(Modifier.height(4.dp))
         Row(
             modifier = Modifier
@@ -257,7 +371,8 @@ private fun UpcomingEventsSection(
     events: List<Event>,
     isLoading: Boolean,
     lang: String,
-    onEventClick: (String) -> Unit
+    onEventClick: (String) -> Unit,
+    onSeeAll: () -> Unit
 ) {
     val colors = KompassTheme.colors
     Column(
@@ -267,7 +382,7 @@ private fun UpcomingEventsSection(
             .padding(vertical = 20.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        SectionHeader(title = "Upcoming Events", onSeeAll = {})
+        SectionHeader(title = "Upcoming Events", onSeeAll = onSeeAll)
         Column(
             modifier = Modifier.padding(horizontal = 20.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -287,6 +402,65 @@ private fun UpcomingEventsSection(
                         meta = event.toHomeEventMeta(),
                         onClick = { onEventClick(event.id) }
                     )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun InfoCenterPreviewSection(
+    notices: List<InfoNotice>,
+    lang: String,
+    onNoticeClick: (String) -> Unit,
+    onSeeAll: () -> Unit
+) {
+    val colors = KompassTheme.colors
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(colors.colorSurface)
+            .padding(vertical = 20.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        SectionHeader(title = "Recent News", onSeeAll = onSeeAll)
+        Column(
+            modifier = Modifier.padding(horizontal = 20.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            notices.forEach { notice ->
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(18.dp))
+                        .background(colors.colorWhite)
+                        .border(1.dp, colors.colorSlateGhost, RoundedCornerShape(18.dp))
+                        .clickable { onNoticeClick(notice.id) }
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Text(
+                        text = notice.localizedTitle(lang),
+                        style = MaterialTheme.typography.titleMedium,
+                        color = colors.colorNavy
+                    )
+                    Text(
+                        text = notice.localizedShortDescription(lang),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = colors.colorSlate
+                    )
+                    val meta = listOfNotNull(
+                        notice.noticeType.replace('_', ' ').replaceFirstChar { it.uppercase() },
+                        notice.startsAt?.toNoticeMetaTime(),
+                        notice.localizedLocation(lang).ifBlank { null }
+                    ).joinToString(" · ")
+                    if (meta.isNotBlank()) {
+                        Text(
+                            text = meta,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = if (notice.priorityRank() == 0) colors.colorError else colors.colorSlateLight
+                        )
+                    }
                 }
             }
         }
@@ -337,6 +511,12 @@ private fun NearbyPlace.toNearbyMeta(): String {
 
     return listOfNotNull(distanceText, bestTimeText).joinToString(" · ")
 }
+
+@OptIn(ExperimentalTime::class)
+private fun String.toNoticeMetaTime(): String? = runCatching {
+    val dateTime = Instant.parse(this).toLocalDateTime(TimeZone.currentSystemDefault())
+    "${dateTime.date.day}. ${dateTime.date.month.name.take(3)}"
+}.getOrNull()
 
 private fun Event.toHomeEventMeta(): String {
     val start = startTime.toHomeEventTime()

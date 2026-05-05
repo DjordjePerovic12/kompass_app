@@ -13,6 +13,13 @@ class IosAppPreferences : AppPreferences {
         defaults.setObject(language, forKey = "selected_language")
     }
 
+    override fun getAnonymousUserId(): String? =
+        defaults.stringForKey("anonymous_user_id")
+
+    override fun setAnonymousUserId(value: String) {
+        defaults.setObject(value, forKey = "anonymous_user_id")
+    }
+
     override fun isFirstLaunch(): Boolean {
         if (defaults.objectForKey("is_first_launch") == null) return true
         return defaults.boolForKey("is_first_launch")

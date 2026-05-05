@@ -1,6 +1,7 @@
 package llc.bokadev.kompass.presentation.screens.nearby
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -10,6 +11,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import llc.bokadev.kompass.domain.location.UserLocationProvider
+import llc.bokadev.kompass.domain.repository.AnalyticsRepository
 import llc.bokadev.kompass.presentation.permissions.LocationPermissionEffect
 import llc.bokadev.kompass.presentation.shared.KompassSharedTopBar
 import org.koin.compose.koinInject
@@ -23,8 +25,14 @@ fun NearbyPlacesScreen(
     val vm: NearbyPlacesViewModel = koinViewModel()
     val state by vm.state.collectAsState()
     val locationProvider = koinInject<UserLocationProvider>()
+    val analytics = koinInject<AnalyticsRepository>()
     var shouldRequestLocation by remember { mutableStateOf(false) }
     var showLocationPrompt by remember { mutableStateOf(!locationProvider.hasPermission()) }
+
+    LaunchedEffect(Unit) {
+        analytics.trackScreenView("nearby")
+        analytics.trackNearbyView()
+    }
 
     if (showLocationPrompt) {
         AlertDialog(
@@ -56,7 +64,18 @@ fun NearbyPlacesScreen(
     NearbyPlacesScreenContent(
         state = state,
         onIntent = vm::onIntent,
-        onPlaceClick = onPlaceClick,
+        onPlaceClick = { id ->
+            state.nearbyPlaces.firstOrNull { it.place.id == id }?.place?.let { place ->
+                analytics.trackPlaceView(
+                    placeId = place.id,
+                    cityId = place.cityId,
+                    zone = place.zone,
+                    placeCategory = place.category.name.lowercase(),
+                    contentOrigin = "nearby"
+                )
+            }
+            onPlaceClick(id)
+        },
         topBar = {
             KompassSharedTopBar(
                 slug = "Closest to you",

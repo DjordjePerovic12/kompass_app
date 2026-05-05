@@ -23,8 +23,8 @@ import llc.bokadev.kompass.presentation.theme.KompassTheme
 enum class BottomTab(val label: String) {
     Home("Home"),
     Categories("Categories"),
-    Events("Events"),
-    Experiences("Activities")
+    Activities("Activities"),
+    Essentials("Essentials")
 }
 
 @Composable
@@ -55,9 +55,8 @@ fun KompassBottomNavBar(
                 selected = selected,
                 onClick = { onTabSelected(tab) },
                 icon = { TabIcon(tab = tab, color = iconColor) },
-                label = if (selected) {
-                    { Text(tab.label, style = MaterialTheme.typography.labelSmall) }
-                } else null,
+                label = { Text(tab.label, style = MaterialTheme.typography.labelSmall) },
+                alwaysShowLabel = true,
                 colors = NavigationBarItemDefaults.colors(
                     selectedIconColor = colors.colorNavy,
                     selectedTextColor = colors.colorNavy,
@@ -76,8 +75,8 @@ private fun TabIcon(tab: BottomTab, color: Color) {
         when (tab) {
             BottomTab.Home        -> drawHome(color)
             BottomTab.Categories  -> drawCategories(color)
-            BottomTab.Events      -> drawEvents(color)
-            BottomTab.Experiences -> drawExperiences(color)
+            BottomTab.Activities  -> drawExperiences(color)
+            BottomTab.Essentials  -> drawInfoCenter(color)
         }
     }
 }
@@ -175,4 +174,30 @@ private fun DrawScope.drawExperiences(color: Color) {
     }
     path.close()
     drawPath(path, color)
+}
+
+private fun DrawScope.drawInfoCenter(color: Color) {
+    val w = size.width
+    val h = size.height
+    drawRoundRect(
+        color = color,
+        topLeft = Offset(w * 0.16f, h * 0.18f),
+        size = Size(w * 0.68f, h * 0.62f),
+        cornerRadius = CornerRadius(6.dp.toPx())
+    )
+    drawCircle(
+        color = Color.White,
+        radius = w * 0.09f,
+        center = Offset(w * 0.5f, h * 0.36f)
+    )
+    drawRect(
+        color = Color.White,
+        topLeft = Offset(w * 0.47f, h * 0.44f),
+        size = Size(w * 0.06f, h * 0.16f)
+    )
+    drawRect(
+        color = Color.White,
+        topLeft = Offset(w * 0.30f, h * 0.62f),
+        size = Size(w * 0.40f, h * 0.05f)
+    )
 }
