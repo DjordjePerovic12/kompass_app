@@ -78,8 +78,10 @@ fun NearbyPlacesScreen(
         },
         topBar = {
             KompassSharedTopBar(
-                slug = "Closest to you",
-                title = "Nearby",
+                slug = "",
+                title = "Places",
+                subtitle = "Curated spots across the city",
+                showBack = true,
                 onBackClick = onBack
             )
         }

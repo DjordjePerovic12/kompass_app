@@ -9,6 +9,7 @@ fun InfoNoticeDto.toDomain(): InfoNotice = InfoNotice(
     title = title,
     shortDescription = shortDescription,
     longDescription = longDescription,
+    imageUrl = imageUrl,
     priority = priority,
     noticeType = noticeType,
     startsAt = startsAt,

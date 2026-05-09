@@ -11,7 +11,7 @@ import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 val eventsModule = module {
-    single<EventRepository> { EventRepositoryImpl(get()) }
+    single<EventRepository> { EventRepositoryImpl(get(), get()) }
     factory { GetEventsUseCase(get()) }
     factory { GetEventFiltersUseCase(get()) }
     factory { GetUpcomingEventsUseCase(get()) }

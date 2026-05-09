@@ -8,7 +8,7 @@ import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 val categoryModule = module {
-    single<CategoryRepository> { CategoryRepositoryImpl(get()) }
+    single<CategoryRepository> { CategoryRepositoryImpl(get(), get()) }
     factory { GetCategoriesUseCase(get()) }
     viewModel { CategoriesViewModel(get()) }
 }

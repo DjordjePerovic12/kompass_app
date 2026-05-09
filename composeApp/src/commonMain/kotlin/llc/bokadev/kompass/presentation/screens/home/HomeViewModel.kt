@@ -37,7 +37,15 @@ class HomeViewModel(
 
     private fun loadHomeData() {
         viewModelScope.launch {
-            val entitlements = premiumRepository.getEntitlements()
+            val entitlements = premiumRepository.getEntitlements().let { current ->
+                if (current.audioPass) {
+                    current
+                } else {
+                    val updated = current.copy(audioPass = true)
+                    premiumRepository.applyEntitlements(updated)
+                    updated
+                }
+            }
             _state.update {
                 it.copy(
                     isLoading = true,
@@ -95,7 +103,10 @@ class HomeViewModel(
 
         return getNearbyPlaces(origin).mapCatching { nearbyPlaces ->
             nearbyPlaces
-                .filter { it.distanceKm <= 1.5 }
+                .filter { nearbyPlace ->
+                    nearbyPlace.distanceKm <= 3.5 &&
+                        nearbyPlace.place.category == llc.bokadev.kompass.domain.model.PlaceCategory.SEE_AND_VISIT
+                }
                 .take(4) to (currentLocation != null)
         }
     }

@@ -18,6 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import llc.bokadev.kompass.core.presentation.base.BaseContentView
 import llc.bokadev.kompass.core.util.currentAppLanguage
+import llc.bokadev.kompass.core.util.rememberAppStrings
 import llc.bokadev.kompass.presentation.shared.KompassSharedTopBar
 import llc.bokadev.kompass.presentation.theme.KompassTheme
 import org.koin.compose.viewmodel.koinViewModel
@@ -31,14 +32,15 @@ fun InfoCenterDetailScreen(
     val vm: InfoCenterDetailViewModel = koinViewModel(parameters = { parametersOf(id) })
     val state by vm.state.collectAsState()
     val lang = currentAppLanguage()
+    val strings = rememberAppStrings()
     val uriHandler = LocalUriHandler.current
 
     BaseContentView(
         state = state,
         topBar = {
             KompassSharedTopBar(
-                slug = "Important town information",
-                title = state.notice?.localizedTitle(lang) ?: "Info Center",
+                slug = strings.importantTownInformation,
+                title = state.notice?.localizedTitle(lang) ?: strings.infoCenterTitle,
                 showBack = true,
                 onBackClick = onBack
             )
@@ -76,14 +78,14 @@ fun InfoCenterDetailScreen(
             }
             if (notice.localizedLocation(lang).isNotBlank()) {
                 Text(
-                    text = "Affected area: ${notice.localizedLocation(lang)}",
+                    text = "${strings.affectedArea}: ${notice.localizedLocation(lang)}",
                     style = MaterialTheme.typography.bodySmall,
                     color = KompassTheme.colors.colorSlate
                 )
             }
             if (notice.externalUrl != null) {
                 Text(
-                    text = "Open source link",
+                    text = strings.openSourceLink,
                     style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
                     color = KompassTheme.colors.colorAmberDark,
                     modifier = Modifier.padding(top = 4.dp)
@@ -95,7 +97,7 @@ fun InfoCenterDetailScreen(
                     modifier = Modifier.padding(top = 2.dp)
                 )
                 androidx.compose.foundation.text.ClickableText(
-                    text = androidx.compose.ui.text.AnnotatedString("Visit source"),
+                    text = androidx.compose.ui.text.AnnotatedString(strings.visitSource),
                     style = MaterialTheme.typography.bodyMedium.copy(color = KompassTheme.colors.colorAmberDark),
                     onClick = { uriHandler.openUri(notice.externalUrl) }
                 )

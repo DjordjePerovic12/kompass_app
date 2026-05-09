@@ -10,7 +10,7 @@ import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 val infoCenterModule = module {
-    single<InfoCenterRepository> { InfoCenterRepositoryImpl(get()) }
+    single<InfoCenterRepository> { InfoCenterRepositoryImpl(get(), get()) }
     factory { GetCurrentInfoNoticesUseCase(get()) }
     factory { GetInfoNoticeByIdUseCase(get()) }
     viewModel { InfoCenterViewModel(get()) }

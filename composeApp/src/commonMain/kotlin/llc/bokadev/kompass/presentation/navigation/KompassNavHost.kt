@@ -10,12 +10,15 @@ import llc.bokadev.kompass.presentation.screens.events.EventsScreen
 import llc.bokadev.kompass.presentation.screens.experiencedetail.ExperienceDetailScreen
 import llc.bokadev.kompass.presentation.screens.experiencedetail.ExperienceGuideScreen
 import llc.bokadev.kompass.presentation.screens.experiences.ExperiencesScreen
+import llc.bokadev.kompass.presentation.screens.favorites.FavoritesScreen
 import llc.bokadev.kompass.presentation.screens.infocenter.InfoCenterDetailScreen
 import llc.bokadev.kompass.presentation.screens.infocenter.InfoCenterScreen
 import llc.bokadev.kompass.presentation.screens.itinerarydetail.ItineraryDetailScreen
 import llc.bokadev.kompass.presentation.screens.languagepicker.LanguagePickerScreen
+import llc.bokadev.kompass.presentation.screens.mustsee.MustSeePlacesScreen
 import llc.bokadev.kompass.presentation.screens.myguides.MyGuidesScreen
 import llc.bokadev.kompass.presentation.screens.placedetail.PlaceDetailScreen
+import llc.bokadev.kompass.presentation.screens.placedetail.PlaceGuideScreen
 import llc.bokadev.kompass.presentation.screens.category_items_list.CategoryItemsListScreen
 import llc.bokadev.kompass.presentation.screens.essentials.EssentialsScreen
 import llc.bokadev.kompass.presentation.screens.nearby.NearbyPlacesScreen
@@ -42,6 +45,14 @@ fun KompassNavHost(isFirstLaunch: Boolean) {
             )
         }
 
+        composable<Route.ChangeLanguage> {
+            LanguagePickerScreen(
+                showBack = true,
+                onBack = { navController.popBackStack() },
+                onLanguageSelected = { navController.popBackStack() }
+            )
+        }
+
         composable<Route.Main> {
             MainShell(
                 onNavigateToPlaceDetail = { id -> navController.navigate(Route.PlaceDetail(id)) },
@@ -51,12 +62,15 @@ fun KompassNavHost(isFirstLaunch: Boolean) {
                 onNavigateToInfoCenterDetail = { id -> navController.navigate(Route.InfoCenterDetail(id)) },
                 onNavigateToItineraryDetail = { id -> navController.navigate(Route.ItineraryDetail(id)) },
                 onNavigateToPlacesList = { category -> navController.navigate(Route.CategoryItemsList(category)) },
+                onNavigateToMustSeePlaces = { navController.navigate(Route.MustSeePlaces) },
                 onNavigateToActivities = { navController.navigate(Route.Activities) },
                 onNavigateToNearbyPlaces = { navController.navigate(Route.NearbyPlaces) },
                 onNavigateToEssentials = { navController.navigate(Route.Essentials) },
                 onNavigateToServices = { navController.navigate(Route.Services) },
                 onNavigateToInfoCenter = { navController.navigate(Route.InfoCenter) },
-                onNavigateToMyGuides = { navController.navigate(Route.MyGuides) }
+                onNavigateToMyGuides = { navController.navigate(Route.MyGuides) },
+                onNavigateToFavorites = { navController.navigate(Route.Favorites) },
+                onNavigateToChangeLanguage = { navController.navigate(Route.ChangeLanguage) }
             )
         }
 
@@ -69,7 +83,21 @@ fun KompassNavHost(isFirstLaunch: Boolean) {
 
         composable<Route.PlaceDetail> { backStackEntry ->
             val route: Route.PlaceDetail = backStackEntry.toRoute()
-            PlaceDetailScreen(id = route.id, onBack = { navController.popBackStack() })
+            PlaceDetailScreen(
+                id = route.id,
+                onBack = { navController.popBackStack() },
+                onLearnMore = { navController.navigate(Route.PremiumBundles()) },
+                onOpenGuide = { id -> navController.navigate(Route.PlaceGuide(id)) }
+            )
+        }
+
+        composable<Route.PlaceGuide> { backStackEntry ->
+            val route: Route.PlaceGuide = backStackEntry.toRoute()
+            PlaceGuideScreen(
+                id = route.id,
+                autoplay = route.autoplay,
+                onBack = { navController.popBackStack() }
+            )
         }
 
         composable<Route.EventDetail> { backStackEntry ->
@@ -91,6 +119,7 @@ fun KompassNavHost(isFirstLaunch: Boolean) {
             val route: Route.ExperienceGuide = backStackEntry.toRoute()
             ExperienceGuideScreen(
                 id = route.id,
+                autoplay = route.autoplay,
                 onBack = { navController.popBackStack() }
             )
         }
@@ -116,6 +145,13 @@ fun KompassNavHost(isFirstLaunch: Boolean) {
             )
         }
 
+        composable<Route.MustSeePlaces> {
+            MustSeePlacesScreen(
+                onBack = { navController.popBackStack() },
+                onPlaceClick = { id -> navController.navigate(Route.PlaceDetail(id)) }
+            )
+        }
+
         composable<Route.Activities> {
             ExperiencesScreen(
                 vmKey = "activities-route",
@@ -135,9 +171,18 @@ fun KompassNavHost(isFirstLaunch: Boolean) {
         composable<Route.MyGuides> {
             MyGuidesScreen(
                 onBack = { navController.popBackStack() },
-                onOpenGuide = { id -> navController.navigate(Route.ExperienceGuide(id)) },
-                onOpenActivity = { id -> navController.navigate(Route.ExperienceDetail(id)) },
-                onOpenItineraries = { navController.navigate(Route.ItineraryDetail("my-guides")) }
+                onOpenPlaceGuide = { id -> navController.navigate(Route.PlaceGuide(id, autoplay = true)) },
+                onOpenActivityGuide = { id -> navController.navigate(Route.ExperienceGuide(id, autoplay = true)) },
+                onOpenPlace = { id -> navController.navigate(Route.PlaceDetail(id)) },
+                onOpenActivity = { id -> navController.navigate(Route.ExperienceDetail(id)) }
+            )
+        }
+
+        composable<Route.Favorites> {
+            FavoritesScreen(
+                onBack = { navController.popBackStack() },
+                onPlaceClick = { id -> navController.navigate(Route.PlaceDetail(id)) },
+                onActivityClick = { id -> navController.navigate(Route.ExperienceDetail(id)) }
             )
         }
 

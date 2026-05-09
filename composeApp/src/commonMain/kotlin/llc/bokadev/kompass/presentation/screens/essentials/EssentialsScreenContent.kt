@@ -2,6 +2,7 @@ package llc.bokadev.kompass.presentation.screens.essentials
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -119,10 +120,10 @@ private fun CategorySectionHeader(category: EssentialCategory) {
         Text(
             text = category.label().uppercase(),
             style = MaterialTheme.typography.labelSmall.copy(
-                fontWeight = FontWeight.SemiBold,
-                letterSpacing = 0.8.sp
+                fontWeight = FontWeight.Medium,
+                letterSpacing = 1.8.sp
             ),
-            color = colors.colorNavyMedium
+            color = colors.colorSlateLight
         )
     }
 }
@@ -139,9 +140,11 @@ private fun EssentialCard(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(colors.colorWhite)
+            .clip(RoundedCornerShape(22.dp))
+            .background(colors.colorSurface)
+            .border(1.dp, colors.colorSlatePale, RoundedCornerShape(22.dp))
             .clickable(onClick = onClick)
-            .padding(horizontal = 20.dp, vertical = 16.dp),
+            .padding(horizontal = 20.dp, vertical = 18.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Row(
@@ -156,8 +159,8 @@ private fun EssentialCard(
                 modifier = Modifier.weight(1f).padding(end = 8.dp)
             )
             Canvas(modifier = Modifier.size(20.dp)) {
-                if (expanded) drawChevronUp(colors.colorAmberDark)
-                else drawChevronDown(colors.colorAmberDark)
+                if (expanded) drawChevronUp(colors.colorNavyMuted)
+                else drawChevronDown(colors.colorNavyMuted)
             }
         }
 
@@ -180,7 +183,7 @@ private fun EssentialCard(
                     Canvas(modifier = Modifier.size(12.dp)) { drawPin(colors.colorAmberDark) }
                     Text(
                         text = location,
-                        style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
+                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
                         color = colors.colorAmberDark
                     )
                 }
@@ -191,7 +194,7 @@ private fun EssentialCard(
                 essential.links.forEach { link ->
                     Text(
                         text = link,
-                        style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
+                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
                         color = colors.colorAmberDark,
                         modifier = Modifier.clickable { uriHandler.openUri(link) }
                     )
@@ -218,11 +221,11 @@ private fun EssentialCategory.label(): String = when (this) {
 }
 
 private fun EssentialCategory.accentColor(colors: llc.bokadev.kompass.presentation.theme.KompassColors): Color = when (this) {
-    EssentialCategory.TRANSPORT -> colors.colorNavyMuted
-    EssentialCategory.CUSTOMS   -> colors.colorAmber
+    EssentialCategory.TRANSPORT -> colors.colorSlateLight
+    EssentialCategory.CUSTOMS   -> colors.colorEmber
     EssentialCategory.EMERGENCY -> colors.colorError
     EssentialCategory.TIPS      -> colors.colorSuccess
-    EssentialCategory.PRACTICAL -> colors.colorSlate
+    EssentialCategory.PRACTICAL -> colors.colorAmberDark
 }
 
 private fun DrawScope.drawChevronDown(color: Color) {

@@ -8,7 +8,7 @@ import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 val essentialsModule = module {
-    single<EssentialRepository> { EssentialRepositoryImpl(get()) }
+    single<EssentialRepository> { EssentialRepositoryImpl(get(), get()) }
     factory { GetEssentialsUseCase(get()) }
     viewModel { EssentialsViewModel(get()) }
 }

@@ -6,5 +6,7 @@ import llc.bokadev.kompass.domain.model.Place
 data class PlaceDetailState(
     override val isLoading: Boolean = false,
     override val error: String? = null,
-    val place: Place? = null
+    val place: Place? = null,
+    val hasAudioAccess: Boolean = false,
+    val hasDetailAccess: Boolean = false
 ) : BaseState()

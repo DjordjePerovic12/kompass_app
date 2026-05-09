@@ -1,4 +1,5 @@
 package llc.bokadev.kompass.presentation.screens.events
+import llc.bokadev.kompass.core.util.rememberAppStrings
 import llc.bokadev.kompass.core.util.currentAppLanguage
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
@@ -28,6 +29,7 @@ fun EventsScreenContent(
 ) {
     val colors = KompassTheme.colors
     val lang = currentAppLanguage()
+    val strings = rememberAppStrings()
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(bottom = 16.dp),
@@ -97,9 +99,9 @@ fun EventsScreenContent(
             state.events.isEmpty() && !state.isLoading -> item {
                 Text(
                     text = if (state.isShowingFilteredResults()) {
-                        "No events match these filters"
+                        strings.noEventsForFilters
                     } else {
-                        "No events added yet"
+                        strings.noEventsYet
                     },
                     style = MaterialTheme.typography.bodyMedium,
                     color = colors.colorSlate,

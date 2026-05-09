@@ -15,12 +15,19 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import llc.bokadev.kompass.core.util.currentAppLanguage
+import llc.bokadev.kompass.domain.model.FavoriteItemType
+import llc.bokadev.kompass.domain.model.favoritePlacesFirst
+import llc.bokadev.kompass.domain.repository.FavoritesRepository
 import llc.bokadev.kompass.presentation.screens.category_items_list.components.PlaceListItem
 import llc.bokadev.kompass.presentation.theme.KompassTheme
+import org.koin.compose.koinInject
 
 @Composable
 fun CategoryItemsListScreenContent(
@@ -30,6 +37,11 @@ fun CategoryItemsListScreenContent(
     onBack: () -> Unit
 ) {
     val colors = KompassTheme.colors
+    val lang = currentAppLanguage()
+    val favoritesRepository = koinInject<FavoritesRepository>()
+    val favorites by favoritesRepository.favoritesFlow.collectAsState()
+    val favoriteKeys = favoritesRepository.getFavoriteKeySet()
+    val orderedPlaces = state.places.favoritePlacesFirst(favoriteKeys)
 
     when {
         state.error != null -> {
@@ -60,12 +72,15 @@ fun CategoryItemsListScreenContent(
                     .background(colors.colorWhite),
                 contentPadding = PaddingValues(bottom = 24.dp)
             ) {
-                itemsIndexed(state.places, key = { _, p -> p.id }) { index, place ->
+                itemsIndexed(orderedPlaces, key = { _, p -> p.id }) { index, place ->
                     PlaceListItem(
                         place = place,
+                        lang = lang,
+                        isFavorited = favoritesRepository.isFavorited(FavoriteItemType.PLACE, place.id),
+                        onFavoriteClick = { favoritesRepository.toggleFavorite(FavoriteItemType.PLACE, place.id) },
                         onClick = { onPlaceClick(place.id) }
                     )
-                    if (index < state.places.lastIndex) {
+                    if (index < orderedPlaces.lastIndex) {
                         HorizontalDivider(
                             modifier = Modifier,
                             color = colors.colorSlateGhost,

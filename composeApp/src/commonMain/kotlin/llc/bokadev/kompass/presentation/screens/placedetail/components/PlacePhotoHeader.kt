@@ -15,13 +15,19 @@ import llc.bokadev.kompass.presentation.theme.KompassTheme
 @Composable
 fun PlacePhotoHeader(
     imageUrl: String?,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    imageAspectRatio: Float? = 4f / 3f
 ) {
     val colors = KompassTheme.colors
-    Box(
-        modifier = modifier
+    val frameModifier = if (imageAspectRatio != null) {
+        modifier
             .fillMaxWidth()
-            .aspectRatio(4f / 3f)
+            .aspectRatio(imageAspectRatio)
+    } else {
+        modifier.fillMaxWidth()
+    }
+    Box(
+        modifier = frameModifier
             .background(colors.colorSlateGhost)
     ) {
         if (imageUrl != null) {
@@ -39,8 +45,22 @@ fun PlacePhotoHeader(
                     Brush.verticalGradient(
                         colorStops = arrayOf(
                             0.0f to Color.Transparent,
-                            0.5f to Color.Transparent,
-                            1.0f to colors.colorNavy.copy(alpha = 0.75f)
+                            0.56f to Color.Transparent,
+                            0.82f to Color.Black.copy(alpha = 0.32f),
+                            1.0f to Color.Black.copy(alpha = 0.72f)
+                        )
+                    )
+                )
+        )
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .background(
+                    Brush.verticalGradient(
+                        colorStops = arrayOf(
+                            0.0f to Color.Transparent,
+                            0.72f to Color.Transparent,
+                            1.0f to colors.colorOrangeMain.copy(alpha = 0.18f)
                         )
                     )
                 )

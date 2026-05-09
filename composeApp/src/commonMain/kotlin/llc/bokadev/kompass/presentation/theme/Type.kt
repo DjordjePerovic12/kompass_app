@@ -6,47 +6,49 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
 val KompassTypography = Typography(
-    // display — 32sp Bold — hero text, screen titles
+    // display — editorial hero
     displayLarge = TextStyle(
-        fontWeight = FontWeight.Bold,
-        fontSize = 32.sp,
-        lineHeight = (32 * 1.2).sp
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 54.sp,
+        lineHeight = 56.sp,
+        letterSpacing = (-0.9).sp
     ),
-    // headline — 24sp Bold — section headers
+    // headline — section and screen titles
     headlineLarge = TextStyle(
-        fontWeight = FontWeight.Bold,
-        fontSize = 24.sp,
-        lineHeight = (24 * 1.2).sp
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 35.sp,
+        lineHeight = 38.sp,
+        letterSpacing = (-0.5).sp
     ),
-    // title — 20sp SemiBold — card titles, modal headers
+    // title — card titles
     titleLarge = TextStyle(
         fontWeight = FontWeight.SemiBold,
-        fontSize = 20.sp,
-        lineHeight = (20 * 1.3).sp
+        fontSize = 24.sp,
+        lineHeight = 30.sp
     ),
-    // body_large — 16sp Regular — descriptions, long text
+    // body_large — descriptions and long text
     bodyLarge = TextStyle(
         fontWeight = FontWeight.Normal,
         fontSize = 16.sp,
-        lineHeight = (16 * 1.5).sp
+        lineHeight = 25.sp
     ),
-    // body — 14sp Regular — default body, list items
+    // body — lists, metadata, default copy
     bodyMedium = TextStyle(
         fontWeight = FontWeight.Normal,
         fontSize = 14.sp,
-        lineHeight = (14 * 1.5).sp
+        lineHeight = 20.sp
     ),
-    // caption — 12sp Medium — labels, badges, metadata
+    // caption — subdued labels and metadata
     bodySmall = TextStyle(
-        fontWeight = FontWeight.Medium,
-        fontSize = 12.sp,
-        lineHeight = (12 * 1.4).sp
+        fontWeight = FontWeight.Normal,
+        fontSize = 13.sp,
+        lineHeight = 18.sp
     ),
-    // overline — 10sp SemiBold uppercase — category labels, tags
+    // overline — quiet mono-inspired labels
     labelSmall = TextStyle(
-        fontWeight = FontWeight.SemiBold,
-        fontSize = 10.sp,
-        lineHeight = (10 * 1.4).sp,
-        letterSpacing = 0.8.sp
+        fontWeight = FontWeight.Medium,
+        fontSize = 11.sp,
+        lineHeight = 14.sp,
+        letterSpacing = 0.9.sp
     )
 )

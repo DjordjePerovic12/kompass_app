@@ -10,6 +10,7 @@ data class InfoNoticeDto(
     @SerialName("title") val title: Map<String, String>,
     @SerialName("short_description") val shortDescription: Map<String, String>,
     @SerialName("long_description") val longDescription: Map<String, String>? = null,
+    @SerialName("image_url") val imageUrl: String? = null,
     @SerialName("priority") val priority: String = "general",
     @SerialName("notice_type") val noticeType: String = "general",
     @SerialName("starts_at") val startsAt: String? = null,

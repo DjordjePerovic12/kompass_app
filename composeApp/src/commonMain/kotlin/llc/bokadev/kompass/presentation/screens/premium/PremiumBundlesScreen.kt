@@ -21,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import llc.bokadev.kompass.core.presentation.base.BaseContentView
 import llc.bokadev.kompass.core.util.currentAppLanguage
+import llc.bokadev.kompass.core.util.rememberAppStrings
 import llc.bokadev.kompass.domain.model.PremiumProduct
 import llc.bokadev.kompass.domain.repository.AnalyticsRepository
 import llc.bokadev.kompass.presentation.shared.KompassSharedTopBar
@@ -38,6 +39,7 @@ fun PremiumBundlesScreen(
     val vm: PremiumBundlesViewModel = koinViewModel()
     val state by vm.state.collectAsState()
     val locale = currentAppLanguage()
+    val strings = rememberAppStrings()
     val colors = KompassTheme.colors
     val analytics = koinInject<AnalyticsRepository>()
 
@@ -58,8 +60,8 @@ fun PremiumBundlesScreen(
         state = state,
         topBar = {
             KompassSharedTopBar(
-                slug = "Unlock richer stories and planning",
-                title = "Premium",
+                slug = strings.premiumSlug,
+                title = strings.premiumTitle,
                 showBack = true,
                 onBackClick = onBack
             )
@@ -78,12 +80,12 @@ fun PremiumBundlesScreen(
                     onClick = { onNavigateToGuide(unlockTargetActivityId) },
                     shape = RoundedCornerShape(999.dp)
                 ) {
-                    Text("OPEN AUDIO GUIDE NOW")
+                    Text(strings.openAudioGuideNow)
                 }
             }
 
             Text(
-                text = "Premium turns KOmpass into more than a free browse app. It unlocks guided storytelling and deeper trip planning designed for people who want more than the obvious Kotor route.",
+                text = strings.premiumIntro,
                 style = MaterialTheme.typography.bodyMedium,
                 color = colors.colorSlate
             )
@@ -93,6 +95,7 @@ fun PremiumBundlesScreen(
                     product = product,
                     isUnlocked = state.entitlements.hasAccess(product.tier),
                     isProcessing = state.activeCheckoutProductId == product.id,
+                    strings = strings,
                     onUnlock = {
                         vm.onIntent(
                             PremiumBundlesEvent.StartCheckout(
@@ -123,6 +126,7 @@ private fun BundleCard(
     product: PremiumProduct,
     isUnlocked: Boolean,
     isProcessing: Boolean,
+    strings: llc.bokadev.kompass.core.util.AppStrings,
     onUnlock: () -> Unit
 ) {
     val colors = KompassTheme.colors
@@ -158,9 +162,9 @@ private fun BundleCard(
         ) {
             Text(
                 when {
-                    isUnlocked -> "UNLOCKED"
-                    isProcessing -> "PROCESSING CHECKOUT..."
-                    else -> "UNLOCK ${product.priceLabel}"
+                    isUnlocked -> strings.unlocked
+                    isProcessing -> strings.processingCheckout
+                    else -> "${strings.unlockPricePrefix} ${product.priceLabel}"
                 }
             )
         }

@@ -1,30 +1,46 @@
 package llc.bokadev.kompass.presentation.navigation
 
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import llc.bokadev.kompass.core.util.rememberAppStrings
 import llc.bokadev.kompass.presentation.theme.KompassTheme
 
-enum class BottomTab(val label: String) {
-    Home("Home"),
-    Categories("Categories"),
-    Activities("Activities"),
-    Essentials("Essentials")
+enum class BottomTab {
+    Home,
+    Categories,
+    Activities,
+    Essentials
 }
 
 @Composable
@@ -33,171 +49,215 @@ fun KompassBottomNavBar(
     onTabSelected: (BottomTab) -> Unit
 ) {
     val colors = KompassTheme.colors
-    NavigationBar(
-        containerColor = colors.colorWhite,
-        tonalElevation = 0.dp,
+    val strings = rememberAppStrings()
+    val shellShape = RoundedCornerShape(34.dp)
+
+    Box(
         modifier = Modifier
+            .fillMaxWidth()
+            .wrapContentHeight()
             .navigationBarsPadding()
-            .height(64.dp)
-            .drawBehind {
-                drawLine(
-                    color = colors.colorSlateGhost,
-                    start = Offset(0f, 0f),
-                    end = Offset(size.width, 0f),
-                    strokeWidth = 1.dp.toPx()
+            .padding(horizontal = 20.dp, vertical = 0.dp),
+        contentAlignment = Alignment.BottomCenter
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .shadow(
+                    elevation = 14.dp,
+                    shape = shellShape,
+                    ambientColor = colors.colorNavy.copy(alpha = 0.14f),
+                    spotColor = colors.colorNavy.copy(alpha = 0.18f)
+                )
+                .clip(shellShape)
+                .background(colors.colorWhite)
+                .padding(start = 12.dp, end = 12.dp, top = 6.dp, bottom = 10.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            BottomTab.entries.forEach { tab ->
+                val selected = tab == selectedTab
+                val label = when (tab) {
+                    BottomTab.Home -> strings.bottomHome
+                    BottomTab.Categories -> strings.bottomBrowse
+                    BottomTab.Activities -> strings.bottomActivities
+                    BottomTab.Essentials -> strings.bottomEssentials
+                }
+
+                BottomNavItem(
+                    tab = tab,
+                    label = label,
+                    selected = selected,
+                    onClick = { onTabSelected(tab) }
                 )
             }
-    ) {
-        BottomTab.entries.forEach { tab ->
-            val selected = tab == selectedTab
-            val iconColor = if (selected) colors.colorNavy else colors.colorSlateLight
-            NavigationBarItem(
-                selected = selected,
-                onClick = { onTabSelected(tab) },
-                icon = { TabIcon(tab = tab, color = iconColor) },
-                label = { Text(tab.label, style = MaterialTheme.typography.labelSmall) },
-                alwaysShowLabel = true,
-                colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = colors.colorNavy,
-                    selectedTextColor = colors.colorNavy,
-                    indicatorColor = colors.colorAmberSubtle,
-                    unselectedIconColor = colors.colorSlateLight,
-                    unselectedTextColor = colors.colorSlateLight
-                )
-            )
         }
     }
 }
 
 @Composable
-private fun TabIcon(tab: BottomTab, color: Color) {
-    Canvas(modifier = Modifier.size(22.dp)) {
-        when (tab) {
-            BottomTab.Home        -> drawHome(color)
-            BottomTab.Categories  -> drawCategories(color)
-            BottomTab.Activities  -> drawExperiences(color)
-            BottomTab.Essentials  -> drawInfoCenter(color)
+private fun BottomNavItem(
+    tab: BottomTab,
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    val colors = KompassTheme.colors
+
+    Column(
+        modifier = Modifier
+            .widthIn(min = 62.dp)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 3.dp, vertical = 0.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(2.dp)
+    ) {
+        if (selected) {
+            Box(
+                modifier = Modifier
+                    .size(42.dp)
+                    .shadow(
+                        elevation = 3.dp,
+                        shape = CircleShape,
+                        ambientColor = colors.colorNavy.copy(alpha = 0.08f),
+                        spotColor = colors.colorNavy.copy(alpha = 0.10f)
+                    )
+                    .clip(CircleShape)
+                    .background(colors.colorSignal.copy(alpha = 0.08f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Canvas(modifier = Modifier.size(25.dp)) {
+                    drawTabIcon(tab = tab, color = colors.colorSignalStrong)
+                }
+            }
+        } else {
+            Canvas(modifier = Modifier.size(24.dp)) {
+                drawTabIcon(tab = tab, color = colors.colorSlateSoft.copy(alpha = 0.72f))
+            }
         }
-    }
-}
 
-private fun DrawScope.drawHome(color: Color) {
-    val w = size.width
-    val h = size.height
-    val path = androidx.compose.ui.graphics.Path().apply {
-        moveTo(w * 0.5f, h * 0.08f)
-        lineTo(w * 0.04f, h * 0.48f)
-        lineTo(w * 0.18f, h * 0.48f)
-        lineTo(w * 0.18f, h * 0.92f)
-        lineTo(w * 0.82f, h * 0.92f)
-        lineTo(w * 0.82f, h * 0.48f)
-        lineTo(w * 0.96f, h * 0.48f)
-        close()
-    }
-    drawPath(path, color)
-    drawRect(
-        color = Color.White,
-        topLeft = Offset(w * 0.39f, h * 0.58f),
-        size = Size(w * 0.22f, h * 0.34f)
-    )
-}
-
-private fun DrawScope.drawCategories(color: Color) {
-    val cell = size.width * 0.38f
-    val gap = size.width * 0.12f
-    listOf(
-        Offset(gap, gap),
-        Offset(cell + gap * 2, gap),
-        Offset(gap, cell + gap * 2),
-        Offset(cell + gap * 2, cell + gap * 2)
-    ).forEach { offset ->
-        drawRoundRect(
-            color = color,
-            topLeft = offset,
-            size = Size(cell, cell),
-            cornerRadius = CornerRadius(3.dp.toPx())
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontSize = 8.sp,
+                letterSpacing = 0.05.sp
+            ),
+            color = if (selected) colors.colorSignalStrong else colors.colorSlateSoft.copy(alpha = 0.72f),
+            maxLines = 1,
+            overflow = TextOverflow.Clip,
+            textAlign = TextAlign.Center
         )
     }
 }
 
-private fun DrawScope.drawEvents(color: Color) {
-    val w = size.width
-    val h = size.height
-    val cr = CornerRadius(w * 0.1f)
-    drawRoundRect(
-        color = color,
-        topLeft = Offset(w * 0.08f, h * 0.14f),
-        size = Size(w * 0.84f, h * 0.78f),
-        cornerRadius = cr
-    )
-    drawRect(
-        color = Color.White,
-        topLeft = Offset(w * 0.08f, h * 0.35f),
-        size = Size(w * 0.84f, h * 0.57f)
-    )
-    drawRoundRect(
-        color = Color.White,
-        topLeft = Offset(w * 0.08f, h * 0.7f),
-        size = Size(w * 0.84f, h * 0.22f),
-        cornerRadius = cr
-    )
-    drawRoundRect(
-        color = color,
-        topLeft = Offset(w * 0.08f, h * 0.7f),
-        size = Size(w * 0.84f, h * 0.22f),
-        cornerRadius = cr
-    )
-    drawRoundRect(
-        color = Color.White,
-        topLeft = Offset(w * 0.08f, h * 0.78f),
-        size = Size(w * 0.84f, h * 0.15f),
-        cornerRadius = CornerRadius(0f)
-    )
-    drawRoundRect(color = color, topLeft = Offset(w * 0.28f, h * 0.02f), size = Size(w * 0.12f, h * 0.2f), cornerRadius = CornerRadius(w * 0.06f))
-    drawRoundRect(color = color, topLeft = Offset(w * 0.60f, h * 0.02f), size = Size(w * 0.12f, h * 0.2f), cornerRadius = CornerRadius(w * 0.06f))
-    drawCircle(color = color, radius = w * 0.09f, center = Offset(w * 0.5f, h * 0.66f))
-}
-
-private fun DrawScope.drawExperiences(color: Color) {
-    val cx = size.width / 2f
-    val cy = size.height / 2f
-    val outerR = size.width * 0.45f
-    val innerR = size.width * 0.19f
-    val path = androidx.compose.ui.graphics.Path()
-    val points = 5
-    for (i in 0 until points * 2) {
-        val r = if (i % 2 == 0) outerR else innerR
-        val angle = kotlin.math.PI * i / points - kotlin.math.PI / 2
-        val x = cx + r * kotlin.math.cos(angle).toFloat()
-        val y = cy + r * kotlin.math.sin(angle).toFloat()
-        if (i == 0) path.moveTo(x, y) else path.lineTo(x, y)
+private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawTabIcon(tab: BottomTab, color: Color) {
+    when (tab) {
+        BottomTab.Home -> drawHome(color)
+        BottomTab.Categories -> drawCategories(color)
+        BottomTab.Activities -> drawActivities(color)
+        BottomTab.Essentials -> drawProfile(color)
     }
-    path.close()
-    drawPath(path, color)
 }
 
-private fun DrawScope.drawInfoCenter(color: Color) {
+private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawHome(color: Color) {
     val w = size.width
     val h = size.height
+    val path = Path().apply {
+        moveTo(w * 0.5f, h * 0.1f)
+        lineTo(w * 0.14f, h * 0.42f)
+        lineTo(w * 0.14f, h * 0.86f)
+        lineTo(w * 0.86f, h * 0.86f)
+        lineTo(w * 0.86f, h * 0.42f)
+        close()
+    }
+    drawPath(path, color, style = Stroke(width = 1.9.dp.toPx()))
+    drawRect(
+        color = color,
+        topLeft = Offset(w * 0.44f, h * 0.58f),
+        size = Size(w * 0.12f, h * 0.22f)
+    )
+}
+
+private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawCategories(color: Color) {
+    val w = size.width
+    val h = size.height
+    val stroke = 1.8.dp.toPx()
     drawRoundRect(
         color = color,
-        topLeft = Offset(w * 0.16f, h * 0.18f),
-        size = Size(w * 0.68f, h * 0.62f),
-        cornerRadius = CornerRadius(6.dp.toPx())
+        topLeft = Offset(w * 0.12f, h * 0.18f),
+        size = Size(w * 0.26f, h * 0.22f),
+        cornerRadius = CornerRadius(4.dp.toPx()),
+        style = Stroke(width = stroke)
+    )
+    drawRoundRect(
+        color = color,
+        topLeft = Offset(w * 0.56f, h * 0.18f),
+        size = Size(w * 0.18f, h * 0.18f),
+        cornerRadius = CornerRadius(4.dp.toPx()),
+        style = Stroke(width = stroke)
+    )
+    drawRoundRect(
+        color = color,
+        topLeft = Offset(w * 0.12f, h * 0.56f),
+        size = Size(w * 0.18f, h * 0.18f),
+        cornerRadius = CornerRadius(4.dp.toPx()),
+        style = Stroke(width = stroke)
+    )
+    drawRoundRect(
+        color = color,
+        topLeft = Offset(w * 0.42f, h * 0.50f),
+        size = Size(w * 0.32f, h * 0.24f),
+        cornerRadius = CornerRadius(4.dp.toPx()),
+        style = Stroke(width = stroke)
+    )
+}
+
+private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawActivities(color: Color) {
+    val w = size.width
+    val h = size.height
+    val stroke = 1.9.dp.toPx()
+    drawCircle(
+        color = color,
+        radius = w * 0.13f,
+        center = Offset(w * 0.28f, h * 0.36f),
+        style = Stroke(width = stroke)
     )
     drawCircle(
-        color = Color.White,
-        radius = w * 0.09f,
-        center = Offset(w * 0.5f, h * 0.36f)
+        color = color,
+        radius = w * 0.13f,
+        center = Offset(w * 0.72f, h * 0.36f),
+        style = Stroke(width = stroke)
     )
-    drawRect(
-        color = Color.White,
-        topLeft = Offset(w * 0.47f, h * 0.44f),
-        size = Size(w * 0.06f, h * 0.16f)
+    drawCircle(
+        color = color,
+        radius = w * 0.13f,
+        center = Offset(w * 0.28f, h * 0.72f),
+        style = Stroke(width = stroke)
     )
-    drawRect(
-        color = Color.White,
-        topLeft = Offset(w * 0.30f, h * 0.62f),
-        size = Size(w * 0.40f, h * 0.05f)
+    drawCircle(
+        color = color,
+        radius = w * 0.13f,
+        center = Offset(w * 0.72f, h * 0.72f),
+        style = Stroke(width = stroke)
+    )
+}
+
+private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawProfile(color: Color) {
+    val w = size.width
+    val h = size.height
+    val stroke = 1.9.dp.toPx()
+    drawCircle(
+        color = color,
+        radius = w * 0.18f,
+        center = Offset(w * 0.5f, h * 0.32f),
+        style = Stroke(width = stroke)
+    )
+    drawPath(
+        path = Path().apply {
+            moveTo(w * 0.22f, h * 0.84f)
+            cubicTo(w * 0.30f, h * 0.60f, w * 0.70f, h * 0.60f, w * 0.78f, h * 0.84f)
+        },
+        color = color,
+        style = Stroke(width = stroke)
     )
 }

@@ -11,9 +11,12 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import llc.bokadev.kompass.domain.location.UserLocationProvider
+import llc.bokadev.kompass.domain.model.FavoriteItemType
 import llc.bokadev.kompass.domain.repository.AnalyticsRepository
+import llc.bokadev.kompass.domain.repository.FavoritesRepository
+import llc.bokadev.kompass.core.util.AppPreferences
+import llc.bokadev.kompass.core.util.rememberAppStrings
 import llc.bokadev.kompass.presentation.permissions.LocationPermissionEffect
-import org.koin.compose.koinInject
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -25,34 +28,52 @@ fun HomeScreen(
     onNavigateToInfoCenterDetail: (String) -> Unit = {},
     onNavigateToEvents: () -> Unit = {},
     onNavigateToItineraryDetail: (String) -> Unit = {},
+    onNavigateToMustSeePlaces: () -> Unit = {},
     onNavigateToNearbyPlaces: () -> Unit = {},
     onNavigateToInfoCenter: () -> Unit = {},
-    onNavigateToMyGuides: () -> Unit = {}
+    onNavigateToMyGuides: () -> Unit = {},
+    onNavigateToChangeLanguage: () -> Unit = {}
 ) {
     val vm: HomeViewModel = koinViewModel(key = vmKey)
     val state by vm.state.collectAsState()
     val locationProvider = koinInject<UserLocationProvider>()
     val analytics = koinInject<AnalyticsRepository>()
+    val favoritesRepository = koinInject<FavoritesRepository>()
+    val preferences = koinInject<AppPreferences>()
+    val strings = rememberAppStrings()
+    val favoriteEntries by favoritesRepository.favoritesFlow.collectAsState()
     var shouldRequestLocation by remember { mutableStateOf(false) }
-    var showLocationPrompt by remember { mutableStateOf(!locationProvider.hasPermission()) }
+    var showLocationPrompt by remember {
+        mutableStateOf(
+            !locationProvider.hasPermission() &&
+                !preferences.hasSeenLocationEducationPrompt()
+        )
+    }
 
     LaunchedEffect(Unit) {
         analytics.trackScreenView("home")
+        if (!locationProvider.hasPermission() && preferences.hasSeenLocationEducationPrompt()) {
+            shouldRequestLocation = true
+        }
     }
 
     if (showLocationPrompt) {
         AlertDialog(
             onDismissRequest = { showLocationPrompt = false },
-            title = { Text("See what’s closest right now") },
-            text = { Text("Allow location to show walkable places nearby and better local recommendations while you explore Kotor.") },
+            title = { Text(strings.locationPromptTitle) },
+            text = { Text(strings.locationPromptBody) },
             confirmButton = {
                 TextButton(onClick = {
                     showLocationPrompt = false
+                    preferences.setSeenLocationEducationPrompt(true)
                     shouldRequestLocation = true
-                }) { Text("Continue") }
+                }) { Text(strings.continueLabel) }
             },
             dismissButton = {
-                TextButton(onClick = { showLocationPrompt = false }) { Text("Not now") }
+                TextButton(onClick = {
+                    preferences.setSeenLocationEducationPrompt(true)
+                    showLocationPrompt = false
+                }) { Text(strings.notNow) }
             }
         )
     }
@@ -69,6 +90,7 @@ fun HomeScreen(
 
     HomeScreenContent(
         state = state,
+        favoriteKeySet = favoritesRepository.getFavoriteKeySet(),
         onPlaceClick = { id ->
             state.mustSeePlaces.firstOrNull { it.id == id }?.let { place ->
                 analytics.trackPlaceView(
@@ -104,9 +126,14 @@ fun HomeScreen(
             onNavigateToInfoCenterDetail(id)
         },
         onEventsSeeAll = onNavigateToEvents,
+        onMustSeeSeeAll = onNavigateToMustSeePlaces,
         onNearbySeeAll = onNavigateToNearbyPlaces,
         onInfoCenterSeeAll = onNavigateToInfoCenter,
         onMyGuidesClick = onNavigateToMyGuides,
+        onChangeLanguageClick = onNavigateToChangeLanguage,
+        onPlaceFavoriteToggle = { id ->
+            favoritesRepository.toggleFavorite(FavoriteItemType.PLACE, id)
+        },
         onIntent = vm::onIntent
     )
 }

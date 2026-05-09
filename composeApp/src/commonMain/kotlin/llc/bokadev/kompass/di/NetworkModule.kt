@@ -6,6 +6,6 @@ import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
 val networkModule = module {
-    single { createKompassSupabaseClient() }
-    single(named("kompassApi")) { createKompassHttpClient() }
+    single { createKompassSupabaseClient(get()) }
+    single(named("kompassApi")) { createKompassHttpClient(get()) }
 }

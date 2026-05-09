@@ -1,16 +1,37 @@
 package llc.bokadev.kompass.core.util
 
 import platform.Foundation.NSUserDefaults
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 class IosAppPreferences : AppPreferences {
 
     private val defaults = NSUserDefaults.standardUserDefaults
 
-    override fun getSelectedLanguage(): String =
+    private val languageState = MutableStateFlow(
         defaults.stringForKey("selected_language") ?: "en"
+    )
+
+    override val selectedLanguageFlow: StateFlow<String> = languageState.asStateFlow()
+
+    override fun getString(key: String): String? =
+        defaults.stringForKey(key)
+
+    override fun setString(key: String, value: String?) {
+        if (value == null) {
+            defaults.removeObjectForKey(key)
+        } else {
+            defaults.setObject(value, forKey = key)
+        }
+    }
+
+    override fun getSelectedLanguage(): String =
+        languageState.value
 
     override fun setSelectedLanguage(language: String) {
         defaults.setObject(language, forKey = "selected_language")
+        languageState.value = language
     }
 
     override fun getAnonymousUserId(): String? =
@@ -27,6 +48,13 @@ class IosAppPreferences : AppPreferences {
 
     override fun setFirstLaunch(value: Boolean) {
         defaults.setBool(value, forKey = "is_first_launch")
+    }
+
+    override fun hasSeenLocationEducationPrompt(): Boolean =
+        defaults.boolForKey("has_seen_location_education_prompt")
+
+    override fun setSeenLocationEducationPrompt(value: Boolean) {
+        defaults.setBool(value, forKey = "has_seen_location_education_prompt")
     }
 
     override fun hasAudioPass(): Boolean =

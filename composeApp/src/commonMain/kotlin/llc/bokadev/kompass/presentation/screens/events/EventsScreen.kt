@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import llc.bokadev.kompass.core.presentation.base.BaseContentView
+import llc.bokadev.kompass.core.util.rememberAppStrings
 import llc.bokadev.kompass.domain.repository.AnalyticsRepository
 import llc.bokadev.kompass.presentation.shared.KompassSharedTopBar
 import org.koin.compose.koinInject
@@ -21,6 +22,7 @@ fun EventsScreen(
     val vm: EventsViewModel = koinViewModel(key = vmKey)
     val state by vm.state.collectAsState()
     val analytics = koinInject<AnalyticsRepository>()
+    val strings = rememberAppStrings()
 
     LaunchedEffect(Unit) {
         analytics.trackScreenView("events")
@@ -30,8 +32,9 @@ fun EventsScreen(
         state = state,
         topBar = {
             KompassSharedTopBar(
-                slug = "Whats on in Kotor",
-                title = "Events",
+                slug = strings.eventsSlug,
+                title = strings.eventsTitle,
+                subtitle = strings.eventsSubtitle,
                 showBack = true,
                 onBackClick = onBack
             )

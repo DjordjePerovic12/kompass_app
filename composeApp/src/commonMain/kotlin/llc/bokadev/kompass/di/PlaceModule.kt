@@ -9,7 +9,7 @@ import llc.bokadev.kompass.domain.usecase.GetPlacesByCategoryUseCase
 import org.koin.dsl.module
 
 val placeModule = module {
-    single<PlaceRepository> { PlaceRepositoryImpl(get()) }
+    single<PlaceRepository> { PlaceRepositoryImpl(get(), get()) }
     factory { GetNearbyPlacesUseCase(get()) }
     factory { GetMustSeePlacesUseCase(get()) }
     factory { GetPlacesByCategoryUseCase(get()) }

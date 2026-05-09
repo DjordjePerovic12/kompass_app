@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,22 +14,21 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -38,25 +38,23 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import llc.bokadev.kompass.core.presentation.base.BaseContentView
 import llc.bokadev.kompass.core.util.AudioGuidePlaybackState
 import llc.bokadev.kompass.core.util.buildGuideMapHtml
 import llc.bokadev.kompass.core.util.buildMapsUrl
 import llc.bokadev.kompass.core.util.buildPhotoUrl
 import llc.bokadev.kompass.core.util.currentAppLanguage
+import llc.bokadev.kompass.domain.model.BestTime
 import llc.bokadev.kompass.domain.model.Experience
-import llc.bokadev.kompass.domain.model.GeoPoint
 import llc.bokadev.kompass.domain.repository.AnalyticsRepository
-import llc.bokadev.kompass.presentation.permissions.NotificationPermissionEffect
-import llc.bokadev.kompass.presentation.permissions.rememberShouldShowNotificationPrompt
-import llc.bokadev.kompass.presentation.screens.placedetail.components.InfoChip
 import llc.bokadev.kompass.presentation.screens.placedetail.components.PlacePhotoHeader
 import llc.bokadev.kompass.presentation.shared.InlineHtmlMapView
 import llc.bokadev.kompass.presentation.shared.KompassSharedTopBar
@@ -68,26 +66,24 @@ import org.koin.core.parameter.parametersOf
 @Composable
 fun ExperienceGuideScreen(
     id: String,
+    autoplay: Boolean = false,
     onBack: () -> Unit = {}
 ) {
-    val vm: ExperienceGuideViewModel = koinViewModel(parameters = { parametersOf(id) })
+    val vm: ExperienceGuideViewModel = koinViewModel(parameters = { parametersOf(id, autoplay) })
     val state by vm.state.collectAsState()
     val analytics = koinInject<AnalyticsRepository>()
 
     LaunchedEffect(id) {
-        analytics.trackScreenView("guide")
-    }
-
-    LaunchedEffect(state.activity?.id) {
-        state.activity?.let { analytics.trackGuideOpen(it.id, it.cityId) }
+        analytics.trackScreenView("experience_guide")
     }
 
     BaseContentView(
         state = state,
         topBar = {
             KompassSharedTopBar(
-                slug = "Unlocked audio guide",
-                title = "Guide",
+                slug = "",
+                title = "Audio Guide",
+                subtitle = "Listen while exploring on-site",
                 showBack = true,
                 onBackClick = onBack
             )
@@ -97,6 +93,7 @@ fun ExperienceGuideScreen(
             state = state,
             onIntent = vm::onIntent,
             onAudioStarted = { activity ->
+                analytics.trackGuideOpen(activity.id, activity.cityId)
                 analytics.trackAudioPlay(activity.id, activity.cityId)
             }
         )
@@ -113,20 +110,25 @@ private fun ExperienceGuideScreenContent(
     val lang = currentAppLanguage()
     val uriHandler = LocalUriHandler.current
     var mapVisible by remember { mutableStateOf(false) }
-    var showNotificationDialog by remember { mutableStateOf(false) }
-    var shouldRequestPermission by remember { mutableStateOf(false) }
-    val shouldShowNotificationPrompt = rememberShouldShowNotificationPrompt()
+    val lifecycleOwner = LocalLifecycleOwner.current
+    var appInBackground by remember { mutableStateOf(false) }
 
-    LaunchedEffect(state.audioUrl) {
-        if (state.audioUrl != null && shouldShowNotificationPrompt) {
-            showNotificationDialog = true
+    DisposableEffect(lifecycleOwner, state.playback.sourceUrl) {
+        val observer = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_STOP -> appInBackground = true
+                Lifecycle.Event.ON_START -> appInBackground = false
+                else -> Unit
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+            if (!appInBackground && state.playback.sourceUrl != null) {
+                onIntent(ExperienceGuideEvent.StopPlayback)
+            }
         }
     }
-
-    NotificationPermissionEffect(
-        enabled = shouldRequestPermission,
-        onPermissionResult = { shouldRequestPermission = false }
-    )
 
     when {
         state.error != null -> {
@@ -146,143 +148,158 @@ private fun ExperienceGuideScreenContent(
 
         state.activity != null -> {
             val activity = state.activity
-
-            if (showNotificationDialog) {
-                AlertDialog(
-                    onDismissRequest = { showNotificationDialog = false },
-                    title = { Text("Keep audio visible in background") },
-                    text = { Text("Allow notifications so KOmpass can show playback controls while the guide continues playing in the background on Android.") },
-                    confirmButton = {
-                        TextButton(onClick = {
-                            showNotificationDialog = false
-                            shouldRequestPermission = true
-                        }) { Text("Continue") }
-                    },
-                    dismissButton = {
-                        TextButton(onClick = { showNotificationDialog = false }) { Text("Not now") }
-                    }
+            val locationLabel = activity.localizedLocation(lang).takeIf { it.isNotBlank() }
+            val metaLinePrimary = buildString {
+                append(activity.category.prettyActivityCategory())
+                locationLabel?.let {
+                    append(" · ")
+                    append(it)
+                }
+            }
+            val metaLineSecondary = buildString {
+                append(activity.bestTime.toGuideMomentLabel())
+                activity.durationMin?.let {
+                    append(" · ")
+                    append(it.formatGuideDuration())
+                }
+            }
+            val mapHtml = remember(activity.id, state.currentLocation, lang) {
+                buildGuideMapHtml(
+                    placeName = activity.localizedName(lang),
+                    destination = llc.bokadev.kompass.domain.model.GeoPoint(
+                        activity.latitude ?: 0.0,
+                        activity.longitude ?: 0.0
+                    ),
+                    currentLocation = state.currentLocation
                 )
             }
+            val mapQuery = buildString {
+                append(activity.localizedName(lang))
+                locationLabel?.let {
+                    append(", ")
+                    append(it)
+                }
+                activity.latitude?.let { lat ->
+                    activity.longitude?.let { lon ->
+                        append(" @")
+                        append(lat)
+                        append(",")
+                        append(lon)
+                    }
+                }
+            }
 
-            Column(
+            Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                    .background(colors.colorSurface)
+                    .background(colors.colorHomeCanvas)
             ) {
-                PlacePhotoHeader(
-                    imageUrl = activity.photos.firstOrNull()?.let { buildPhotoUrl(it) }
-                )
-
                 Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .background(colors.colorWhite, RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
-                        .padding(20.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .padding(bottom = 32.dp)
                 ) {
-                    Text(
-                        text = activity.localizedName(lang),
-                        style = MaterialTheme.typography.headlineLarge,
-                        color = colors.colorNavy
+                    PlacePhotoHeader(
+                        imageUrl = activity.photos.firstOrNull()?.let { buildPhotoUrl(it) },
+                        modifier = Modifier.height(320.dp),
+                        imageAspectRatio = null
                     )
 
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        activity.category?.takeIf(String::isNotBlank)
-                            ?.let { InfoChip(it.prettyActivityCategory()) }
-                        activity.durationMin?.let { InfoChip("$it min") }
-                        InfoChip(activity.bestTime.toUiLabel())
-                    }
-
-                    if (activity.latitude != null && activity.longitude != null) {
-                        val destination = GeoPoint(activity.latitude, activity.longitude)
-                        val mapHtml = remember(destination, state.currentLocation) {
-                            buildGuideMapHtml(
-                                placeName = activity.localizedName(lang),
-                                destination = destination,
-                                currentLocation = state.currentLocation
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .offset(y = (-28).dp)
+                            .background(
+                                color = colors.colorWhite,
+                                shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
+                            )
+                            .padding(horizontal = 22.dp, vertical = 24.dp),
+                        verticalArrangement = Arrangement.spacedBy(22.dp)
+                    ) {
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Text(
+                                text = activity.localizedName(lang),
+                                style = MaterialTheme.typography.headlineLarge.copy(
+                                    fontSize = 46.sp,
+                                    lineHeight = 50.sp,
+                                    letterSpacing = (-1).sp,
+                                    fontWeight = FontWeight.SemiBold
+                                ),
+                                color = colors.colorNavy
+                            )
+                            Text(
+                                text = metaLinePrimary,
+                                style = MaterialTheme.typography.bodyMedium.copy(
+                                    fontSize = 14.sp,
+                                    lineHeight = 20.sp,
+                                    fontWeight = FontWeight.Medium
+                                ),
+                                color = colors.colorSignalStrong.copy(alpha = 0.72f)
+                            )
+                            Text(
+                                text = metaLineSecondary,
+                                style = MaterialTheme.typography.bodyMedium.copy(
+                                    fontSize = 14.sp,
+                                    lineHeight = 20.sp
+                                ),
+                                color = colors.colorSlate.copy(alpha = 0.68f)
                             )
                         }
-                        val mapsQuery = remember(destination) {
-                            buildString {
-                                append(activity.localizedName(lang))
-                                if (activity.localizedLocation(lang).isNotBlank()) {
-                                    append(", ")
-                                    append(activity.localizedLocation(lang))
+
+                        ListeningActivityCard(
+                            activity = activity,
+                            playback = state.playback,
+                            audioReady = state.audioUrl != null,
+                            hasAudioAccess = state.hasAudioAccess,
+                            onTogglePlayPause = {
+                                if (!state.playback.isPlaying && state.audioUrl != null) {
+                                    onAudioStarted(activity)
                                 }
-                                append(" @")
-                                append(destination.latitude)
-                                append(",")
-                                append(destination.longitude)
-                            }
+                                onIntent(ExperienceGuideEvent.TogglePlayPause)
+                            },
+                            onSeek = { onIntent(ExperienceGuideEvent.SeekTo(it)) }
+                        )
+
+                        if (activity.latitude != null && activity.longitude != null) {
+                            ExploreActivityAroundCard(
+                                activityName = activity.localizedName(lang),
+                                mapHtml = mapHtml,
+                                mapVisible = mapVisible,
+                                onToggleMap = { mapVisible = !mapVisible },
+                                onOpenInMaps = { uriHandler.openUri(buildMapsUrl(mapQuery)) }
+                            )
                         }
 
-                        OutlinedButton(
-                            onClick = { mapVisible = !mapVisible },
-                            shape = RoundedCornerShape(999.dp)
-                        ) {
-                            Text(if (mapVisible) "HIDE MAP" else "SHOW MAP")
-                        }
+                        EditorialActivitySection(
+                            title = "Overview",
+                            body = activity.localizedDescription(lang)
+                        )
 
-                        // Use fade-only: expandVertically clamps height during
-                        // animation which races with the WebView's layout pass,
-                        // causing window.innerWidth/Height to read 0 in JS.
-                        AnimatedVisibility(
-                            visible = mapVisible,
-                            enter = fadeIn(),
-                            exit = fadeOut()
-                        ) {
-                            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                                InlineHtmlMapView(
-                                    html = mapHtml,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(280.dp)
-                                        .clip(RoundedCornerShape(16.dp))
+                        if (state.hasDetailAccess) {
+                            activity.localizedLongDescription(lang).takeIf(String::isNotBlank)?.let {
+                                EditorialActivitySection(
+                                    title = "Editorial Notes",
+                                    body = it
                                 )
-                                TextButton(
-                                    onClick = { uriHandler.openUri(buildMapsUrl(mapsQuery)) },
-                                    modifier = Modifier.align(Alignment.End)
-                                ) {
-                                    Text(
-                                        text = "Open in Maps app →",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = colors.colorAmberDark
-                                    )
-                                }
                             }
+                        } else if (activity.localizedLongDescription(lang).isNotBlank()) {
+                            ActivityPremiumDeepDiveCard()
                         }
-                    }
 
-                    GuideDetailSection("Overview", activity.localizedDescription(lang))
+                        activity.localizedHowToGetThere(lang).takeIf(String::isNotBlank)?.let {
+                            EditorialActivitySection(
+                                title = "How to get there",
+                                body = it
+                            )
+                        }
 
-                    activity.localizedLongDescription(lang).takeIf(String::isNotBlank)?.let {
-                        GuideDetailSection("Story", it)
-                    }
-
-                    activity.localizedLocation(lang).takeIf(String::isNotBlank)?.let {
-                        GuideDetailSection("Location", it)
-                    }
-
-                    activity.localizedHowToGetThere(lang).takeIf(String::isNotBlank)?.let {
-                        GuideDetailSection("How to get there", it)
-                    }
-
-                    AudioGuideCard(
-                        activity = activity,
-                        playback = state.playback,
-                        audioReady = state.audioUrl != null,
-                        onTogglePlayPause = {
-                            if (!state.playback.isPlaying && state.audioUrl != null) {
-                                onAudioStarted(activity)
-                            }
-                            onIntent(ExperienceGuideEvent.TogglePlayPause)
-                        },
-                        onSeek = { onIntent(ExperienceGuideEvent.SeekTo(it)) }
-                    )
-
-                    activity.externalWebsite?.takeIf(String::isNotBlank)?.let {
-                        GuideDetailSection("External link", it)
+                        locationLabel?.let {
+                            EditorialActivitySection(
+                                title = "Local context",
+                                body = it
+                            )
+                        }
                     }
                 }
             }
@@ -291,159 +308,291 @@ private fun ExperienceGuideScreenContent(
 }
 
 @Composable
-private fun AudioGuideCard(
+private fun ListeningActivityCard(
     activity: Experience,
     playback: AudioGuidePlaybackState,
     audioReady: Boolean,
+    hasAudioAccess: Boolean,
     onTogglePlayPause: () -> Unit,
     onSeek: (Long) -> Unit
 ) {
     val colors = KompassTheme.colors
     val durationMs = playback.durationMs.coerceAtLeast(0L)
     val progressMs = playback.progressMs.coerceIn(0L, durationMs.takeIf { it > 0L } ?: Long.MAX_VALUE)
+    val approximateMinutes = when {
+        durationMs > 0L -> (durationMs / 60000L).coerceAtLeast(1L).toString() + " minutes"
+        activity.durationMin != null -> "${(activity.durationMin / 2).coerceAtLeast(4)} minutes"
+        else -> "12 minutes"
+    }
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .background(
-                brush = Brush.linearGradient(
-                    colors = listOf(colors.colorNavy, colors.colorNavyMedium)
-                ),
-                shape = RoundedCornerShape(20.dp)
+                color = colors.colorSurfaceMid,
+                shape = RoundedCornerShape(28.dp)
             )
             .padding(horizontal = 20.dp, vertical = 22.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(6.dp)
+        verticalArrangement = Arrangement.spacedBy(18.dp)
     ) {
-        // Title row
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Text(
                 text = "Audio Guide",
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                color = Color.White
+                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold),
+                color = colors.colorNavy
             )
             Text(
-                text = "${progressMs.toClockLabel()} / ${durationMs.toClockLabel()}",
-                style = MaterialTheme.typography.labelSmall,
-                color = Color.White.copy(alpha = 0.55f)
+                text = "Narrated route guide with context you can listen to while moving through the experience.",
+                style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 22.sp),
+                color = colors.colorSlate.copy(alpha = 0.8f)
             )
         }
 
-        Spacer(Modifier.height(6.dp))
-
-        // Seek slider
-        Slider(
-            value = progressMs.toFloat(),
-            onValueChange = { onSeek(it.toLong()) },
-            valueRange = 0f..durationMs.coerceAtLeast(1L).toFloat(),
-            enabled = audioReady && durationMs > 0L,
+        Row(
             modifier = Modifier.fillMaxWidth(),
-            colors = SliderDefaults.colors(
-                thumbColor = colors.colorAmber,
-                activeTrackColor = colors.colorAmber,
-                inactiveTrackColor = Color.White.copy(alpha = 0.2f),
-                disabledThumbColor = Color.White.copy(alpha = 0.25f),
-                disabledActiveTrackColor = Color.White.copy(alpha = 0.2f),
-                disabledInactiveTrackColor = Color.White.copy(alpha = 0.1f)
-            )
-        )
-
-        Spacer(Modifier.height(8.dp))
-
-        // Play / Pause button
-        Box(
-            modifier = Modifier
-                .size(62.dp)
-                .background(
-                    color = if (audioReady) colors.colorAmber else Color.White.copy(alpha = 0.12f),
-                    shape = CircleShape
-                )
-                .clip(CircleShape)
-                .clickable(enabled = audioReady) { onTogglePlayPause() },
-            contentAlignment = Alignment.Center
+            horizontalArrangement = Arrangement.spacedBy(18.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            when {
-                playback.isBuffering -> CircularProgressIndicator(
-                    color = colors.colorNavy,
-                    modifier = Modifier.size(26.dp),
-                    strokeWidth = 2.5.dp
+            Box(
+                modifier = Modifier
+                    .size(58.dp)
+                    .clip(CircleShape)
+                    .background(if (audioReady) colors.colorOrangeMain else colors.colorOrangeMain.copy(alpha = 0.32f))
+                    .clickable(enabled = audioReady, onClick = onTogglePlayPause),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = if (playback.isPlaying) "❚❚" else "▶",
+                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold),
+                    color = colors.colorWhite
                 )
-                playback.isPlaying -> Text(
-                    text = "⏸",
-                    style = MaterialTheme.typography.titleLarge,
-                    color = colors.colorNavy
-                )
-                else -> Text(
-                    text = "▶",
-                    style = MaterialTheme.typography.titleLarge,
-                    color = if (audioReady) colors.colorNavy else Color.White.copy(alpha = 0.35f)
+            }
+
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                ActivityGuideMetaLine("Approx. $approximateMinutes")
+                ActivityGuideMetaLine("Best experienced on-site")
+                ActivityGuideMetaLine(
+                    when {
+                        playback.isBuffering -> "Preparing playback"
+                        !hasAudioAccess -> "Available with premium access"
+                        audioReady -> "Ready to play"
+                        else -> "Audio is still preparing"
+                    }
                 )
             }
         }
 
-        Spacer(Modifier.height(4.dp))
+        if (durationMs > 0L || progressMs > 0L) {
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Slider(
+                    value = progressMs.toFloat(),
+                    onValueChange = { onSeek(it.toLong()) },
+                    valueRange = 0f..durationMs.coerceAtLeast(1L).toFloat(),
+                    colors = SliderDefaults.colors(
+                        thumbColor = colors.colorOrangeMain,
+                        activeTrackColor = colors.colorOrangeMain,
+                        inactiveTrackColor = colors.colorWhite.copy(alpha = 0.55f)
+                    ),
+                    modifier = Modifier.height(18.dp)
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = progressMs.toActivityClockLabel(),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = colors.colorSlate.copy(alpha = 0.7f)
+                    )
+                    Text(
+                        text = durationMs.toActivityClockLabel(),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = colors.colorSlate.copy(alpha = 0.7f)
+                    )
+                }
+            }
+        }
 
-        // Status text / error
-        if (playback.error != null) {
+        playback.error?.let {
             Text(
-                text = playback.error,
+                text = it,
                 style = MaterialTheme.typography.bodySmall,
-                color = colors.colorError,
-                textAlign = TextAlign.Center
-            )
-        } else {
-            Text(
-                text = when {
-                    !audioReady -> "Audio not yet available"
-                    playback.isPlaying -> "Continues playing in background"
-                    else -> "Tap to start the audio guide"
-                },
-                style = MaterialTheme.typography.bodySmall,
-                color = Color.White.copy(alpha = 0.45f),
-                textAlign = TextAlign.Center
+                color = colors.colorError
             )
         }
     }
 }
 
 @Composable
-private fun GuideDetailSection(title: String, body: String) {
+private fun ActivityGuideMetaLine(text: String) {
     val colors = KompassTheme.colors
-    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.bodyMedium.copy(
+            fontSize = 14.sp,
+            lineHeight = 20.sp
+        ),
+        color = colors.colorSlate.copy(alpha = 0.76f)
+    )
+}
+
+@Composable
+private fun ExploreActivityAroundCard(
+    activityName: String,
+    mapHtml: String,
+    mapVisible: Boolean,
+    onToggleMap: () -> Unit,
+    onOpenInMaps: () -> Unit
+) {
+    val colors = KompassTheme.colors
+
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(26.dp))
+                .background(colors.colorWhite)
+                .border(1.dp, colors.colorSurfaceMid.copy(alpha = 0.75f), RoundedCornerShape(26.dp))
+                .clickable(onClick = onToggleMap)
+                .padding(14.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            InlineHtmlMapView(
+                html = mapHtml,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(156.dp)
+                    .clip(RoundedCornerShape(20.dp))
+            )
+
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(
+                    text = "Explore Around",
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                    color = colors.colorNavy
+                )
+                Text(
+                    text = "Nearby viewpoints, cafés, and useful stops around $activityName.",
+                    style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 21.sp),
+                    color = colors.colorSlate.copy(alpha = 0.78f),
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+
+        AnimatedVisibility(
+            visible = mapVisible,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                InlineHtmlMapView(
+                    html = mapHtml,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(280.dp)
+                        .clip(RoundedCornerShape(18.dp))
+                )
+                TextButton(
+                    onClick = onOpenInMaps,
+                    modifier = Modifier.align(Alignment.End)
+                ) {
+                    Text(
+                        text = "Open in Maps app →",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = colors.colorOrangeMain
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun EditorialActivitySection(
+    title: String,
+    body: String
+) {
+    val colors = KompassTheme.colors
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
             text = title,
-            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold),
+            style = MaterialTheme.typography.titleMedium.copy(
+                fontWeight = FontWeight.SemiBold
+            ),
             color = colors.colorNavy
         )
         Text(
             text = body,
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.bodyLarge.copy(
+                lineHeight = 33.sp
+            ),
             color = colors.colorSlate
         )
     }
 }
 
-private fun Long.toClockLabel(): String {
+@Composable
+private fun ActivityPremiumDeepDiveCard() {
+    val colors = KompassTheme.colors
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                color = colors.colorSurfaceMid.copy(alpha = 0.82f),
+                shape = RoundedCornerShape(24.dp)
+            )
+            .border(
+                width = 1.dp,
+                color = colors.colorOrangeMain.copy(alpha = 0.12f),
+                shape = RoundedCornerShape(24.dp)
+            )
+            .padding(20.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Text(
+            text = "Historical Layers",
+            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+            color = colors.colorNavy
+        )
+        Text(
+            text = "Deeper editorial notes unlock with premium access once you want fuller context beyond the core guide.",
+            style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 22.sp),
+            color = colors.colorSlate.copy(alpha = 0.82f)
+        )
+    }
+}
+
+private fun String?.prettyActivityCategory(): String =
+    this?.split('_', '-', ' ')
+        ?.filter { it.isNotBlank() }
+        ?.joinToString(" ") { token ->
+            token.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+        }
+        ?.takeIf { it.isNotBlank() }
+        ?: "Activity"
+
+private fun BestTime.toGuideMomentLabel(): String = when (this) {
+    BestTime.MORNING -> "Best in morning"
+    BestTime.AFTERNOON -> "Best in afternoon"
+    BestTime.EVENING -> "Best in evening"
+    BestTime.ANYTIME -> "Any time"
+}
+
+private fun Int.formatGuideDuration(): String = when {
+    this < 60 -> "$this min"
+    this % 60 == 0 -> "${this / 60} hr"
+    else -> "${this / 60} hr ${this % 60} min"
+}
+
+private fun Long.toActivityClockLabel(): String {
     val totalSeconds = (this / 1000L).coerceAtLeast(0L)
     val minutes = totalSeconds / 60L
     val seconds = totalSeconds % 60L
     return "${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}"
-}
-
-private fun String.prettyActivityCategory(): String =
-    split('_', '-', ' ')
-        .filter { it.isNotBlank() }
-        .joinToString(" ") { token ->
-            token.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
-        }
-
-private fun llc.bokadev.kompass.domain.model.BestTime.toUiLabel(): String = when (this) {
-    llc.bokadev.kompass.domain.model.BestTime.MORNING -> "Morning"
-    llc.bokadev.kompass.domain.model.BestTime.AFTERNOON -> "Afternoon"
-    llc.bokadev.kompass.domain.model.BestTime.EVENING -> "Evening"
-    llc.bokadev.kompass.domain.model.BestTime.ANYTIME -> "Any time"
 }

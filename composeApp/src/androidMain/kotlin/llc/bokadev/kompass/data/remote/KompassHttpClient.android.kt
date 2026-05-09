@@ -3,13 +3,16 @@ package llc.bokadev.kompass.data.remote
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.DefaultRequest
+import io.ktor.client.request.header
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
+import llc.bokadev.kompass.core.util.AppPreferences
 
-actual fun createKompassHttpClient(): HttpClient = HttpClient(OkHttp) {
+actual fun createKompassHttpClient(preferences: AppPreferences): HttpClient = HttpClient(OkHttp) {
     install(ContentNegotiation) {
         json(
             Json {
@@ -18,6 +21,12 @@ actual fun createKompassHttpClient(): HttpClient = HttpClient(OkHttp) {
                 explicitNulls = false
             }
         )
+    }
+
+    install(DefaultRequest) {
+        val language = preferences.getSelectedLanguage()
+        header("Accept-Language", language)
+        header("X-App-Language", language)
     }
 
     install(Logging) {

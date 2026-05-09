@@ -19,17 +19,22 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import llc.bokadev.kompass.core.presentation.base.BaseContentView
 import llc.bokadev.kompass.core.util.buildPhotoUrl
 import llc.bokadev.kompass.core.util.currentAppLanguage
+import llc.bokadev.kompass.domain.model.FavoriteItemType
 import llc.bokadev.kompass.domain.model.Experience
+import llc.bokadev.kompass.domain.repository.FavoritesRepository
 import llc.bokadev.kompass.presentation.screens.placedetail.components.InfoChip
 import llc.bokadev.kompass.presentation.screens.placedetail.components.PlacePhotoHeader
+import llc.bokadev.kompass.presentation.shared.FavoriteToggleButton
 import llc.bokadev.kompass.presentation.shared.KompassSharedTopBar
 import llc.bokadev.kompass.presentation.theme.KompassTheme
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -42,6 +47,8 @@ fun ExperienceDetailScreen(
 ) {
     val vm: ExperienceDetailViewModel = koinViewModel(parameters = { parametersOf(id) })
     val state by vm.state.collectAsState()
+    val favoritesRepository = koinInject<FavoritesRepository>()
+    val favorites by favoritesRepository.favoritesFlow.collectAsState()
 
     BaseContentView(
         state = state,
@@ -56,6 +63,8 @@ fun ExperienceDetailScreen(
     ) {
         ExperienceDetailScreenContent(
             state = state,
+            isFavorited = favoritesRepository.isFavorited(FavoriteItemType.ACTIVITY, id),
+            onFavoriteClick = { favoritesRepository.toggleFavorite(FavoriteItemType.ACTIVITY, id) },
             onIntent = vm::onIntent,
             onLearnMore = onLearnMore,
             onOpenGuide = onOpenGuide
@@ -66,6 +75,8 @@ fun ExperienceDetailScreen(
 @Composable
 private fun ExperienceDetailScreenContent(
     state: ExperienceDetailState,
+    isFavorited: Boolean,
+    onFavoriteClick: () -> Unit,
     onIntent: (ExperienceDetailEvent) -> Unit,
     onLearnMore: () -> Unit,
     onOpenGuide: (String) -> Unit
@@ -116,6 +127,14 @@ private fun ExperienceDetailScreenContent(
                         style = MaterialTheme.typography.headlineLarge,
                         color = colors.colorNavy
                     )
+
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                        FavoriteToggleButton(
+                            isFavorited = isFavorited,
+                            onClick = onFavoriteClick,
+                            modifier = Modifier.align(Alignment.CenterEnd)
+                        )
+                    }
 
                     androidx.compose.foundation.layout.Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         activity.category?.takeIf(String::isNotBlank)?.let { InfoChip(it.prettyActivityCategory()) }

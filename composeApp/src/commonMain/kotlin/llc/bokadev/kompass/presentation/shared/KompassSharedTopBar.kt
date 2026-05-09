@@ -1,11 +1,11 @@
 package llc.bokadev.kompass.presentation.shared
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -20,10 +20,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import llc.bokadev.kompass.presentation.theme.KompassTheme
 
 @Composable
@@ -31,6 +29,7 @@ fun KompassSharedTopBar(
     modifier: Modifier = Modifier,
     slug: String,
     title: String,
+    subtitle: String? = null,
     showBack: Boolean = false,
     onBackClick: () -> Unit
 ) {
@@ -38,57 +37,63 @@ fun KompassSharedTopBar(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .background(colors.colorNavy)
+            .background(colors.colorOrangeMain)
             .windowInsetsPadding(WindowInsets.statusBars)
-            .padding(horizontal = 20.dp)
-            .padding(top = if (showBack) 12.dp else 20.dp, bottom = 24.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp)
+            .padding(horizontal = 24.dp, vertical = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        if (showBack) {
-            Box(
-                modifier = Modifier
-                    .size(36.dp)
-                    .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.1f))
-                    .clickable(onClick = onBackClick),
-                contentAlignment = Alignment.Center
-            ) {
-                Canvas(modifier = Modifier.size(16.dp)) { drawBackArrow(Color.White) }
-            }
-            Box(modifier = Modifier.padding(top = 12.dp)) {
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.Top
+        ) {
+            if (showBack) {
+                Box(
+                    modifier = Modifier
+                        .padding(top = 2.dp)
+                        .size(38.dp)
+                        .clip(CircleShape)
+                        .background(Color.White.copy(alpha = 0.18f))
+                        .clickable(onClick = onBackClick),
+                    contentAlignment = Alignment.Center
+                ) {
                     Text(
-                        text = slug,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = Color.White.copy(alpha = 0.55f)
-                    )
-                    Text(
-                        text = title,
-                        style = MaterialTheme.typography.headlineLarge,
-                        color = Color.White
+                        text = "‹",
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontSize = 22.sp,
+                            lineHeight = 22.sp
+                        ),
+                        color = colors.colorWhite
                     )
                 }
             }
-        } else {
-            Text(
-                text = slug,
-                style = MaterialTheme.typography.bodySmall,
-                color = Color.White.copy(alpha = 0.55f)
-            )
-            Text(
-                text = title,
-                style = MaterialTheme.typography.headlineLarge,
-                color = Color.White
-            )
+
+            Row(
+                modifier = Modifier.weight(1f),
+                horizontalArrangement = Arrangement.Start,
+                verticalAlignment = Alignment.Top
+            ) {
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.headlineLarge.copy(
+                            fontSize = 32.sp,
+                            lineHeight = 36.sp,
+                            letterSpacing = (-0.6).sp
+                        ),
+                        color = Color(0xFFF8F1E8)
+                    )
+                    subtitle?.takeIf { it.isNotBlank() }?.let {
+                        Text(
+                            text = it,
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                fontSize = 14.sp,
+                                lineHeight = 20.sp
+                            ),
+                            color = Color(0xFFF5E0C8).copy(alpha = 0.88f)
+                        )
+                    }
+                }
+            }
         }
     }
-}
-
-private fun DrawScope.drawBackArrow(color: Color) {
-    val path = Path().apply {
-        moveTo(size.width * 0.65f, size.height * 0.15f)
-        lineTo(size.width * 0.25f, size.height * 0.5f)
-        lineTo(size.width * 0.65f, size.height * 0.85f)
-    }
-    drawPath(path, color, style = Stroke(width = 2.dp.toPx()))
 }

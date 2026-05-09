@@ -1,15 +1,12 @@
 package llc.bokadev.kompass.presentation.screens.experiences
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -18,14 +15,20 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import llc.bokadev.kompass.core.util.currentAppLanguage
 import llc.bokadev.kompass.core.util.noRippleClickable
-import llc.bokadev.kompass.domain.model.Experience
+import llc.bokadev.kompass.core.util.rememberAppStrings
+import llc.bokadev.kompass.domain.model.FavoriteItemType
+import llc.bokadev.kompass.domain.model.favoriteExperiencesFirst
+import llc.bokadev.kompass.domain.repository.FavoritesRepository
+import llc.bokadev.kompass.presentation.screens.experiences.components.ActivityListItem
 import llc.bokadev.kompass.presentation.theme.KompassTheme
+import org.koin.compose.koinInject
 
 @Composable
 fun ExperiencesScreenContent(
@@ -35,10 +38,16 @@ fun ExperiencesScreenContent(
 ) {
     val colors = KompassTheme.colors
     val lang = currentAppLanguage()
+    val strings = rememberAppStrings()
+    val favoritesRepository = koinInject<FavoritesRepository>()
+    val favorites by favoritesRepository.favoritesFlow.collectAsState()
+    val favoriteKeys = favoritesRepository.getFavoriteKeySet()
     val categories = state.activities.mapNotNull { it.category?.takeIf(String::isNotBlank) }.distinct()
-    val filteredActivities = state.activities.filter { activity ->
-        state.selectedCategory == null || activity.category == state.selectedCategory
-    }
+    val filteredActivities = state.activities
+        .filter { activity ->
+            state.selectedCategory == null || activity.category == state.selectedCategory
+        }
+        .favoriteExperiencesFirst(favoriteKeys)
 
     LazyColumn(
         modifier = Modifier
@@ -53,7 +62,7 @@ fun ExperiencesScreenContent(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(
-                    text = "Find hikes, UNESCO trails, medieval fortresses, village detours, and sunset ideas that move visitors outside the usual Kotor core.",
+                    text = strings.activitiesIntro,
                     style = MaterialTheme.typography.bodyMedium,
                     color = colors.colorSlate
                 )
@@ -61,7 +70,7 @@ fun ExperiencesScreenContent(
                     LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         item {
                             ActivityCategoryChip(
-                                label = "All",
+                                label = strings.all,
                                 isSelected = state.selectedCategory == null,
                                 onClick = { onIntent(ExperiencesEvent.SelectCategory(null)) }
                             )
@@ -90,17 +99,17 @@ fun ExperiencesScreenContent(
                         color = colors.colorError
                     )
                     Text(
-                        text = "Retry",
+                        text = strings.retry,
                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
                         color = colors.colorAmberDark,
-                        modifier = Modifier.clickable { onIntent(ExperiencesEvent.Retry) }
+                        modifier = Modifier.noRippleClickable { onIntent(ExperiencesEvent.Retry) }
                     )
                 }
             }
 
             !state.isLoading && filteredActivities.isEmpty() -> item {
                 Text(
-                    text = if (state.selectedCategory == null) "No activities available yet." else "No activities match this category.",
+                    text = if (state.selectedCategory == null) strings.noActivities else strings.noActivitiesForCategory,
                     style = MaterialTheme.typography.bodyMedium,
                     color = colors.colorSlate,
                     modifier = Modifier.padding(horizontal = 20.dp)
@@ -109,9 +118,11 @@ fun ExperiencesScreenContent(
 
             else -> {
                 items(filteredActivities, key = { it.id }) { activity ->
-                    ActivityCard(
+                    ActivityListItem(
                         activity = activity,
                         lang = lang,
+                        isFavorited = favoritesRepository.isFavorited(FavoriteItemType.ACTIVITY, activity.id),
+                        onFavoriteClick = { favoritesRepository.toggleFavorite(FavoriteItemType.ACTIVITY, activity.id) },
                         onClick = { onActivityClick(activity.id) }
                     )
                 }
@@ -144,69 +155,9 @@ private fun ActivityCategoryChip(
     }
 }
 
-@Composable
-private fun ActivityCard(
-    activity: Experience,
-    lang: String,
-    onClick: () -> Unit
-) {
-    val colors = KompassTheme.colors
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(horizontal = 20.dp)
-            .background(colors.colorWhite, shape = androidx.compose.foundation.shape.RoundedCornerShape(18.dp))
-            .padding(18.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        activity.category?.takeIf(String::isNotBlank)?.let {
-            Text(
-                text = it.prettyActivityCategory(),
-                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
-                color = colors.colorAmberDark
-            )
-        }
-        Text(
-            text = activity.localizedName(lang),
-            style = MaterialTheme.typography.titleLarge,
-            color = colors.colorNavy
-        )
-        Text(
-            text = activity.localizedDescription(lang),
-            style = MaterialTheme.typography.bodyMedium,
-            color = colors.colorSlate,
-            maxLines = 3,
-            overflow = TextOverflow.Ellipsis
-        )
-        Text(
-            text = listOfNotNull(
-                activity.localizedLocation(lang).takeIf(String::isNotBlank),
-                activity.durationMin?.let { "$it min" },
-                activity.bestTime.toUiLabel()
-            ).joinToString(" · "),
-            style = MaterialTheme.typography.bodySmall,
-            color = colors.colorSlateLight
-        )
-        if (activity.audioFile != null || activity.localizedLongDescription(lang).isNotBlank()) {
-            Spacer(Modifier.height(2.dp))
-            Text(
-                text = "Premium extras available",
-                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
-                color = colors.colorNavy
-            )
-        }
-    }
-}
-
 private fun String.prettyActivityCategory(): String =
     split('_', '-', ' ')
         .filter { it.isNotBlank() }
-        .joinToString(" ") { token -> token.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() } }
-
-private fun llc.bokadev.kompass.domain.model.BestTime.toUiLabel(): String = when (this) {
-    llc.bokadev.kompass.domain.model.BestTime.MORNING -> "Best in morning"
-    llc.bokadev.kompass.domain.model.BestTime.AFTERNOON -> "Best in afternoon"
-    llc.bokadev.kompass.domain.model.BestTime.EVENING -> "Best in evening"
-    llc.bokadev.kompass.domain.model.BestTime.ANYTIME -> "Any time"
-}
+        .joinToString(" ") { token ->
+            token.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+        }

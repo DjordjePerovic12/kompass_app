@@ -22,6 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import llc.bokadev.kompass.core.presentation.base.BaseContentView
 import llc.bokadev.kompass.core.util.currentAppLanguage
+import llc.bokadev.kompass.core.util.rememberAppStrings
 import llc.bokadev.kompass.domain.model.InfoNotice
 import llc.bokadev.kompass.domain.repository.AnalyticsRepository
 import llc.bokadev.kompass.presentation.shared.KompassSharedTopBar
@@ -39,6 +40,7 @@ fun InfoCenterScreen(
     val vm: InfoCenterViewModel = koinViewModel(key = vmKey)
     val state by vm.state.collectAsState()
     val lang = currentAppLanguage()
+    val strings = rememberAppStrings()
     val analytics = koinInject<AnalyticsRepository>()
 
     LaunchedEffect(Unit) {
@@ -49,8 +51,9 @@ fun InfoCenterScreen(
         state = state,
         topBar = {
             KompassSharedTopBar(
-                slug = "Town notices and practical updates",
-                title = "Info Center",
+                slug = strings.infoCenterSlug,
+                title = strings.infoCenterTitle,
+                subtitle = strings.infoCenterSubtitle,
                 showBack = showBack,
                 onBackClick = onBack
             )

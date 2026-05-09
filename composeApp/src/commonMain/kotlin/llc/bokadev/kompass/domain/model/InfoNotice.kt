@@ -11,6 +11,7 @@ data class InfoNotice(
     val title: Map<String, String>,
     val shortDescription: Map<String, String>,
     val longDescription: Map<String, String>? = null,
+    val imageUrl: String? = null,
     val priority: String = "general",
     val noticeType: String = "general",
     val startsAt: String? = null,

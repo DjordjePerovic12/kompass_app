@@ -6,6 +6,7 @@ import kotlinx.coroutines.launch
 import llc.bokadev.kompass.core.presentation.base.BaseEvent
 import llc.bokadev.kompass.core.presentation.base.BaseState
 import llc.bokadev.kompass.core.presentation.base.BaseViewModel
+import llc.bokadev.kompass.core.util.AppPreferences
 import llc.bokadev.kompass.core.util.AudioGuidePlaybackState
 import llc.bokadev.kompass.domain.location.UserLocationProvider
 import llc.bokadev.kompass.domain.model.Experience
@@ -29,19 +30,23 @@ data class ExperienceGuideState(
 sealed interface ExperienceGuideEvent : BaseEvent {
     data object Retry : ExperienceGuideEvent
     data object TogglePlayPause : ExperienceGuideEvent
+    data object StopPlayback : ExperienceGuideEvent
     data class SeekTo(val positionMs: Long) : ExperienceGuideEvent
 }
 
 class ExperienceGuideViewModel(
     private val id: String,
+    private val autoplay: Boolean,
     private val getActivityById: GetActivityByIdUseCase,
     private val getSignedAudioUrl: GetSignedAudioUrlUseCase,
     private val hasPremiumAccess: HasPremiumAccessUseCase,
     private val userLocationProvider: UserLocationProvider,
+    private val appPreferences: AppPreferences,
     private val audioGuidePlayer: AudioGuidePlayer
 ) : BaseViewModel<ExperienceGuideState, ExperienceGuideEvent>() {
 
     override val initialState = ExperienceGuideState()
+    private var pendingAutoplay = autoplay
 
     init {
         observePlayback()
@@ -51,7 +56,8 @@ class ExperienceGuideViewModel(
     override fun onIntent(event: ExperienceGuideEvent) {
         when (event) {
             ExperienceGuideEvent.Retry -> load()
-            ExperienceGuideEvent.TogglePlayPause -> audioGuidePlayer.togglePlayPause()
+            ExperienceGuideEvent.TogglePlayPause -> togglePlayback()
+            ExperienceGuideEvent.StopPlayback -> audioGuidePlayer.stop()
             is ExperienceGuideEvent.SeekTo -> audioGuidePlayer.seekTo(event.positionMs)
         }
     }
@@ -86,12 +92,9 @@ class ExperienceGuideViewModel(
                         )
                     }
 
-                    if (audioUrl != null) {
-                        audioGuidePlayer.prepare(
-                            url = audioUrl,
-                            title = activity.localizedName("en"),
-                            subtitle = activity.localizedLocation("en")
-                        )
+                    if (pendingAutoplay && audioUrl != null) {
+                        pendingAutoplay = false
+                        startPlayback(activity, audioUrl)
                     }
                 }
                 .onFailure { error ->
@@ -100,9 +103,31 @@ class ExperienceGuideViewModel(
         }
     }
 
+    private fun togglePlayback() {
+        val current = _state.value
+        val audioUrl = current.audioUrl ?: return
+        val activity = current.activity ?: return
+
+        if (current.playback.sourceUrl != audioUrl) {
+            startPlayback(activity, audioUrl)
+            return
+        }
+
+        audioGuidePlayer.togglePlayPause()
+    }
+
     private suspend fun resolveAudioUrl(activity: Experience, hasAudioAccess: Boolean): String? {
         val audioPath = activity.audioFile ?: return null
         if (!hasAudioAccess) return null
         return getSignedAudioUrl(audioPath).getOrNull()
+    }
+
+    private fun startPlayback(activity: Experience, audioUrl: String) {
+        val selectedLanguage = appPreferences.getSelectedLanguage()
+        audioGuidePlayer.prepare(
+            url = audioUrl,
+            title = activity.localizedName(selectedLanguage),
+            subtitle = activity.localizedLocation(selectedLanguage)
+        )
     }
 }

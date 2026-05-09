@@ -16,6 +16,7 @@ val appModule = module {
         essentialsModule,
         servicesModule,
         analyticsModule,
+        favoritesModule,
         placesListModule,
         nearbyPlacesModule,
         placeDetailModule,

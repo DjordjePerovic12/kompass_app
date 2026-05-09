@@ -3,6 +3,9 @@ package llc.bokadev.kompass.presentation.screens.placedetail.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -11,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import llc.bokadev.kompass.presentation.theme.KompassTheme
 
@@ -21,22 +25,32 @@ fun InfoChip(
     modifier: Modifier = Modifier
 ) {
     val colors = KompassTheme.colors
-    val shape = RoundedCornerShape(999.dp)
+    val shape = RoundedCornerShape(14.dp)
     Box(
         modifier = modifier
             .clip(shape)
-            .background(if (amber) colors.colorAmberSubtle else Color.Transparent)
+            .background(if (amber) colors.colorOrangeMain.copy(alpha = 0.08f) else colors.colorSurface)
             .border(
-                width = if (amber) 0.dp else 1.dp,
-                color = if (amber) Color.Transparent else colors.colorSlateGhost,
+                width = 1.dp,
+                color = if (amber) colors.colorOrangeMain.copy(alpha = 0.24f) else Color.Black.copy(alpha = 0.08f),
                 shape = shape
             )
-            .padding(horizontal = 10.dp, vertical = 5.dp)
+            .padding(horizontal = 12.dp, vertical = 8.dp)
     ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodySmall,
-            color = if (amber) colors.colorAmberDark else colors.colorSlate
-        )
+        Row(horizontalArrangement = Arrangement.spacedBy(7.dp)) {
+            if (amber) {
+                Box(
+                    modifier = Modifier
+                        .size(5.dp)
+                        .clip(RoundedCornerShape(999.dp))
+                        .background(colors.colorOrangeMain)
+                )
+            }
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
+                color = if (amber) colors.colorOrangeMain else colors.colorNavy.copy(alpha = 0.82f)
+            )
+        }
     }
 }
