@@ -14,16 +14,25 @@ import llc.bokadev.kompass.domain.repository.PlaceRepository
 import llc.bokadev.kompass.domain.repository.PremiumRepository
 import llc.bokadev.kompass.domain.usecase.GetActivitiesUseCase
 
+enum class GuideFilter {
+    ALL,
+    DEEP
+}
+
 data class MyGuidesState(
     override val isLoading: Boolean = true,
     override val error: String? = null,
     val entitlements: PremiumEntitlements = PremiumEntitlements(),
     val placeGuides: List<Place> = emptyList(),
-    val activityGuides: List<Experience> = emptyList()
+    val activityGuides: List<Experience> = emptyList(),
+    val deepPlaceGuides: List<Place> = emptyList(),
+    val deepActivityGuides: List<Experience> = emptyList(),
+    val selectedFilter: GuideFilter = GuideFilter.ALL
 ) : BaseState()
 
 sealed interface MyGuidesEvent : BaseEvent {
     data object Retry : MyGuidesEvent
+    data class SelectFilter(val filter: GuideFilter) : MyGuidesEvent
 }
 
 class MyGuidesViewModel(
@@ -41,6 +50,7 @@ class MyGuidesViewModel(
     override fun onIntent(event: MyGuidesEvent) {
         when (event) {
             MyGuidesEvent.Retry -> load()
+            is MyGuidesEvent.SelectFilter -> _state.update { it.copy(selectedFilter = event.filter) }
         }
     }
 
@@ -64,19 +74,18 @@ class MyGuidesViewModel(
                 return@launch
             }
 
-            val placeGuides = placesResult.getOrDefault(emptyList())
-                .filter { place -> !place.audioFile.isNullOrBlank() && entitlements.hasAccess(place.audioAccessTier) }
-                .sortedBy { it.sortOrder }
-
-            val activityGuides = activitiesResult.getOrDefault(emptyList())
-                .filter { activity -> !activity.audioFile.isNullOrBlank() && entitlements.hasAccess(activity.audioAccessTier) }
-                .sortedBy { it.sortOrder }
+            val places = placesResult.getOrDefault(emptyList())
+            val activities = activitiesResult.getOrDefault(emptyList())
 
             _state.update {
                 it.copy(
                     isLoading = false,
-                    placeGuides = placeGuides,
-                    activityGuides = activityGuides
+                    entitlements = entitlements,
+                    placeGuides = places.filter { place -> !place.audioFile.isNullOrEmpty() }.sortedBy { place -> place.sortOrder },
+                    activityGuides = activities.filter { activity -> !activity.audioFile.isNullOrEmpty() }.sortedBy { activity -> activity.sortOrder },
+                    deepPlaceGuides = places.filter { place -> entitlements.audioPass && !place.deepAudioFile.isNullOrEmpty() }.sortedBy { place -> place.sortOrder },
+                    deepActivityGuides = activities.filter { activity -> entitlements.audioPass && !activity.deepAudioFile.isNullOrEmpty() }.sortedBy { activity -> activity.sortOrder },
+                    selectedFilter = if (!entitlements.audioPass) GuideFilter.ALL else it.selectedFilter
                 )
             }
         }

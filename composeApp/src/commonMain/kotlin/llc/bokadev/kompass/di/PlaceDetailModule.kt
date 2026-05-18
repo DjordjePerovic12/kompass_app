@@ -7,5 +7,5 @@ import org.koin.dsl.module
 
 val placeDetailModule = module {
     viewModel { PlaceDetailViewModel(get(), get()) }
-    viewModel { (id: String, autoplay: Boolean) -> PlaceGuideViewModel(id, autoplay, get(), get(), get(), get(), get(), get()) }
+    viewModel { (id: String, autoplay: Boolean, deep: Boolean) -> PlaceGuideViewModel(id, autoplay, deep, get(), get(), get(), get(), get(), get()) }
 }

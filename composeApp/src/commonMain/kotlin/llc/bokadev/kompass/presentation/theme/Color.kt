@@ -10,15 +10,15 @@ import androidx.compose.ui.graphics.Color
 // One real brand color + one fallback color while we rebuild the system.
 // =====================================================
 
-val colorMain = Color(0xFFDB7C26)
+val colorMain = Color(0xFFC4AC49)
 val colorBlack = Color(0xFF000000)
 val colorWarmOffWhite = Color(0xFFF8F3EA)
 val colorHeaderTitle = Color(0xFFF8F1E8)
 val colorHeaderSubtitle = Color(0xFFF5E0C8)
 val colorWarmStone = Color(0xFFE8DCC8)
-val colorDustySage = Color(0xFFAEBBA2)
-val colorSoftTerracotta = Color(0xFFC98B5A)
-val colorMutedSky = Color(0xFF97A8B8)
+val colorDustySage = Color(0xFF95A486)
+val colorSoftTerracotta = Color(0xFFC292E6)
+val colorMutedSky = Color(0xFF808CDA)
 val colorSoftLilac = Color(0xFFCDB7AE)
 val colorSandGold = Color(0xFFD8C197)
 val colorRoseClay = Color(0xFFB98979)

@@ -24,6 +24,7 @@ import llc.bokadev.kompass.core.util.currentAppLanguage
 import llc.bokadev.kompass.core.util.noRippleClickable
 import llc.bokadev.kompass.core.util.rememberAppStrings
 import llc.bokadev.kompass.domain.model.FavoriteItemType
+import llc.bokadev.kompass.domain.model.FavoriteKey
 import llc.bokadev.kompass.domain.model.favoriteExperiencesFirst
 import llc.bokadev.kompass.domain.repository.FavoritesRepository
 import llc.bokadev.kompass.presentation.screens.experiences.components.ActivityListItem
@@ -41,7 +42,7 @@ fun ExperiencesScreenContent(
     val strings = rememberAppStrings()
     val favoritesRepository = koinInject<FavoritesRepository>()
     val favorites by favoritesRepository.favoritesFlow.collectAsState()
-    val favoriteKeys = favoritesRepository.getFavoriteKeySet()
+    val favoriteKeys = favorites.map { FavoriteKey(it.type, it.id) }.toSet()
     val categories = state.activities.mapNotNull { it.category?.takeIf(String::isNotBlank) }.distinct()
     val filteredActivities = state.activities
         .filter { activity ->
@@ -121,7 +122,7 @@ fun ExperiencesScreenContent(
                     ActivityListItem(
                         activity = activity,
                         lang = lang,
-                        isFavorited = favoritesRepository.isFavorited(FavoriteItemType.ACTIVITY, activity.id),
+                        isFavorited = FavoriteKey(FavoriteItemType.ACTIVITY, activity.id) in favoriteKeys,
                         onFavoriteClick = { favoritesRepository.toggleFavorite(FavoriteItemType.ACTIVITY, activity.id) },
                         onClick = { onActivityClick(activity.id) }
                     )

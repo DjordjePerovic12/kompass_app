@@ -7,6 +7,8 @@ data class CityEssential(
     val title: Map<String, String>,
     val content: Map<String, String>,
     val location: Map<String, String>? = null,
+    val latitude: Double? = null,
+    val longitude: Double? = null,
     val links: List<String> = emptyList(),
     val sortOrder: Int = 0
 ) {

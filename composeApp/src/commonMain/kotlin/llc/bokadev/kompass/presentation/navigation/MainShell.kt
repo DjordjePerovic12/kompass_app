@@ -37,7 +37,9 @@ fun MainShell(
     onNavigateToInfoCenter: () -> Unit,
     onNavigateToMyGuides: () -> Unit,
     onNavigateToFavorites: () -> Unit,
-    onNavigateToChangeLanguage: () -> Unit
+    onNavigateToSearch: () -> Unit,
+    onNavigateToChangeLanguage: () -> Unit,
+    onNavigateToLocalFinds: () -> Unit
 ) {
     var selectedTab by remember { mutableStateOf(BottomTab.Home) }
     val tabHistory = remember { mutableListOf<BottomTab>().toMutableStateList() }
@@ -86,6 +88,7 @@ fun MainShell(
                     onNavigateToNearbyPlaces = onNavigateToNearbyPlaces,
                     onNavigateToInfoCenter = onNavigateToInfoCenter,
                     onNavigateToMyGuides = onNavigateToMyGuides,
+                    onNavigateToSearch = onNavigateToSearch,
                     onNavigateToChangeLanguage = onNavigateToChangeLanguage
                 )
 
@@ -99,7 +102,8 @@ fun MainShell(
                     onNavigateToServices = onNavigateToServices,
                     onNavigateToEvents = onNavigateToEvents,
                     onNavigateToInfoCenter = onNavigateToInfoCenter,
-                    onNavigateToFavorites = onNavigateToFavorites
+                    onNavigateToFavorites = onNavigateToFavorites,
+                    onNavigateToLocalFinds = onNavigateToLocalFinds
                 )
 
                 BottomTab.Activities -> ExperiencesScreen(

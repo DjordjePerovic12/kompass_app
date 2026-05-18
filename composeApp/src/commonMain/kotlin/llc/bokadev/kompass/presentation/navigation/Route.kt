@@ -18,7 +18,7 @@ sealed interface Route {
     data class PlaceDetail(val id: String) : Route
 
     @Serializable
-    data class PlaceGuide(val id: String, val autoplay: Boolean = false) : Route
+    data class PlaceGuide(val id: String, val autoplay: Boolean = false, val deep: Boolean = false) : Route
 
     @Serializable
     data class EventDetail(val id: String) : Route
@@ -30,7 +30,7 @@ sealed interface Route {
     data class ExperienceDetail(val id: String) : Route
 
     @Serializable
-    data class ExperienceGuide(val id: String, val autoplay: Boolean = false) : Route
+    data class ExperienceGuide(val id: String, val autoplay: Boolean = false, val deep: Boolean = false) : Route
 
     @Serializable
     data class ItineraryDetail(val id: String) : Route
@@ -54,10 +54,16 @@ sealed interface Route {
     data object Services : Route
 
     @Serializable
+    data class ServiceDetail(val id: String) : Route
+
+    @Serializable
     data object MyGuides : Route
 
     @Serializable
     data object Favorites : Route
+
+    @Serializable
+    data object Search : Route
 
     @Serializable
     data object InfoCenter : Route
@@ -70,4 +76,10 @@ sealed interface Route {
 
     @Serializable
     data class PaymentCheckout(val sessionId: String) : Route
+
+    @Serializable
+    data object LocalFinds : Route
+
+    @Serializable
+    data class LocalFindDetail(val id: String) : Route
 }

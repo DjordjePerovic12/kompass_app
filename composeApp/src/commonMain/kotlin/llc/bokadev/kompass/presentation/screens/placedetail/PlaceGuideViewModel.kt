@@ -37,6 +37,7 @@ sealed interface PlaceGuideEvent : BaseEvent {
 class PlaceGuideViewModel(
     private val id: String,
     private val autoplay: Boolean,
+    private val deep: Boolean,
     private val getPlaceById: GetPlaceByIdUseCase,
     private val getSignedAudioUrl: GetSignedAudioUrlUseCase,
     private val hasPremiumAccess: HasPremiumAccessUseCase,
@@ -76,17 +77,16 @@ class PlaceGuideViewModel(
 
             getPlaceById(id)
                 .onSuccess { place ->
-                    val hasAudioAccess = hasPremiumAccess(place.audioAccessTier)
-                    val hasDetailAccess = hasPremiumAccess(place.detailAccessTier)
+                    val hasDeepAccess = hasPremiumAccess("audio_pass")
                     val currentLocation = runCatching { userLocationProvider.getCurrentLocation() }.getOrNull()
-                    val audioUrl = resolveAudioUrl(place, hasAudioAccess)
+                    val audioUrl = resolveAudioUrl(place, hasDeepAccess)
 
                     _state.update {
                         it.copy(
                             isLoading = false,
                             place = place,
-                            hasAudioAccess = hasAudioAccess,
-                            hasDetailAccess = hasDetailAccess,
+                            hasAudioAccess = if (deep) hasDeepAccess else !place.audioFile.isNullOrEmpty(),
+                            hasDetailAccess = hasDeepAccess,
                             currentLocation = currentLocation,
                             audioUrl = audioUrl
                         )
@@ -116,9 +116,14 @@ class PlaceGuideViewModel(
         audioGuidePlayer.togglePlayPause()
     }
 
-    private suspend fun resolveAudioUrl(place: Place, hasAudioAccess: Boolean): String? {
-        val audioPath = place.audioFile ?: return null
-        if (!hasAudioAccess) return null
+    private suspend fun resolveAudioUrl(place: Place, hasDeepAccess: Boolean): String? {
+        val lang = appPreferences.getSelectedLanguage()
+        val audioPath = if (deep) {
+            if (!hasDeepAccess) return null
+            place.localizedDeepAudioFile(lang)
+        } else {
+            place.localizedAudioFile(lang)
+        } ?: return null
         return getSignedAudioUrl(audioPath).getOrNull()
     }
 

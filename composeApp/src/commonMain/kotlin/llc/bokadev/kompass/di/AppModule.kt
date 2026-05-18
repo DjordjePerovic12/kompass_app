@@ -17,10 +17,12 @@ val appModule = module {
         servicesModule,
         analyticsModule,
         favoritesModule,
+        searchModule,
         placesListModule,
         nearbyPlacesModule,
         placeDetailModule,
         categoryModule,
-        premiumModule
+        premiumModule,
+        localFindsModule
     )
 }

@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import llc.bokadev.kompass.core.util.currentAppLanguage
 import llc.bokadev.kompass.core.util.noRippleClickable
 import llc.bokadev.kompass.domain.model.FavoriteItemType
+import llc.bokadev.kompass.domain.model.FavoriteKey
 import llc.bokadev.kompass.domain.model.NearbyPlace
 import llc.bokadev.kompass.domain.model.PlaceCategory
 import llc.bokadev.kompass.domain.model.favoriteNearbyFirst
@@ -54,8 +55,8 @@ fun NearbyPlacesScreenContent(
     val lang = currentAppLanguage()
     val favoritesRepository = koinInject<FavoritesRepository>()
     val favorites by favoritesRepository.favoritesFlow.collectAsState()
+    val favoriteKeys = favorites.map { FavoriteKey(it.type, it.id) }.toSet()
     var selectedFilter by remember { mutableStateOf(PlacesFilter.ALL) }
-    val favoriteKeys = favoritesRepository.getFavoriteKeySet()
 
     val filteredPlaces = remember(state.nearbyPlaces, selectedFilter, favorites) {
         state.nearbyPlaces.filter { nearbyPlace ->
@@ -134,7 +135,7 @@ fun NearbyPlacesScreenContent(
                         NearbyPlacesListCard(
                             nearbyPlace = nearbyPlace,
                             lang = lang,
-                            isFavorited = favoritesRepository.isFavorited(FavoriteItemType.PLACE, nearbyPlace.place.id),
+                            isFavorited = FavoriteKey(FavoriteItemType.PLACE, nearbyPlace.place.id) in favoriteKeys,
                             onFavoriteClick = { favoritesRepository.toggleFavorite(FavoriteItemType.PLACE, nearbyPlace.place.id) },
                             onPlaceClick = onPlaceClick
                         )

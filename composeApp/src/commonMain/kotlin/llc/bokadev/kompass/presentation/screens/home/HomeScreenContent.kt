@@ -69,6 +69,11 @@ import llc.bokadev.kompass.presentation.screens.home.components.SectionHeader
 import llc.bokadev.kompass.presentation.theme.KompassTheme
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import llc.bokadev.kompass.presentation.theme.helveticaBold48
+import llc.bokadev.kompass.presentation.theme.helveticaMedium11
+import llc.bokadev.kompass.presentation.theme.helveticaMedium16
+import llc.bokadev.kompass.presentation.theme.helveticaRegular11
+import llc.bokadev.kompass.presentation.theme.stomic48
 import kotlin.math.roundToInt
 import kotlin.math.absoluteValue
 import kotlin.time.ExperimentalTime
@@ -86,6 +91,7 @@ fun HomeScreenContent(
     onNearbySeeAll: () -> Unit,
     onInfoCenterSeeAll: () -> Unit,
     onMyGuidesClick: () -> Unit,
+    onSearchClick: () -> Unit,
     onChangeLanguageClick: () -> Unit,
     onPlaceFavoriteToggle: (String) -> Unit,
     onIntent: (HomeEvent) -> Unit
@@ -111,8 +117,9 @@ fun HomeScreenContent(
             .verticalScroll(rememberScrollState())
     ) {
         HeroHeader(
-            showMyGuides = state.hasPremiumAccess,
+            showMyGuides = true,
             onMyGuidesClick = onMyGuidesClick,
+            onSearchClick = onSearchClick,
             onChangeLanguageClick = onChangeLanguageClick,
             strings = strings
         )
@@ -220,6 +227,7 @@ private fun HomeSplashLoader(loadingText: String) {
 private fun HeroHeader(
     showMyGuides: Boolean,
     onMyGuidesClick: () -> Unit,
+    onSearchClick: () -> Unit,
     onChangeLanguageClick: () -> Unit,
     strings: llc.bokadev.kompass.core.util.AppStrings
 ) {
@@ -246,14 +254,15 @@ private fun HeroHeader(
             ) {
                 Text(
                     text = strings.heroLocation,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = colors.colorHomeHeroSoft.copy(alpha = 0.82f)
+                    style = helveticaMedium11(),
+                    color = colors.colorNavy
                 )
                 Text(
                     text = strings.heroTitle,
-                    style = MaterialTheme.typography.displayLarge,
+                    style = helveticaBold48(),
                     lineHeight = 56.sp,
-                    color = colors.colorHomePanel,
+                    color = colors.colorWhite,
+                    letterSpacing = 0.8.sp
                 )
             }
 
@@ -390,6 +399,7 @@ private fun HeroHeader(
                         colors.colorSignal.copy(alpha = 0.18f),
                         RoundedCornerShape(16.dp)
                     )
+                    .clickable(onClick = onSearchClick)
                     .padding(horizontal = 16.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
@@ -607,12 +617,10 @@ private fun UpcomingEventsSection(
                     EventCard(
                         name = event.localizedName(lang),
                         venue = event.localizedVenue(lang),
-                        category = event.category.toHomeEventCategory(),
                         day = event.startTime.toHomeEventDay(),
                         month = event.startTime.toHomeEventMonth(),
                         meta = event.toHomeEventMeta(),
                         price = event.price,
-                        onFavoriteClick = {},
                         onClick = { onEventClick(event.id) },
                     )
                 }

@@ -11,6 +11,8 @@ data class CityEssentialDto(
     @SerialName("title") val title: Map<String, String>,
     @SerialName("content") val content: Map<String, String>,
     @SerialName("location") val location: Map<String, String>? = null,
+    @SerialName("latitude") val latitude: Double? = null,
+    @SerialName("longitude") val longitude: Double? = null,
     @SerialName("links") val links: List<String>? = null,
     @SerialName("sort_order") val sortOrder: Int = 0,
     @SerialName("is_active") val isActive: Boolean = true

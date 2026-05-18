@@ -22,7 +22,8 @@ fun CategoriesScreen(
     onNavigateToServices: () -> Unit = {},
     onNavigateToEvents: () -> Unit = {},
     onNavigateToInfoCenter: () -> Unit = {},
-    onNavigateToFavorites: () -> Unit = {}
+    onNavigateToFavorites: () -> Unit = {},
+    onNavigateToLocalFinds: () -> Unit = {}
 ) {
     val vm: CategoriesViewModel = koinViewModel(key = vmKey)
     val state by vm.state.collectAsState()
@@ -53,6 +54,7 @@ fun CategoriesScreen(
                 when (category.id) {
                     "practical" -> onNavigateToEssentials()
                     "activities" -> onNavigateToActivities()
+                    "hidden_gems" -> onNavigateToLocalFinds()
                     else -> onNavigateToPlacesList(category.id.uppercase())
                 }
             },

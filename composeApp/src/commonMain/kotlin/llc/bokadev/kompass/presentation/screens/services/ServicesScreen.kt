@@ -13,7 +13,8 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun ServicesScreen(
-    onBack: () -> Unit = {}
+    onBack: () -> Unit = {},
+    onServiceClick: (String) -> Unit = {}
 ) {
     val vm: ServicesViewModel = koinViewModel()
     val state by vm.state.collectAsState()
@@ -38,7 +39,8 @@ fun ServicesScreen(
     ) {
         ServicesScreenContent(
             state = state,
-            onIntent = vm::onIntent
+            onIntent = vm::onIntent,
+            onServiceClick = onServiceClick
         )
     }
 }

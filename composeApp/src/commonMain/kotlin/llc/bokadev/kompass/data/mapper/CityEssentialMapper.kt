@@ -11,6 +11,8 @@ fun CityEssentialDto.toDomain(): CityEssential = CityEssential(
     title = title,
     content = content,
     location = location,
+    latitude = latitude,
+    longitude = longitude,
     links = links ?: emptyList(),
     sortOrder = sortOrder
 )

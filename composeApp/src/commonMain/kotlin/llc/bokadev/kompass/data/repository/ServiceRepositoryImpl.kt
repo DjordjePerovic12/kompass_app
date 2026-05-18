@@ -21,4 +21,17 @@ class ServiceRepositoryImpl(
             .decodeList<ServiceDto>()
             .map { it.toDomain() }
     }
+
+    override suspend fun getServiceById(id: String): Result<Service> = runCatching {
+        supabase.from("services")
+            .select {
+                filter {
+                    eq("id", id)
+                    eq("is_active", true)
+                }
+                limit(1)
+            }
+            .decodeSingle<ServiceDto>()
+            .toDomain()
+    }
 }

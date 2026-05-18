@@ -25,12 +25,13 @@ class PlaceDetailViewModel(
             _state.update { it.copy(isLoading = true, error = null) }
             getPlaceById(id)
                 .onSuccess { place ->
+                    val hasDeepAccess = hasPremiumAccess("audio_pass")
                     _state.update {
                         it.copy(
                             isLoading = false,
                             place = place,
-                            hasAudioAccess = hasPremiumAccess(place.audioAccessTier),
-                            hasDetailAccess = hasPremiumAccess(place.detailAccessTier)
+                            hasAudioAccess = !place.audioFile.isNullOrEmpty(),
+                            hasDetailAccess = hasDeepAccess
                         )
                     }
                 }

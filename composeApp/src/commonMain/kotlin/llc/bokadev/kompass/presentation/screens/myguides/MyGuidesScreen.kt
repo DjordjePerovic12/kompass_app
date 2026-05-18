@@ -8,17 +8,16 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -39,6 +38,7 @@ import llc.bokadev.kompass.core.util.buildPhotoUrl
 import llc.bokadev.kompass.core.util.currentAppLanguage
 import llc.bokadev.kompass.domain.model.Experience
 import llc.bokadev.kompass.domain.model.FavoriteItemType
+import llc.bokadev.kompass.domain.model.FavoriteKey
 import llc.bokadev.kompass.domain.model.Place
 import llc.bokadev.kompass.domain.repository.AnalyticsRepository
 import llc.bokadev.kompass.domain.repository.FavoritesRepository
@@ -51,8 +51,8 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun MyGuidesScreen(
     onBack: () -> Unit = {},
-    onOpenPlaceGuide: (String) -> Unit = {},
-    onOpenActivityGuide: (String) -> Unit = {},
+    onOpenPlaceGuide: (String, Boolean) -> Unit = { _, _ -> },
+    onOpenActivityGuide: (String, Boolean) -> Unit = { _, _ -> },
     onOpenPlace: (String) -> Unit = {},
     onOpenActivity: (String) -> Unit = {}
 ) {
@@ -62,27 +62,34 @@ fun MyGuidesScreen(
     val analytics = koinInject<AnalyticsRepository>()
     val favoritesRepository = koinInject<FavoritesRepository>()
     val favorites by favoritesRepository.favoritesFlow.collectAsState()
-    val favoriteKeys = favoritesRepository.getFavoriteKeySet()
+    val favoriteKeySet = favorites.map { FavoriteKey(it.type, it.id) }.toSet()
 
     LaunchedEffect(Unit) {
         analytics.trackScreenView("audio_library")
     }
 
-    val guideItems = buildList {
-        addAll(state.placeGuides.map { AudioLibraryItem.PlaceItem(it) })
-        addAll(state.activityGuides.map { AudioLibraryItem.ActivityItem(it) })
-    }.sortedBy { it.title(lang) }
-        .let { items ->
-            val (favoriteItems, regularItems) = items.partition { item ->
-                when (item) {
-                    is AudioLibraryItem.PlaceItem ->
-                        favoriteKeys.any { it.type == FavoriteItemType.PLACE && it.id == item.place.id }
-                    is AudioLibraryItem.ActivityItem ->
-                        favoriteKeys.any { it.type == FavoriteItemType.ACTIVITY && it.id == item.activity.id }
-                }
+    val baseItems = buildList {
+        when (state.selectedFilter) {
+            GuideFilter.ALL -> {
+                addAll(state.placeGuides.map { AudioLibraryItem.PlaceItem(it, false) })
+                addAll(state.activityGuides.map { AudioLibraryItem.ActivityItem(it, false) })
             }
-            favoriteItems + regularItems
+            GuideFilter.DEEP -> {
+                addAll(state.deepPlaceGuides.map { AudioLibraryItem.PlaceItem(it, true) })
+                addAll(state.deepActivityGuides.map { AudioLibraryItem.ActivityItem(it, true) })
+            }
         }
+    }.sortedBy { it.title(lang) }
+
+    val guideItems = baseItems.let { items ->
+        val (favoriteItems, regularItems) = items.partition { item ->
+            when (item) {
+                is AudioLibraryItem.PlaceItem -> FavoriteKey(FavoriteItemType.PLACE, item.place.id) in favoriteKeySet
+                is AudioLibraryItem.ActivityItem -> FavoriteKey(FavoriteItemType.ACTIVITY, item.activity.id) in favoriteKeySet
+            }
+        }
+        favoriteItems + regularItems
+    }
 
     BaseContentView(
         state = state,
@@ -90,76 +97,103 @@ fun MyGuidesScreen(
             KompassSharedTopBar(
                 slug = "",
                 title = "Audio Guides",
-                subtitle = "Places and activities ready to play",
+                subtitle = if (state.entitlements.audioPass) {
+                    "Free and Deep audio ready to play"
+                } else {
+                    "Free audio ready to play"
+                },
                 showBack = true,
                 onBackClick = onBack
             )
         }
     ) {
-        LazyColumn(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(KompassTheme.colors.colorHomeCanvas),
-            contentPadding = PaddingValues(horizontal = 18.dp, vertical = 18.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
+                .background(KompassTheme.colors.colorHomeCanvas)
         ) {
-            if (guideItems.isEmpty()) {
-                item {
-                    AudioLibraryPlaceholder()
+            if (state.entitlements.audioPass) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 18.dp, vertical = 14.dp),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    GuideFilter.values().forEach { filter ->
+                        FilterChip(
+                            selected = state.selectedFilter == filter,
+                            onClick = { vm.onIntent(MyGuidesEvent.SelectFilter(filter)) },
+                            label = { Text(if (filter == GuideFilter.ALL) "All" else "Deep") },
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = KompassTheme.colors.colorOrangeMain.copy(alpha = 0.12f),
+                                selectedLabelColor = KompassTheme.colors.colorSignalStrong
+                            )
+                        )
+                    }
                 }
-            } else {
-                items(guideItems, key = { item -> item.stableKey }) { item ->
-                    AudioLibraryCard(
-                        item = item,
-                        lang = lang,
-                        isFavorited = when (item) {
-                            is AudioLibraryItem.PlaceItem -> favoritesRepository.isFavorited(FavoriteItemType.PLACE, item.place.id)
-                            is AudioLibraryItem.ActivityItem -> favoritesRepository.isFavorited(FavoriteItemType.ACTIVITY, item.activity.id)
-                        },
-                        onFavoriteClick = {
-                            when (item) {
-                                is AudioLibraryItem.PlaceItem -> favoritesRepository.toggleFavorite(FavoriteItemType.PLACE, item.place.id)
-                                is AudioLibraryItem.ActivityItem -> favoritesRepository.toggleFavorite(FavoriteItemType.ACTIVITY, item.activity.id)
+            }
+
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(horizontal = 18.dp, vertical = 4.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
+                if (guideItems.isEmpty()) {
+                    item { AudioLibraryPlaceholder(state.selectedFilter) }
+                } else {
+                    items(guideItems, key = { item -> item.stableKey }) { item ->
+                        AudioLibraryCard(
+                            item = item,
+                            lang = lang,
+                            isFavorited = when (item) {
+                                is AudioLibraryItem.PlaceItem -> FavoriteKey(FavoriteItemType.PLACE, item.place.id) in favoriteKeySet
+                                is AudioLibraryItem.ActivityItem -> FavoriteKey(FavoriteItemType.ACTIVITY, item.activity.id) in favoriteKeySet
+                            },
+                            onFavoriteClick = {
+                                when (item) {
+                                    is AudioLibraryItem.PlaceItem -> favoritesRepository.toggleFavorite(FavoriteItemType.PLACE, item.place.id)
+                                    is AudioLibraryItem.ActivityItem -> favoritesRepository.toggleFavorite(FavoriteItemType.ACTIVITY, item.activity.id)
+                                }
+                            },
+                            onCardClick = {
+                                when (item) {
+                                    is AudioLibraryItem.PlaceItem -> {
+                                        analytics.trackPlaceView(
+                                            placeId = item.place.id,
+                                            cityId = item.place.cityId,
+                                            zone = item.place.zone,
+                                            placeCategory = item.place.category.name.lowercase(),
+                                            contentOrigin = "audio_library"
+                                        )
+                                        onOpenPlace(item.place.id)
+                                    }
+                                    is AudioLibraryItem.ActivityItem -> {
+                                        analytics.trackActivityView(
+                                            activityId = item.activity.id,
+                                            cityId = item.activity.cityId,
+                                            zone = item.activity.category,
+                                            contentOrigin = "audio_library"
+                                        )
+                                        onOpenActivity(item.activity.id)
+                                    }
+                                }
+                            },
+                            onPlayClick = {
+                                when (item) {
+                                    is AudioLibraryItem.PlaceItem -> {
+                                        analytics.trackGuideOpen(item.place.id, item.place.cityId)
+                                        analytics.trackAudioPlay(item.place.id, item.place.cityId)
+                                        onOpenPlaceGuide(item.place.id, item.isDeep)
+                                    }
+                                    is AudioLibraryItem.ActivityItem -> {
+                                        analytics.trackGuideOpen(item.activity.id, item.activity.cityId)
+                                        analytics.trackAudioPlay(item.activity.id, item.activity.cityId)
+                                        onOpenActivityGuide(item.activity.id, item.isDeep)
+                                    }
+                                }
                             }
-                        },
-                        onCardClick = {
-                            when (item) {
-                                is AudioLibraryItem.PlaceItem -> {
-                                    analytics.trackPlaceView(
-                                        placeId = item.place.id,
-                                        cityId = item.place.cityId,
-                                        zone = item.place.zone,
-                                        placeCategory = item.place.category.name.lowercase(),
-                                        contentOrigin = "audio_library"
-                                    )
-                                    onOpenPlace(item.place.id)
-                                }
-                                is AudioLibraryItem.ActivityItem -> {
-                                    analytics.trackActivityView(
-                                        activityId = item.activity.id,
-                                        cityId = item.activity.cityId,
-                                        zone = item.activity.category,
-                                        contentOrigin = "audio_library"
-                                    )
-                                    onOpenActivity(item.activity.id)
-                                }
-                            }
-                        },
-                        onPlayClick = {
-                            when (item) {
-                                is AudioLibraryItem.PlaceItem -> {
-                                    analytics.trackGuideOpen(item.place.id, item.place.cityId)
-                                    analytics.trackAudioPlay(item.place.id, item.place.cityId)
-                                    onOpenPlaceGuide(item.place.id)
-                                }
-                                is AudioLibraryItem.ActivityItem -> {
-                                    analytics.trackGuideOpen(item.activity.id, item.activity.cityId)
-                                    analytics.trackAudioPlay(item.activity.id, item.activity.cityId)
-                                    onOpenActivityGuide(item.activity.id)
-                                }
-                            }
-                        }
-                    )
+                        )
+                    }
                 }
             }
         }
@@ -168,31 +202,34 @@ fun MyGuidesScreen(
 
 private sealed interface AudioLibraryItem {
     val stableKey: String
+    val isDeep: Boolean
     fun title(lang: String): String
     fun meta(lang: String): String
     fun imageUrl(): String?
 
-    data class PlaceItem(val place: Place) : AudioLibraryItem {
-        override val stableKey: String = "place-${place.id}"
+    data class PlaceItem(val place: Place, override val isDeep: Boolean) : AudioLibraryItem {
+        override val stableKey: String = "place-${place.id}-$isDeep"
         override fun title(lang: String): String = place.localizedName(lang)
         override fun meta(lang: String): String {
             val zone = place.zone?.replace('_', ' ')?.replace('-', ' ')?.takeIf { it.isNotBlank() }
-            return listOfNotNull(
+            val base = listOfNotNull(
                 place.category.name.lowercase().replace('_', ' ').replaceFirstChar { it.titlecase() },
                 zone
             ).joinToString(" · ")
+            return if (isDeep) "Deep · $base" else base
         }
         override fun imageUrl(): String? = place.photos.firstOrNull()?.let(::buildPhotoUrl)
     }
 
-    data class ActivityItem(val activity: Experience) : AudioLibraryItem {
-        override val stableKey: String = "activity-${activity.id}"
+    data class ActivityItem(val activity: Experience, override val isDeep: Boolean) : AudioLibraryItem {
+        override val stableKey: String = "activity-${activity.id}-$isDeep"
         override fun title(lang: String): String = activity.localizedName(lang)
         override fun meta(lang: String): String {
             val category = activity.category?.replace('_', ' ')?.replace('-', ' ')
                 ?.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
             val location = activity.localizedLocation(lang).takeIf { it.isNotBlank() }
-            return listOfNotNull(category, location).joinToString(" · ")
+            val base = listOfNotNull(category, location).joinToString(" · ")
+            return if (isDeep) "Deep · $base" else base
         }
         override fun imageUrl(): String? = activity.photos.firstOrNull()?.let(::buildPhotoUrl)
     }
@@ -283,7 +320,7 @@ private fun AudioLibraryCard(
 }
 
 @Composable
-private fun AudioLibraryPlaceholder() {
+private fun AudioLibraryPlaceholder(filter: GuideFilter) {
     val colors = KompassTheme.colors
     Column(
         modifier = Modifier
@@ -295,12 +332,16 @@ private fun AudioLibraryPlaceholder() {
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Text(
-            text = "No audio guides unlocked yet",
+            text = if (filter == GuideFilter.ALL) "No audio guides available yet" else "No Deep audio available yet",
             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
             color = colors.colorNavy
         )
         Text(
-            text = "As soon as a premium place or activity includes narration, it will appear here for quick access and offline playback.",
+            text = if (filter == GuideFilter.ALL) {
+                "As soon as a place or activity includes free narration, it will appear here for quick access and offline playback."
+            } else {
+                "Deep-supported audio will appear here once it is available for your unlocked Kotor experience."
+            },
             style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 22.sp),
             color = colors.colorSlate.copy(alpha = 0.78f)
         )

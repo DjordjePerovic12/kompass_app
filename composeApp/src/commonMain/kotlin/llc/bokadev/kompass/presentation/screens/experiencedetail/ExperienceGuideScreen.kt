@@ -67,9 +67,10 @@ import org.koin.core.parameter.parametersOf
 fun ExperienceGuideScreen(
     id: String,
     autoplay: Boolean = false,
+    deep: Boolean = false,
     onBack: () -> Unit = {}
 ) {
-    val vm: ExperienceGuideViewModel = koinViewModel(parameters = { parametersOf(id, autoplay) })
+    val vm: ExperienceGuideViewModel = koinViewModel(parameters = { parametersOf(id, autoplay, deep) })
     val state by vm.state.collectAsState()
     val analytics = koinInject<AnalyticsRepository>()
 
@@ -82,15 +83,19 @@ fun ExperienceGuideScreen(
         topBar = {
             KompassSharedTopBar(
                 slug = "",
-                title = "Audio Guide",
-                subtitle = "Listen while exploring on-site",
+                title = if (deep) "KOMPASS Deep" else "Audio Guide",
+                subtitle = if (deep) "A quieter companion layer while you explore" else "Listen while exploring on-site",
                 showBack = true,
-                onBackClick = onBack
+                onBackClick = {
+                    vm.onIntent(ExperienceGuideEvent.StopPlayback)
+                    onBack()
+                }
             )
         }
     ) {
         ExperienceGuideScreenContent(
             state = state,
+            deep = deep,
             onIntent = vm::onIntent,
             onAudioStarted = { activity ->
                 analytics.trackGuideOpen(activity.id, activity.cityId)
@@ -103,6 +108,7 @@ fun ExperienceGuideScreen(
 @Composable
 private fun ExperienceGuideScreenContent(
     state: ExperienceGuideState,
+    deep: Boolean,
     onIntent: (ExperienceGuideEvent) -> Unit,
     onAudioStarted: (Experience) -> Unit
 ) {
@@ -273,18 +279,20 @@ private fun ExperienceGuideScreenContent(
 
                         EditorialActivitySection(
                             title = "Overview",
-                            body = activity.localizedDescription(lang)
+                            body = if (deep) {
+                                activity.localizedDeepText(lang).ifBlank { activity.localizedDescription(lang) }
+                            } else {
+                                activity.localizedDescription(lang)
+                            }
                         )
 
-                        if (state.hasDetailAccess) {
+                        if (!deep) {
                             activity.localizedLongDescription(lang).takeIf(String::isNotBlank)?.let {
                                 EditorialActivitySection(
-                                    title = "Editorial Notes",
+                                    title = "More Context",
                                     body = it
                                 )
                             }
-                        } else if (activity.localizedLongDescription(lang).isNotBlank()) {
-                            ActivityPremiumDeepDiveCard()
                         }
 
                         activity.localizedHowToGetThere(lang).takeIf(String::isNotBlank)?.let {

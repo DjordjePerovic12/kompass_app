@@ -14,7 +14,22 @@
       "Read(//Users/djordjeperovic/Downloads/kompass-admin/**)",
       "Bash(xargs cat *)",
       "mcp__figma__get_metadata",
-      "mcp__figma__get_design_context"
+      "mcp__figma__get_design_context",
+      "WebFetch(domain:api.fontshare.com)",
+      "WebFetch(domain:www.fontshare.com)",
+      "WebSearch",
+      "WebFetch(domain:www.weseektravel.com)",
+      "WebFetch(domain:monteguide.com)",
+      "WebFetch(domain:www.kotorcablecar.me)",
+      "WebFetch(domain:visitladyoftherocks.com)",
+      "WebFetch(domain:www.montenegropulse.com)",
+      "WebFetch(domain:www.tripadvisor.com)",
+      "WebFetch(domain:www.earthtrekkers.com)",
+      "WebFetch(domain:adriaticways.com)",
+      "WebFetch(domain:www.ancient-origins.net)",
+      "WebFetch(domain:en.wikipedia.org)",
+      "WebFetch(domain:www.spottinghistory.com)",
+      "WebFetch(domain:www.livetheworld.com)"
     ]
   }
 }

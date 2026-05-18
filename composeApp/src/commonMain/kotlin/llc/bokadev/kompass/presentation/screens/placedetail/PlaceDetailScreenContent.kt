@@ -27,25 +27,38 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import llc.bokadev.kompass.core.util.AudioGuidePlaybackState
 import llc.bokadev.kompass.core.util.buildPhotoUrl
 import llc.bokadev.kompass.core.util.currentAppLanguage
 import llc.bokadev.kompass.domain.model.BestTime
+import llc.bokadev.kompass.domain.model.GeoPoint
 import llc.bokadev.kompass.domain.model.Place
 import llc.bokadev.kompass.domain.model.PlaceCategory
 import llc.bokadev.kompass.domain.model.PriceIndicator
 import llc.bokadev.kompass.presentation.screens.placedetail.components.InfoChip
 import llc.bokadev.kompass.presentation.screens.placedetail.components.PlacePhotoHeader
+import llc.bokadev.kompass.presentation.shared.DetailNativeMapCard
 import llc.bokadev.kompass.presentation.shared.FavoriteToggleButton
 import llc.bokadev.kompass.presentation.theme.KompassTheme
 
@@ -57,7 +70,10 @@ fun PlaceDetailScreenContent(
     onIntent: (PlaceDetailEvent) -> Unit,
     onBack: () -> Unit,
     onLearnMore: () -> Unit,
-    onOpenGuide: (String) -> Unit
+    freeGuideState: PlaceGuideState,
+    onFreeGuideIntent: (PlaceGuideEvent) -> Unit,
+    deepGuideState: PlaceGuideState,
+    onDeepGuideIntent: (PlaceGuideEvent) -> Unit
 ) {
     val colors = KompassTheme.colors
 
@@ -94,7 +110,10 @@ fun PlaceDetailScreenContent(
                     onFavoriteClick = onFavoriteClick,
                     onBack = onBack,
                     onLearnMore = onLearnMore,
-                    onOpenGuide = onOpenGuide
+                    freeGuideState = freeGuideState,
+                    onFreeGuideIntent = onFreeGuideIntent,
+                    deepGuideState = deepGuideState,
+                    onDeepGuideIntent = onDeepGuideIntent
                 )
             }
         }
@@ -111,7 +130,10 @@ private fun PlaceDetailBody(
     onFavoriteClick: () -> Unit,
     onBack: () -> Unit,
     onLearnMore: () -> Unit,
-    onOpenGuide: (String) -> Unit
+    freeGuideState: PlaceGuideState,
+    onFreeGuideIntent: (PlaceGuideEvent) -> Unit,
+    deepGuideState: PlaceGuideState,
+    onDeepGuideIntent: (PlaceGuideEvent) -> Unit
 ) {
     val colors = KompassTheme.colors
     val lang = currentAppLanguage()
@@ -212,6 +234,12 @@ private fun PlaceDetailBody(
                     }
                 }
 
+                DetailNativeMapCard(
+                    placeName = place.localizedName(lang),
+                    summary = "Nearby sites, cafés, and viewpoints around ${place.localizedName(lang)}.",
+                    destination = GeoPoint(place.latitude, place.longitude)
+                )
+
                 HorizontalDivider(color = Color.Black.copy(alpha = 0.08f))
 
                 DetailSection(
@@ -219,39 +247,68 @@ private fun PlaceDetailBody(
                     body = place.localizedDescription(lang)
                 )
 
-                if (place.audioFile != null) {
-                    PremiumGuideCard(
-                        title = "Audio Guide",
-                        body = if (hasAudioAccess) {
-                            "This place includes an unlocked narration guide with background playback and location context."
-                        } else {
-                            "This narration is part of the Audio Pass and can be unlocked once premium access is active."
-                        },
-                        isLocked = !hasAudioAccess,
-                        ctaLabel = if (hasAudioAccess) "OPEN GUIDE" else "LEARN MORE",
-                        onPrimaryAction = {
-                            if (hasAudioAccess) onOpenGuide(place.id) else onLearnMore()
-                        }
-                    )
-                }
-
                 place.localizedLongDescription(lang)
                     .takeIf { it.isNotBlank() }
                     ?.let { longText ->
-                        PremiumGuideCard(
-                            title = "Deep Dive",
-                            body = if (hasDetailAccess) {
-                                longText
-                            } else {
-                                "Deeper cultural context and editorial notes for this place are part of Explorer Pass content."
-                            },
-                            isLocked = !hasDetailAccess,
-                            ctaLabel = if (hasDetailAccess) "READ GUIDE" else "LEARN MORE",
-                            onPrimaryAction = {
-                                if (hasDetailAccess) onOpenGuide(place.id) else onLearnMore()
-                            }
+                        DetailSection(
+                            title = "More Context",
+                            body = longText
                         )
                     }
+
+                place.localizedLocalsTip(lang)
+                    .takeIf { it.isNotBlank() }
+                    ?.let { tip ->
+                        DetailFactCard(
+                            label = "Local perspective",
+                            value = tip
+                        )
+                    }
+
+                if (place.audioFile != null) {
+                    InlinePlaceAudioGuideSection(
+                        place = place,
+                        guideState = freeGuideState,
+                        hasAudioAccess = hasAudioAccess,
+                        onIntent = onFreeGuideIntent
+                    )
+                }
+
+                if (place.hasDeepContent(lang)) {
+                    val deepBody = place.localizedDeepText(lang)
+                    if (hasDetailAccess) {
+                        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                            DeepCompanionSection(
+                                title = "KOMPASS Deep",
+                                body = deepBody.ifBlank {
+                                    "A quieter companion layer for this place with extra atmosphere, context, and guided awareness."
+                                },
+                                ctaLabel = null,
+                                isLocked = false,
+                                onPrimaryAction = null
+                            )
+                            if (!place.deepAudioFile.isNullOrEmpty()) {
+                                InlinePlaceAudioGuideSection(
+                                    place = place,
+                                    guideState = deepGuideState,
+                                    hasAudioAccess = hasDetailAccess,
+                                    onIntent = onDeepGuideIntent,
+                                    title = "Deep Audio",
+                                    description = "A quieter companion layer with additional context, atmosphere, and spatial guidance.",
+                                    availabilityText = "Deep audio ready"
+                                )
+                            }
+                        }
+                    } else {
+                        DeepCompanionSection(
+                            title = "KOMPASS Deep",
+                            body = "Beyond landmarks, routes, and viewpoints, Deep adds a quieter companion layer with short contextual moments across selected places and experiences in Kotor.",
+                            ctaLabel = "What is Deep?",
+                            isLocked = true,
+                            onPrimaryAction = onLearnMore
+                        )
+                    }
+                }
 
                 place.localizedLocalsTip(lang)
                     .takeIf { it.isNotBlank() }
@@ -273,6 +330,178 @@ private fun PlaceDetailBody(
             Spacer(modifier = Modifier.height(34.dp))
         }
     }
+}
+
+@Composable
+private fun InlinePlaceAudioGuideSection(
+    place: Place,
+    guideState: PlaceGuideState,
+    hasAudioAccess: Boolean,
+    onIntent: (PlaceGuideEvent) -> Unit,
+    title: String = "Audio Guide",
+    description: String = "A short guide you can listen to while moving through the site.",
+    availabilityText: String = "Ready to play"
+) {
+    StopPlaybackWhenLeavingForeground(
+        playbackSourceUrl = guideState.playback.sourceUrl,
+        onStopPlayback = { onIntent(PlaceGuideEvent.StopPlayback) }
+    )
+
+    val playback = guideState.playback
+    val isCurrentSource = guideState.audioUrl != null && playback.sourceUrl == guideState.audioUrl
+    val durationMs = if (isCurrentSource) playback.durationMs.coerceAtLeast(0L) else 0L
+    val progressMs = if (isCurrentSource) playback.progressMs.coerceIn(0L, durationMs.takeIf { it > 0L } ?: Long.MAX_VALUE) else 0L
+    val approximateMinutes = when {
+        durationMs > 0L -> "${(durationMs / 60000L).coerceAtLeast(1L)} minutes"
+        place.estimatedDuration != null -> "${(place.estimatedDuration / 2).coerceAtLeast(4)} minutes"
+        else -> "12 minutes"
+    }
+    val colors = KompassTheme.colors
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(color = colors.colorSurfaceMid, shape = RoundedCornerShape(28.dp))
+            .padding(horizontal = 20.dp, vertical = 22.dp),
+        verticalArrangement = Arrangement.spacedBy(18.dp)
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold),
+                color = colors.colorNavy
+            )
+            Text(
+                text = description,
+                style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 22.sp),
+                color = colors.colorSlate.copy(alpha = 0.8f)
+            )
+        }
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(18.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(58.dp)
+                    .clip(CircleShape)
+                    .background(if (guideState.audioUrl != null && hasAudioAccess) colors.colorOrangeMain else colors.colorOrangeMain.copy(alpha = 0.32f))
+                    .clickable(enabled = guideState.audioUrl != null && hasAudioAccess) {
+                        onIntent(PlaceGuideEvent.TogglePlayPause)
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = if (isCurrentSource && playback.isPlaying) "❚❚" else "▶",
+                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold),
+                    color = colors.colorWhite
+                )
+            }
+
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                GuideMetaLine("Approx. $approximateMinutes")
+                GuideMetaLine("Best experienced on-site")
+                GuideMetaLine(
+                    when {
+                        isCurrentSource && playback.isBuffering -> "Preparing playback"
+                        !hasAudioAccess -> "Available with KOMPASS Deep"
+                        guideState.audioUrl != null -> availabilityText
+                        else -> "Audio is still preparing"
+                    }
+                )
+            }
+        }
+
+        if (durationMs > 0L || progressMs > 0L) {
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Slider(
+                    value = progressMs.toFloat(),
+                    onValueChange = { onIntent(PlaceGuideEvent.SeekTo(it.toLong())) },
+                    valueRange = 0f..durationMs.coerceAtLeast(1L).toFloat(),
+                    colors = SliderDefaults.colors(
+                        thumbColor = colors.colorOrangeMain,
+                        activeTrackColor = colors.colorOrangeMain,
+                        inactiveTrackColor = colors.colorWhite.copy(alpha = 0.55f)
+                    ),
+                    modifier = Modifier.height(18.dp)
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = progressMs.toClockLabel(),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = colors.colorSlate.copy(alpha = 0.7f)
+                    )
+                    Text(
+                        text = durationMs.toClockLabel(),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = colors.colorSlate.copy(alpha = 0.7f)
+                    )
+                }
+            }
+        }
+
+        guideState.playback.error?.takeIf { isCurrentSource }?.let {
+            Text(
+                text = it,
+                style = MaterialTheme.typography.bodySmall,
+                color = colors.colorError
+            )
+        }
+    }
+}
+
+@Composable
+private fun StopPlaybackWhenLeavingForeground(
+    playbackSourceUrl: String?,
+    onStopPlayback: () -> Unit
+) {
+    val lifecycleOwner = LocalLifecycleOwner.current
+    var appInBackground by remember { mutableStateOf(false) }
+
+    DisposableEffect(lifecycleOwner, playbackSourceUrl) {
+        val observer = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_STOP -> appInBackground = true
+                Lifecycle.Event.ON_START -> appInBackground = false
+                else -> Unit
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+            if (!appInBackground && playbackSourceUrl != null) {
+                onStopPlayback()
+            }
+        }
+    }
+}
+
+@Composable
+private fun GuideMetaLine(text: String) {
+    val colors = KompassTheme.colors
+    Text(
+        text = text,
+        style = MaterialTheme.typography.bodyMedium.copy(
+            fontSize = 14.sp,
+            lineHeight = 20.sp
+        ),
+        color = colors.colorSlate.copy(alpha = 0.76f)
+    )
+}
+
+private fun Long.toClockLabel(): String {
+    val totalSeconds = (this / 1000L).coerceAtLeast(0L)
+    val minutes = totalSeconds / 60L
+    val seconds = totalSeconds % 60L
+    return "$minutes:${seconds.toString().padStart(2, '0')}"
 }
 
 @Composable
@@ -318,6 +547,55 @@ private fun PremiumGuideCard(
                 text = ctaLabel,
                 style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold),
                 color = colors.colorWhite
+            )
+        }
+    }
+}
+
+@Composable
+private fun DeepCompanionSection(
+    title: String,
+    body: String,
+    isLocked: Boolean,
+    ctaLabel: String?,
+    onPrimaryAction: (() -> Unit)?
+) {
+    val colors = KompassTheme.colors
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 6.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold),
+                color = colors.colorNavy
+            )
+            if (isLocked) {
+                Text(
+                    text = "Optional layer",
+                    style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
+                    color = colors.colorOrangeMain.copy(alpha = 0.88f)
+                )
+            }
+        }
+        Text(
+            text = body,
+            style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 22.sp),
+            color = colors.colorNavy.copy(alpha = 0.78f)
+        )
+        if (ctaLabel != null && onPrimaryAction != null) {
+            Text(
+                text = ctaLabel,
+                modifier = Modifier.clickable(onClick = onPrimaryAction),
+                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                color = colors.colorOrangeMain
             )
         }
     }

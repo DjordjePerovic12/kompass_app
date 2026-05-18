@@ -1,7 +1,6 @@
 package llc.bokadev.kompass.presentation.screens.premium
 
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import llc.bokadev.kompass.core.presentation.base.BaseEvent
@@ -39,47 +38,17 @@ class PremiumBundlesViewModel(
         entitlements = premiumRepository.getEntitlements()
     )
 
-    init {
-        ensureDemoAudioPass()
-    }
-
     override fun onIntent(event: PremiumBundlesEvent) {
         when (event) {
             PremiumBundlesEvent.CheckoutNavigationHandled -> {
                 _state.update { it.copy(pendingCheckoutSession = null) }
             }
             PremiumBundlesEvent.RefreshEntitlements -> {
-                ensureDemoAudioPass()
                 _state.update { it.copy(entitlements = premiumRepository.getEntitlements()) }
             }
             is PremiumBundlesEvent.StartCheckout -> startCheckout(
                 productId = event.productId,
                 locale = event.locale
-            )
-        }
-    }
-
-    private fun unlockLocally(productId: String) {
-        val product = PremiumCatalog.find(productId)
-            ?: run {
-                _state.update { it.copy(error = "Unknown premium product.") }
-                return
-            }
-
-        val current = premiumRepository.getEntitlements()
-        val updated = when (product.tier) {
-            "audio_pass" -> current.copy(audioPass = true)
-            "explorer_pass" -> current.copy(audioPass = true, explorerPass = true)
-            "perks_pass" -> current.copy(audioPass = true, explorerPass = true, perksPass = true)
-            else -> current
-        }
-        premiumRepository.applyEntitlements(updated)
-        _state.update {
-            it.copy(
-                entitlements = updated,
-                error = null,
-                activeCheckoutProductId = null,
-                pendingCheckoutSession = null
             )
         }
     }
@@ -91,11 +60,6 @@ class PremiumBundlesViewModel(
                 return
             }
 
-        if (product.tier == "audio_pass") {
-            unlockLocally(productId)
-            return
-        }
-
         viewModelScope.launch {
             _state.update {
                 it.copy(
@@ -105,21 +69,28 @@ class PremiumBundlesViewModel(
                 )
             }
 
-            delay(1400)
-            unlockLocally(productId)
-            _state.update {
-                it.copy(
-                    isLoading = false,
-                    activeCheckoutProductId = null
-                )
-            }
+            startPremiumCheckout(product, locale, getPlatform().name)
+                .onSuccess { session ->
+                    sessionStore.put(session)
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            error = null,
+                            activeCheckoutProductId = null,
+                            pendingCheckoutSession = session,
+                            entitlements = premiumRepository.getEntitlements()
+                        )
+                    }
+                }
+                .onFailure { error ->
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            activeCheckoutProductId = null,
+                            error = error.message ?: "We couldn't start checkout right now."
+                        )
+                    }
+                }
         }
-    }
-
-    private fun ensureDemoAudioPass() {
-        val current = premiumRepository.getEntitlements()
-        if (current.audioPass) return
-        val updated = current.copy(audioPass = true)
-        premiumRepository.applyEntitlements(updated)
     }
 }

@@ -37,6 +37,7 @@ sealed interface ExperienceGuideEvent : BaseEvent {
 class ExperienceGuideViewModel(
     private val id: String,
     private val autoplay: Boolean,
+    private val deep: Boolean,
     private val getActivityById: GetActivityByIdUseCase,
     private val getSignedAudioUrl: GetSignedAudioUrlUseCase,
     private val hasPremiumAccess: HasPremiumAccessUseCase,
@@ -76,17 +77,16 @@ class ExperienceGuideViewModel(
 
             getActivityById(id)
                 .onSuccess { activity ->
-                    val hasAudioAccess = hasPremiumAccess(activity.audioAccessTier)
-                    val hasDetailAccess = hasPremiumAccess(activity.detailAccessTier)
+                    val hasDeepAccess = hasPremiumAccess("audio_pass")
                     val currentLocation = runCatching { userLocationProvider.getCurrentLocation() }.getOrNull()
-                    val audioUrl = resolveAudioUrl(activity, hasAudioAccess)
+                    val audioUrl = resolveAudioUrl(activity, hasDeepAccess)
 
                     _state.update {
                         it.copy(
                             isLoading = false,
                             activity = activity,
-                            hasAudioAccess = hasAudioAccess,
-                            hasDetailAccess = hasDetailAccess,
+                            hasAudioAccess = if (deep) hasDeepAccess else !activity.audioFile.isNullOrEmpty(),
+                            hasDetailAccess = hasDeepAccess,
                             currentLocation = currentLocation,
                             audioUrl = audioUrl
                         )
@@ -116,9 +116,14 @@ class ExperienceGuideViewModel(
         audioGuidePlayer.togglePlayPause()
     }
 
-    private suspend fun resolveAudioUrl(activity: Experience, hasAudioAccess: Boolean): String? {
-        val audioPath = activity.audioFile ?: return null
-        if (!hasAudioAccess) return null
+    private suspend fun resolveAudioUrl(activity: Experience, hasDeepAccess: Boolean): String? {
+        val lang = appPreferences.getSelectedLanguage()
+        val audioPath = if (deep) {
+            if (!hasDeepAccess) return null
+            activity.localizedDeepAudioFile(lang)
+        } else {
+            activity.localizedAudioFile(lang)
+        } ?: return null
         return getSignedAudioUrl(audioPath).getOrNull()
     }
 

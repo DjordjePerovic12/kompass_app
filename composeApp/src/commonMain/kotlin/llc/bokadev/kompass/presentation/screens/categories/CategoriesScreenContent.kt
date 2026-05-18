@@ -76,7 +76,7 @@ fun CategoriesScreenContent(
             id = "favorites",
             title = "My Favorites",
             subtitle = "Saved places & activities",
-            accent = colorSoftTerracotta,
+            accent = colors.colorNavy.copy(.7f),
             prominent = true,
             onClick = onFavoritesClick
         ),
@@ -84,7 +84,7 @@ fun CategoriesScreenContent(
             id = "places",
             title = "Places",
             subtitle = "Must-sees, restaurants & landmarks",
-            accent = colorDustySage,
+            accent = colors.colorNavy.copy(.7f),
             prominent = true,
             onClick = onPlacesClick
         ),
@@ -93,7 +93,7 @@ fun CategoriesScreenContent(
                 id = it.id,
                 title = it.localizedName(lang).prettyCategoryLabel(),
                 subtitle = CATEGORY_SUBTITLES[it.id].orEmpty(),
-                accent = colorMutedSky,
+                accent = colors.colorNavy.copy(.7f),
                 prominent = false,
                 onClick = { onCategoryClick(it) }
             )
@@ -101,9 +101,9 @@ fun CategoriesScreenContent(
         groupedCategories["hidden_gems"]?.let {
             BrowseCategoryCardData(
                 id = it.id,
-                title = "Local Finds",
-                subtitle = CATEGORY_SUBTITLES[it.id].orEmpty(),
-                accent = colorRoseClay,
+                title = "Legends & Localisms",
+                subtitle = "Stories and secrets from the locals",
+                accent = colors.colorNavy.copy(.7f),
                 prominent = false,
                 onClick = { onCategoryClick(it) }
             )
@@ -254,7 +254,7 @@ private fun CategoryTile(
                     fontWeight = FontWeight.SemiBold,
                     letterSpacing = (-0.4).sp
                 ),
-                color = colors.colorNavy,
+                color = colors.colorWhite,
                 maxLines = 3,
                 overflow = TextOverflow.Ellipsis
             )
@@ -266,7 +266,7 @@ private fun CategoryTile(
                     lineHeight = 20.sp,
                     fontWeight = FontWeight.Medium
                 ),
-                color = colors.colorNavy.copy(alpha = 0.72f),
+                color = colors.colorWhite,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )

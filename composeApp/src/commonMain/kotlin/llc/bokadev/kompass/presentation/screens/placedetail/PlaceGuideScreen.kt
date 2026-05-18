@@ -71,9 +71,10 @@ import org.koin.core.parameter.parametersOf
 fun PlaceGuideScreen(
     id: String,
     autoplay: Boolean = false,
+    deep: Boolean = false,
     onBack: () -> Unit = {}
 ) {
-    val vm: PlaceGuideViewModel = koinViewModel(parameters = { parametersOf(id, autoplay) })
+    val vm: PlaceGuideViewModel = koinViewModel(parameters = { parametersOf(id, autoplay, deep) })
     val state by vm.state.collectAsState()
     val analytics = koinInject<AnalyticsRepository>()
 
@@ -86,15 +87,19 @@ fun PlaceGuideScreen(
         topBar = {
             KompassSharedTopBar(
                 slug = "Unlocked place guide",
-                title = "Audio Guide",
-                subtitle = "Listen while exploring on-site",
+                title = if (deep) "KOMPASS Deep" else "Audio Guide",
+                subtitle = if (deep) "A quieter companion layer while you explore" else "Listen while exploring on-site",
                 showBack = true,
-                onBackClick = onBack
+                onBackClick = {
+                    vm.onIntent(PlaceGuideEvent.StopPlayback)
+                    onBack()
+                }
             )
         }
     ) {
         PlaceGuideScreenContent(
             state = state,
+            deep = deep,
             onIntent = vm::onIntent,
             onAudioStarted = { place ->
                 analytics.trackAudioPlay(place.id, place.cityId)
@@ -106,6 +111,7 @@ fun PlaceGuideScreen(
 @Composable
 private fun PlaceGuideScreenContent(
     state: PlaceGuideState,
+    deep: Boolean,
     onIntent: (PlaceGuideEvent) -> Unit,
     onAudioStarted: (Place) -> Unit
 ) {
@@ -267,18 +273,20 @@ private fun PlaceGuideScreenContent(
 
                         EditorialSection(
                             title = "Overview",
-                            body = place.localizedDescription(lang)
+                            body = if (deep) {
+                                place.localizedDeepText(lang).ifBlank { place.localizedDescription(lang) }
+                            } else {
+                                place.localizedDescription(lang)
+                            }
                         )
 
-                        if (state.hasDetailAccess) {
+                        if (!deep) {
                             place.localizedLongDescription(lang).takeIf(String::isNotBlank)?.let {
                                 EditorialSection(
-                                    title = "Architectural Details",
+                                    title = "More Context",
                                     body = it
                                 )
                             }
-                        } else if (place.localizedLongDescription(lang).isNotBlank()) {
-                            PremiumDeepDiveCard()
                         }
 
                         place.localizedLocalsTip(lang).takeIf(String::isNotBlank)?.let {

@@ -21,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import llc.bokadev.kompass.core.util.currentAppLanguage
 import llc.bokadev.kompass.domain.model.FavoriteItemType
+import llc.bokadev.kompass.domain.model.FavoriteKey
 import llc.bokadev.kompass.domain.model.favoritePlacesFirst
 import llc.bokadev.kompass.domain.repository.FavoritesRepository
 import llc.bokadev.kompass.presentation.screens.category_items_list.components.PlaceListItem
@@ -37,7 +38,7 @@ fun MustSeePlacesScreenContent(
     val lang = currentAppLanguage()
     val favoritesRepository = koinInject<FavoritesRepository>()
     val favorites by favoritesRepository.favoritesFlow.collectAsState()
-    val favoriteKeys = favoritesRepository.getFavoriteKeySet()
+    val favoriteKeys = favorites.map { FavoriteKey(it.type, it.id) }.toSet()
     val orderedPlaces = state.places.favoritePlacesFirst(favoriteKeys)
 
     when {
@@ -73,7 +74,7 @@ fun MustSeePlacesScreenContent(
                     PlaceListItem(
                         place = place,
                         lang = lang,
-                        isFavorited = favoritesRepository.isFavorited(FavoriteItemType.PLACE, place.id),
+                        isFavorited = FavoriteKey(FavoriteItemType.PLACE, place.id) in favoriteKeys,
                         onFavoriteClick = { favoritesRepository.toggleFavorite(FavoriteItemType.PLACE, place.id) },
                         onClick = { onPlaceClick(place.id) }
                     )

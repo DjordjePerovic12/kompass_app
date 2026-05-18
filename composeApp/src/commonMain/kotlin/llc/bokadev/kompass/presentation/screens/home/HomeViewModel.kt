@@ -37,15 +37,7 @@ class HomeViewModel(
 
     private fun loadHomeData() {
         viewModelScope.launch {
-            val entitlements = premiumRepository.getEntitlements().let { current ->
-                if (current.audioPass) {
-                    current
-                } else {
-                    val updated = current.copy(audioPass = true)
-                    premiumRepository.applyEntitlements(updated)
-                    updated
-                }
-            }
+            val entitlements = premiumRepository.getEntitlements()
             _state.update {
                 it.copy(
                     isLoading = true,

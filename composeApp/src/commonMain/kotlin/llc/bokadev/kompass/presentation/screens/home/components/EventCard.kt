@@ -12,12 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -33,14 +28,13 @@ import llc.bokadev.kompass.presentation.theme.KompassTheme
 
 @Composable
 fun EventCard(
+    modifier: Modifier = Modifier,
     name: String,
     venue: String,
-    category: String,
     day: String,
     month: String,
     meta: String? = null,
     price: String? = null,
-    onFavoriteClick: () -> Unit,
     onClick: () -> Unit
 ) {
     val colors = KompassTheme.colors
@@ -51,7 +45,7 @@ fun EventCard(
     ).joinToString(" · ")
 
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .shadow(4.dp, cardShape, ambientColor = colors.colorNavy.copy(alpha = 0.06f), spotColor = colors.colorNavy.copy(alpha = 0.08f))
             .clip(cardShape)
@@ -137,21 +131,5 @@ fun EventCard(
             }
         }
 
-        Box(
-            modifier = Modifier
-                .size(34.dp)
-                .clip(CircleShape)
-                .background(colors.colorWhite)
-                .border(1.dp, colors.colorNavy.copy(alpha = 0.08f), CircleShape)
-                .clickable(onClick = onFavoriteClick),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = Icons.Outlined.FavoriteBorder,
-                contentDescription = "Add to favorites",
-                tint = colors.colorNavy.copy(alpha = 0.48f),
-                modifier = Modifier.size(18.dp)
-            )
-        }
     }
 }

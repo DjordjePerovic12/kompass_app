@@ -22,5 +22,5 @@ val experiencesModule = module {
     factory { GetSignedAudioUrlUseCase(get()) }
     viewModel { ExperiencesViewModel(get()) }
     viewModel { (id: String) -> ExperienceDetailViewModel(id, get(), get()) }
-    viewModel { (id: String, autoplay: Boolean) -> ExperienceGuideViewModel(id, autoplay, get(), get(), get(), get(), get(), get()) }
+    viewModel { (id: String, autoplay: Boolean, deep: Boolean) -> ExperienceGuideViewModel(id, autoplay, deep, get(), get(), get(), get(), get(), get()) }
 }

@@ -12,6 +12,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import llc.bokadev.kompass.domain.location.UserLocationProvider
 import llc.bokadev.kompass.domain.model.FavoriteItemType
+import llc.bokadev.kompass.domain.model.FavoriteKey
 import llc.bokadev.kompass.domain.repository.AnalyticsRepository
 import llc.bokadev.kompass.domain.repository.FavoritesRepository
 import llc.bokadev.kompass.core.util.AppPreferences
@@ -32,6 +33,7 @@ fun HomeScreen(
     onNavigateToNearbyPlaces: () -> Unit = {},
     onNavigateToInfoCenter: () -> Unit = {},
     onNavigateToMyGuides: () -> Unit = {},
+    onNavigateToSearch: () -> Unit = {},
     onNavigateToChangeLanguage: () -> Unit = {}
 ) {
     val vm: HomeViewModel = koinViewModel(key = vmKey)
@@ -41,7 +43,7 @@ fun HomeScreen(
     val favoritesRepository = koinInject<FavoritesRepository>()
     val preferences = koinInject<AppPreferences>()
     val strings = rememberAppStrings()
-    val favoriteEntries by favoritesRepository.favoritesFlow.collectAsState()
+    val favorites by favoritesRepository.favoritesFlow.collectAsState()
     var shouldRequestLocation by remember { mutableStateOf(false) }
     var showLocationPrompt by remember {
         mutableStateOf(
@@ -90,7 +92,7 @@ fun HomeScreen(
 
     HomeScreenContent(
         state = state,
-        favoriteKeySet = favoritesRepository.getFavoriteKeySet(),
+        favoriteKeySet = favorites.map { FavoriteKey(it.type, it.id) }.toSet(),
         onPlaceClick = { id ->
             state.mustSeePlaces.firstOrNull { it.id == id }?.let { place ->
                 analytics.trackPlaceView(
@@ -130,6 +132,7 @@ fun HomeScreen(
         onNearbySeeAll = onNavigateToNearbyPlaces,
         onInfoCenterSeeAll = onNavigateToInfoCenter,
         onMyGuidesClick = onNavigateToMyGuides,
+        onSearchClick = onNavigateToSearch,
         onChangeLanguageClick = onNavigateToChangeLanguage,
         onPlaceFavoriteToggle = { id ->
             favoritesRepository.toggleFavorite(FavoriteItemType.PLACE, id)

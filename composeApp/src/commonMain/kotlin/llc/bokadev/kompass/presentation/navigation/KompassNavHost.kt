@@ -22,9 +22,13 @@ import llc.bokadev.kompass.presentation.screens.placedetail.PlaceGuideScreen
 import llc.bokadev.kompass.presentation.screens.category_items_list.CategoryItemsListScreen
 import llc.bokadev.kompass.presentation.screens.essentials.EssentialsScreen
 import llc.bokadev.kompass.presentation.screens.nearby.NearbyPlacesScreen
+import llc.bokadev.kompass.presentation.screens.search.SearchScreen
 import llc.bokadev.kompass.presentation.screens.payment.PaymentCheckoutScreen
 import llc.bokadev.kompass.presentation.screens.premium.PremiumBundlesScreen
+import llc.bokadev.kompass.presentation.screens.localfinds.LocalFindDetailScreen
+import llc.bokadev.kompass.presentation.screens.localfinds.LocalFindsScreen
 import llc.bokadev.kompass.presentation.screens.services.ServicesScreen
+import llc.bokadev.kompass.presentation.screens.services.ServiceDetailScreen
 
 @Composable
 fun KompassNavHost(isFirstLaunch: Boolean) {
@@ -70,7 +74,9 @@ fun KompassNavHost(isFirstLaunch: Boolean) {
                 onNavigateToInfoCenter = { navController.navigate(Route.InfoCenter) },
                 onNavigateToMyGuides = { navController.navigate(Route.MyGuides) },
                 onNavigateToFavorites = { navController.navigate(Route.Favorites) },
-                onNavigateToChangeLanguage = { navController.navigate(Route.ChangeLanguage) }
+                onNavigateToSearch = { navController.navigate(Route.Search) },
+                onNavigateToChangeLanguage = { navController.navigate(Route.ChangeLanguage) },
+                onNavigateToLocalFinds = { navController.navigate(Route.LocalFinds) }
             )
         }
 
@@ -86,8 +92,7 @@ fun KompassNavHost(isFirstLaunch: Boolean) {
             PlaceDetailScreen(
                 id = route.id,
                 onBack = { navController.popBackStack() },
-                onLearnMore = { navController.navigate(Route.PremiumBundles()) },
-                onOpenGuide = { id -> navController.navigate(Route.PlaceGuide(id)) }
+                onLearnMore = { navController.navigate(Route.PremiumBundles()) }
             )
         }
 
@@ -96,6 +101,7 @@ fun KompassNavHost(isFirstLaunch: Boolean) {
             PlaceGuideScreen(
                 id = route.id,
                 autoplay = route.autoplay,
+                deep = route.deep,
                 onBack = { navController.popBackStack() }
             )
         }
@@ -110,8 +116,7 @@ fun KompassNavHost(isFirstLaunch: Boolean) {
             ExperienceDetailScreen(
                 id = route.id,
                 onBack = { navController.popBackStack() },
-                onLearnMore = { navController.navigate(Route.PremiumBundles(route.id)) },
-                onOpenGuide = { id -> navController.navigate(Route.ExperienceGuide(id)) }
+                onLearnMore = { navController.navigate(Route.PremiumBundles(route.id)) }
             )
         }
 
@@ -120,6 +125,7 @@ fun KompassNavHost(isFirstLaunch: Boolean) {
             ExperienceGuideScreen(
                 id = route.id,
                 autoplay = route.autoplay,
+                deep = route.deep,
                 onBack = { navController.popBackStack() }
             )
         }
@@ -165,14 +171,25 @@ fun KompassNavHost(isFirstLaunch: Boolean) {
         }
 
         composable<Route.Services> {
-            ServicesScreen(onBack = { navController.popBackStack() })
+            ServicesScreen(
+                onBack = { navController.popBackStack() },
+                onServiceClick = { id -> navController.navigate(Route.ServiceDetail(id)) }
+            )
+        }
+
+        composable<Route.ServiceDetail> { backStackEntry ->
+            val route: Route.ServiceDetail = backStackEntry.toRoute()
+            ServiceDetailScreen(
+                id = route.id,
+                onBack = { navController.popBackStack() }
+            )
         }
 
         composable<Route.MyGuides> {
             MyGuidesScreen(
                 onBack = { navController.popBackStack() },
-                onOpenPlaceGuide = { id -> navController.navigate(Route.PlaceGuide(id, autoplay = true)) },
-                onOpenActivityGuide = { id -> navController.navigate(Route.ExperienceGuide(id, autoplay = true)) },
+                onOpenPlaceGuide = { id, deep -> navController.navigate(Route.PlaceGuide(id, autoplay = true, deep = deep)) },
+                onOpenActivityGuide = { id, deep -> navController.navigate(Route.ExperienceGuide(id, autoplay = true, deep = deep)) },
                 onOpenPlace = { id -> navController.navigate(Route.PlaceDetail(id)) },
                 onOpenActivity = { id -> navController.navigate(Route.ExperienceDetail(id)) }
             )
@@ -183,6 +200,15 @@ fun KompassNavHost(isFirstLaunch: Boolean) {
                 onBack = { navController.popBackStack() },
                 onPlaceClick = { id -> navController.navigate(Route.PlaceDetail(id)) },
                 onActivityClick = { id -> navController.navigate(Route.ExperienceDetail(id)) }
+            )
+        }
+
+        composable<Route.Search> {
+            SearchScreen(
+                onBack = { navController.popBackStack() },
+                onPlaceClick = { id -> navController.navigate(Route.PlaceDetail(id)) },
+                onActivityClick = { id -> navController.navigate(Route.ExperienceDetail(id)) },
+                onEventClick = { id -> navController.navigate(Route.EventDetail(id)) }
             )
         }
 
@@ -210,7 +236,7 @@ fun KompassNavHost(isFirstLaunch: Boolean) {
                 },
                 unlockTargetActivityId = route.activityId,
                 onNavigateToGuide = { id ->
-                    navController.navigate(Route.ExperienceGuide(id)) {
+                    navController.navigate(Route.ExperienceGuide(id, deep = true)) {
                         popUpTo<Route.PremiumBundles> { inclusive = true }
                     }
                 }
@@ -222,6 +248,22 @@ fun KompassNavHost(isFirstLaunch: Boolean) {
             PaymentCheckoutScreen(
                 sessionId = route.sessionId,
                 onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable<Route.LocalFinds> {
+            LocalFindsScreen(
+                onBack = { navController.popBackStack() },
+                onFindClick = { id -> navController.navigate(Route.LocalFindDetail(id)) }
+            )
+        }
+
+        composable<Route.LocalFindDetail> { backStackEntry ->
+            val route: Route.LocalFindDetail = backStackEntry.toRoute()
+            LocalFindDetailScreen(
+                id = route.id,
+                onBack = { navController.popBackStack() },
+                onLearnMore = { navController.navigate(Route.PremiumBundles()) }
             )
         }
     }

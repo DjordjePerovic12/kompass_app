@@ -14,25 +14,14 @@ object PremiumCatalog {
         PremiumProduct(
             id = "audio-pass-kotor",
             tier = "audio_pass",
-            title = "Audio Pass",
+            title = "KOMPASS Deep",
             priceLabel = "€4.99",
-            description = "Unlock audio stories for landmarks, fortresses, trails, and activities with learn-more moments you can listen to while exploring.",
+            description = "A quieter companion layer across selected places and experiences in Kotor, adding short contextual moments, atmosphere, and deeper awareness while you explore.",
             features = listOf(
-                "Activity and place audio guides",
-                "Hands-free storytelling while exploring",
-                "Perfect for solo walkers and self-guided discovery"
-            )
-        ),
-        PremiumProduct(
-            id = "explorer-pass-kotor",
-            tier = "explorer_pass",
-            title = "Explorer Pass",
-            priceLabel = "€9.99",
-            description = "Includes everything in Audio Pass plus deeper editorial guides and itinerary logic for people who want more context and better trip structure.",
-            features = listOf(
-                "Everything in Audio Pass",
-                "Premium deep-dive activity descriptions",
-                "Custom itinerary foundation"
+                "Deep-supported place and activity experiences",
+                "Subtle audio companionship during walks",
+                "Layered local, historical, and spatial context",
+                "One-time access across all Deep-supported experiences in Kotor"
             )
         )
     )

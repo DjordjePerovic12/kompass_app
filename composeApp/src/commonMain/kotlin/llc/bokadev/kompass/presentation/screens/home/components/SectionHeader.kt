@@ -18,6 +18,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import llc.bokadev.kompass.core.util.rememberAppStrings
 import llc.bokadev.kompass.presentation.theme.KompassTheme
+import llc.bokadev.kompass.presentation.theme.helveticaBold20
+import llc.bokadev.kompass.presentation.theme.helveticaRegular16
+import llc.bokadev.kompass.presentation.theme.stomic18
 
 @Composable
 fun SectionHeader(title: String, onSeeAll: () -> Unit) {
@@ -32,11 +35,7 @@ fun SectionHeader(title: String, onSeeAll: () -> Unit) {
     ) {
         Text(
             text = title,
-            style = MaterialTheme.typography.headlineLarge.copy(
-                fontSize = 22.sp,
-                fontWeight = FontWeight.SemiBold,
-                letterSpacing = (-0.4).sp
-            ),
+            style = helveticaBold20(),
             color = colors.colorNavy
         )
         Row(

@@ -45,12 +45,13 @@ class ExperienceDetailViewModel(
             _state.update { it.copy(isLoading = true, error = null) }
             getActivityById(id)
                 .onSuccess { activity ->
+                    val hasDeepAccess = hasPremiumAccess("audio_pass")
                     _state.update {
                         it.copy(
                             isLoading = false,
                             activity = activity,
-                            hasAudioAccess = hasPremiumAccess(activity.audioAccessTier),
-                            hasDetailAccess = hasPremiumAccess(activity.detailAccessTier)
+                            hasAudioAccess = !activity.audioFile.isNullOrEmpty(),
+                            hasDetailAccess = hasDeepAccess
                         )
                     }
                 }

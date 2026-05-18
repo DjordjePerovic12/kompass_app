@@ -1,11 +1,15 @@
 package llc.bokadev.kompass.presentation.screens.premium
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -16,8 +20,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.dp
 import llc.bokadev.kompass.core.presentation.base.BaseContentView
 import llc.bokadev.kompass.core.util.currentAppLanguage
@@ -60,8 +66,8 @@ fun PremiumBundlesScreen(
         state = state,
         topBar = {
             KompassSharedTopBar(
-                slug = strings.premiumSlug,
-                title = strings.premiumTitle,
+                slug = "A quieter companion layer through Kotor",
+                title = "KOMPASS Deep",
                 showBack = true,
                 onBackClick = onBack
             )
@@ -80,22 +86,15 @@ fun PremiumBundlesScreen(
                     onClick = { onNavigateToGuide(unlockTargetActivityId) },
                     shape = RoundedCornerShape(999.dp)
                 ) {
-                    Text(strings.openAudioGuideNow)
+                    Text("OPEN DEEP GUIDE")
                 }
             }
 
-            Text(
-                text = strings.premiumIntro,
-                style = MaterialTheme.typography.bodyMedium,
-                color = colors.colorSlate
-            )
-
             state.products.forEach { product ->
-                BundleCard(
+                DeepIntroCard(
                     product = product,
                     isUnlocked = state.entitlements.hasAccess(product.tier),
                     isProcessing = state.activeCheckoutProductId == product.id,
-                    strings = strings,
                     onUnlock = {
                         vm.onIntent(
                             PremiumBundlesEvent.StartCheckout(
@@ -122,11 +121,10 @@ fun PremiumBundlesScreen(
 }
 
 @Composable
-private fun BundleCard(
+private fun DeepIntroCard(
     product: PremiumProduct,
     isUnlocked: Boolean,
     isProcessing: Boolean,
-    strings: llc.bokadev.kompass.core.util.AppStrings,
     onUnlock: () -> Unit
 ) {
     val colors = KompassTheme.colors
@@ -134,37 +132,84 @@ private fun BundleCard(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(colors.colorWhite, RoundedCornerShape(20.dp))
-            .padding(18.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+            .background(colors.colorWhite, RoundedCornerShape(26.dp))
+            .border(1.dp, colors.colorSurfaceMid.copy(alpha = 0.7f), RoundedCornerShape(26.dp))
+            .padding(22.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Text(
-            text = "${product.title} · ${product.priceLabel}",
-            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold),
+            text = "Kotor reveals itself gradually.",
+            style = MaterialTheme.typography.headlineSmall.copy(
+                fontWeight = FontWeight.SemiBold,
+                lineHeight = 34.sp
+            ),
             color = colors.colorNavy
         )
         Text(
-            text = product.description,
-            style = MaterialTheme.typography.bodyMedium,
-            color = colors.colorSlate
+            text = "Beyond landmarks, routes, and viewpoints, KOMPASS Deep adds a quieter companion layer throughout the destination — helping places feel more connected, atmospheric, and alive as you explore.",
+            style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 28.sp),
+            color = colors.colorSlate.copy(alpha = 0.84f)
         )
-        product.features.forEach { bullet ->
+        Text(
+            text = "Instead of long guides or constant narration, Deep offers short contextual moments across selected walks, viewpoints, villages, and experiences throughout the bay.",
+            style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 28.sp),
+            color = colors.colorSlate.copy(alpha = 0.84f)
+        )
+        listOf(
+            "subtle audio companionship during walks",
+            "layered local and historical context",
+            "quieter continuations beyond crowded areas",
+            "viewpoint and atmosphere guidance",
+            "spatial stories tied to the landscape around you",
+            "suggestions that help the destination unfold more naturally"
+        ).forEach { bullet ->
             Text(
-                text = "- $bullet",
-                style = MaterialTheme.typography.bodyMedium,
-                color = colors.colorNavy
+                text = "• $bullet",
+                style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 24.sp),
+                color = colors.colorNavy.copy(alpha = 0.84f)
             )
+        }
+        Text(
+            text = "Deep is designed to enhance the feeling of being in Kotor — not distract from it.",
+            style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 28.sp),
+            color = colors.colorSlate.copy(alpha = 0.84f)
+        )
+        Text(
+            text = "Everything in KOMPASS remains fully explorable without Deep. This layer simply offers a more guided and immersive way to experience the destination for those who want it.",
+            style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 28.sp),
+            color = colors.colorSlate.copy(alpha = 0.84f)
+        )
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(colors.colorHomeCanvas, RoundedCornerShape(22.dp))
+                .border(1.dp, colors.colorSurfaceMid.copy(alpha = 0.65f), RoundedCornerShape(22.dp))
+                .padding(horizontal = 18.dp, vertical = 16.dp)
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(
+                    text = "One-time access — ${product.priceLabel}",
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                    color = colors.colorNavy
+                )
+                Text(
+                    text = "Valid across all Deep-supported experiences in Kotor.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = colors.colorSlate.copy(alpha = 0.8f)
+                )
+            }
         }
         Button(
             onClick = onUnlock,
             enabled = !isUnlocked && !isProcessing,
-            shape = RoundedCornerShape(999.dp)
+            shape = RoundedCornerShape(999.dp),
+            modifier = Modifier.fillMaxWidth().height(54.dp)
         ) {
             Text(
                 when {
-                    isUnlocked -> strings.unlocked
-                    isProcessing -> strings.processingCheckout
-                    else -> "${strings.unlockPricePrefix} ${product.priceLabel}"
+                    isUnlocked -> "UNLOCKED"
+                    isProcessing -> "OPENING CHECKOUT..."
+                    else -> "GET DEEP — ${product.priceLabel}"
                 }
             )
         }

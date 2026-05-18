@@ -1,30 +1,16 @@
-@file:OptIn(ExperimentalTime::class)
+@file:OptIn(kotlin.time.ExperimentalTime::class)
 
 package llc.bokadev.kompass.presentation.screens.events
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import llc.bokadev.kompass.domain.model.Event
-import llc.bokadev.kompass.presentation.theme.KompassTheme
+import llc.bokadev.kompass.presentation.screens.home.components.EventCard
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Instant
-import kotlin.time.ExperimentalTime
 
 @Composable
 fun EventItem(
@@ -33,76 +19,19 @@ fun EventItem(
     lang: String = "en",
     onClick: () -> Unit = {}
 ) {
-    val eventDay = event.startTime.toEventDay()
-    val eventMonth = event.startTime.toEventMonth()
-    val eventName = event.localizedName(lang)
-    val eventVenue = event.localizedVenue(lang)
-    val eventMeta = event.toEventMeta()
-    val cardShape = RoundedCornerShape(18.dp)
-    val dateShape = RoundedCornerShape(8.dp)
-
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp, alignment = Alignment.Start),
-        modifier = modifier
-            .padding(horizontal = 20.dp)
-            .fillMaxWidth()
-            .clip(cardShape)
-            .background(Color.White)
-            .clickable(onClick = onClick)
-            .border(
-                width = 1.dp,
-                shape = cardShape,
-                color = KompassTheme.colors.colorSlateGhost
-            )
-            .padding(horizontal = 16.dp, vertical = 14.dp)
-    ) {
-        Box(
-            modifier = Modifier
-                .clip(dateShape)
-                .background(KompassTheme.colors.dateBoxBackground)
-        ) {
-            Column(
-                verticalArrangement = Arrangement.SpaceEvenly,
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.padding(vertical = 12.dp, horizontal = 18.dp)
-            ) {
-                Text(
-                    text = eventDay,
-                    color = KompassTheme.colors.eventDateText
-                )
-                Text(
-                    text = eventMonth,
-                    color = KompassTheme.colors.eventDateText
-                )
-            }
-        }
-        Column(
-            verticalArrangement = Arrangement.spacedBy(2.dp, alignment = Alignment.Top),
-            horizontalAlignment = Alignment.Start,
-            modifier = Modifier.weight(1f)
-        ) {
-            Text(
-                text = eventName,
-                color = KompassTheme.colors.colorNavy
-            )
-
-            Text(
-                text = eventVenue,
-                color = KompassTheme.colors.colorSlate
-            )
-
-            if (eventMeta.isNotBlank()) {
-                Text(
-                    text = eventMeta,
-                    color = KompassTheme.colors.colorSlate
-                )
-            }
-        }
-    }
+    EventCard(
+        modifier = modifier.padding(horizontal = 20.dp),
+        name = event.localizedName(lang),
+        venue = event.localizedVenue(lang),
+        day = event.startTime.toEventDay(),
+        month = event.startTime.toEventMonth(),
+        meta = event.toEventMeta(),
+        price = event.price,
+        onClick = onClick
+    )
 }
 
-private fun String.toEventDay(): String = runCatching {
+fun String.toEventDay(): String = runCatching {
     Instant.parse(this)
         .toLocalDateTime(TimeZone.currentSystemDefault())
         .date
@@ -110,7 +39,7 @@ private fun String.toEventDay(): String = runCatching {
         .toString()
 }.getOrDefault("--")
 
-private fun String.toEventMonth(): String = runCatching {
+fun String.toEventMonth(): String = runCatching {
     Instant.parse(this)
         .toLocalDateTime(TimeZone.currentSystemDefault())
         .date
@@ -119,7 +48,7 @@ private fun String.toEventMonth(): String = runCatching {
         .take(3)
 }.getOrDefault("---")
 
-private fun Event.toEventMeta(): String {
+fun Event.toEventMeta(): String {
     val start = startTime.toEventTime()
     val end = endTime?.toEventTime()
     val timeRange = when {

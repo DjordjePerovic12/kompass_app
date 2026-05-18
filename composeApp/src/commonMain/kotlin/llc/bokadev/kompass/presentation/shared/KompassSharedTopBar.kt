@@ -23,6 +23,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import llc.bokadev.kompass.presentation.theme.KompassTheme
+import llc.bokadev.kompass.presentation.theme.helveticaBold35
+import llc.bokadev.kompass.presentation.theme.helveticaRegular13
+import llc.bokadev.kompass.presentation.theme.stomic24
 
 @Composable
 fun KompassSharedTopBar(
@@ -75,21 +78,14 @@ fun KompassSharedTopBar(
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Text(
                         text = title,
-                        style = MaterialTheme.typography.headlineLarge.copy(
-                            fontSize = 32.sp,
-                            lineHeight = 36.sp,
-                            letterSpacing = (-0.6).sp
-                        ),
-                        color = Color(0xFFF8F1E8)
+                        style = helveticaBold35(),
+                        color = colors.colorWhite.copy(.7f)
                     )
                     subtitle?.takeIf { it.isNotBlank() }?.let {
                         Text(
                             text = it,
-                            style = MaterialTheme.typography.bodyMedium.copy(
-                                fontSize = 14.sp,
-                                lineHeight = 20.sp
-                            ),
-                            color = Color(0xFFF5E0C8).copy(alpha = 0.88f)
+                            style = helveticaRegular13(),
+                            color = Color(0xFFF5E0C8)
                         )
                     }
                 }
