@@ -9,7 +9,10 @@ sealed interface Route {
     data object LanguagePicker : Route
 
     @Serializable
-    data object Main : Route
+    data class Main(
+        val tab: String = BottomTab.Home.name,
+        val backTab: String? = null
+    ) : Route
 
     @Serializable
     data object ChangeLanguage : Route

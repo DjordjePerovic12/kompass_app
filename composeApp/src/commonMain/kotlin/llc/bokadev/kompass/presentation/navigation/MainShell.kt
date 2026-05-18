@@ -8,10 +8,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -22,6 +20,10 @@ import llc.bokadev.kompass.presentation.theme.KompassTheme
 
 @Composable
 fun MainShell(
+    initialTab: BottomTab = BottomTab.Home,
+    backTab: BottomTab? = null,
+    onSelectRootTab: (BottomTab) -> Unit,
+    onSelectRootTabWithBackTarget: (BottomTab, BottomTab?) -> Unit,
     onNavigateToPlaceDetail: (String) -> Unit,
     onNavigateToEventDetail: (String) -> Unit,
     onNavigateToEvents: () -> Unit,
@@ -30,9 +32,7 @@ fun MainShell(
     onNavigateToItineraryDetail: (String) -> Unit,
     onNavigateToPlacesList: (String) -> Unit,
     onNavigateToMustSeePlaces: () -> Unit,
-    onNavigateToActivities: () -> Unit,
     onNavigateToNearbyPlaces: () -> Unit,
-    onNavigateToEssentials: () -> Unit,
     onNavigateToServices: () -> Unit,
     onNavigateToInfoCenter: () -> Unit,
     onNavigateToMyGuides: () -> Unit,
@@ -41,12 +41,11 @@ fun MainShell(
     onNavigateToChangeLanguage: () -> Unit,
     onNavigateToLocalFinds: () -> Unit
 ) {
-    var selectedTab by remember { mutableStateOf(BottomTab.Home) }
-    val tabHistory = remember { mutableListOf<BottomTab>().toMutableStateList() }
-    var homeVersion by remember { mutableIntStateOf(0) }
-    var categoriesVersion by remember { mutableIntStateOf(0) }
-    var activitiesVersion by remember { mutableIntStateOf(0) }
-    var essentialsVersion by remember { mutableIntStateOf(0) }
+    val selectedTab = initialTab
+    var homeVersion by rememberSaveable { mutableIntStateOf(0) }
+    var categoriesVersion by rememberSaveable { mutableIntStateOf(0) }
+    var activitiesVersion by rememberSaveable { mutableIntStateOf(0) }
+    var essentialsVersion by rememberSaveable { mutableIntStateOf(0) }
 
     fun navigateToTab(tab: BottomTab) {
         if (tab == selectedTab) {
@@ -58,13 +57,12 @@ fun MainShell(
             }
             return
         }
-        tabHistory.add(selectedTab)
-        selectedTab = tab
+        onSelectRootTab(tab)
     }
 
-    fun goBackInTabHistory() {
-        val previous = tabHistory.removeLastOrNull() ?: BottomTab.Home
-        selectedTab = previous
+    fun navigateBackFromRootTab() {
+        if (selectedTab == BottomTab.Home) return
+        onSelectRootTab(backTab ?: BottomTab.Home)
     }
 
     Scaffold(
@@ -94,11 +92,15 @@ fun MainShell(
 
                 BottomTab.Categories -> CategoriesScreen(
                     vmKey = "categories-$categoriesVersion",
-                    onBack = { goBackInTabHistory() },
+                    onBack = { navigateBackFromRootTab() },
                     onNavigateToPlacesList = onNavigateToPlacesList,
                     onNavigateToNearbyPlaces = onNavigateToNearbyPlaces,
-                    onNavigateToActivities = onNavigateToActivities,
-                    onNavigateToEssentials = onNavigateToEssentials,
+                    onNavigateToActivities = {
+                        onSelectRootTabWithBackTarget(BottomTab.Activities, BottomTab.Categories)
+                    },
+                    onNavigateToEssentials = {
+                        onSelectRootTabWithBackTarget(BottomTab.Essentials, BottomTab.Categories)
+                    },
                     onNavigateToServices = onNavigateToServices,
                     onNavigateToEvents = onNavigateToEvents,
                     onNavigateToInfoCenter = onNavigateToInfoCenter,
@@ -109,12 +111,12 @@ fun MainShell(
                 BottomTab.Activities -> ExperiencesScreen(
                     vmKey = "activities-$activitiesVersion",
                     onNavigateToExperienceDetail = onNavigateToExperienceDetail,
-                    onBack = { goBackInTabHistory() }
+                    onBack = { navigateBackFromRootTab() }
                 )
 
                 BottomTab.Essentials -> llc.bokadev.kompass.presentation.screens.essentials.EssentialsScreen(
                     vmKey = "essentials-$essentialsVersion",
-                    onBack = { goBackInTabHistory() }
+                    onBack = { navigateBackFromRootTab() }
                 )
             }
 

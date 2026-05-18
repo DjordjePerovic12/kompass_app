@@ -19,8 +19,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -183,19 +186,29 @@ fun MyGuidesScreen(
                                     is AudioLibraryItem.PlaceItem -> {
                                         analytics.trackGuideOpen(item.place.id, item.place.cityId)
                                         analytics.trackAudioPlay(item.place.id, item.place.cityId)
-                                        onOpenPlaceGuide(item.place.id, item.isDeep)
+                                        vm.onIntent(MyGuidesEvent.PlayPlace(item.place.id, item.isDeep))
                                     }
                                     is AudioLibraryItem.ActivityItem -> {
                                         analytics.trackGuideOpen(item.activity.id, item.activity.cityId)
                                         analytics.trackAudioPlay(item.activity.id, item.activity.cityId)
-                                        onOpenActivityGuide(item.activity.id, item.isDeep)
+                                        vm.onIntent(MyGuidesEvent.PlayActivity(item.activity.id, item.isDeep))
                                     }
                                 }
-                            }
+                            },
+                            isPlaying = state.activePlaybackKey == item.stableKey && state.playback.isPlaying,
+                            showProgress = state.activePlaybackKey == item.stableKey,
+                            progressMs = if (state.activePlaybackKey == item.stableKey) state.playback.progressMs else 0L,
+                            durationMs = if (state.activePlaybackKey == item.stableKey) state.playback.durationMs else 0L
                         )
                     }
                 }
             }
+        }
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            vm.onIntent(MyGuidesEvent.StopPlayback)
         }
     }
 }
@@ -242,7 +255,11 @@ private fun AudioLibraryCard(
     isFavorited: Boolean,
     onFavoriteClick: () -> Unit,
     onCardClick: () -> Unit,
-    onPlayClick: () -> Unit
+    onPlayClick: () -> Unit,
+    isPlaying: Boolean,
+    showProgress: Boolean,
+    progressMs: Long,
+    durationMs: Long
 ) {
     val colors = KompassTheme.colors
     Row(
@@ -310,13 +327,56 @@ private fun AudioLibraryCard(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "▶",
+                    text = if (isPlaying) "❚❚" else "▶",
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                     color = colors.colorWhite
                 )
             }
         }
     }
+
+    if (showProgress && durationMs > 0L) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 126.dp, top = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Slider(
+                value = progressMs.toFloat(),
+                onValueChange = {},
+                enabled = false,
+                valueRange = 0f..durationMs.coerceAtLeast(1L).toFloat(),
+                colors = SliderDefaults.colors(
+                    thumbColor = colors.colorOrangeMain,
+                    activeTrackColor = colors.colorOrangeMain,
+                    inactiveTrackColor = colors.colorSurfaceMid
+                )
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = progressMs.toGuideClockLabel(),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = colors.colorSlate.copy(alpha = 0.7f)
+                )
+                Text(
+                    text = durationMs.toGuideClockLabel(),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = colors.colorSlate.copy(alpha = 0.7f)
+                )
+            }
+        }
+    }
+}
+
+private fun Long.toGuideClockLabel(): String {
+    val totalSeconds = (this / 1000L).coerceAtLeast(0L)
+    val minutes = totalSeconds / 60L
+    val seconds = totalSeconds % 60L
+    return "$minutes:${seconds.toString().padStart(2, '0')}"
 }
 
 @Composable

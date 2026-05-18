@@ -20,14 +20,14 @@ class AndroidAudioGuidePlayer(
     }
 
     override fun togglePlayPause() {
-        ContextCompat.startForegroundService(context, AudioGuidePlaybackService.toggleIntent(context))
+        context.startService(AudioGuidePlaybackService.toggleIntent(context))
     }
 
     override fun seekTo(positionMs: Long) {
-        ContextCompat.startForegroundService(context, AudioGuidePlaybackService.seekIntent(context, positionMs))
+        context.startService(AudioGuidePlaybackService.seekIntent(context, positionMs))
     }
 
     override fun stop() {
-        ContextCompat.startForegroundService(context, AudioGuidePlaybackService.stopIntent(context))
+        context.startService(AudioGuidePlaybackService.stopIntent(context))
     }
 }

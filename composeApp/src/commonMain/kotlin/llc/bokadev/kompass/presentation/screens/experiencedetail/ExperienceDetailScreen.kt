@@ -34,21 +34,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
 import llc.bokadev.kompass.core.util.AudioGuidePlaybackState
 import llc.bokadev.kompass.core.util.buildPhotoUrl
 import llc.bokadev.kompass.core.util.currentAppLanguage
@@ -503,21 +497,9 @@ private fun StopActivityPlaybackWhenLeavingForeground(
     playbackSourceUrl: String?,
     onStopPlayback: () -> Unit
 ) {
-    val lifecycleOwner = LocalLifecycleOwner.current
-    var appInBackground by remember { mutableStateOf(false) }
-
-    DisposableEffect(lifecycleOwner, playbackSourceUrl) {
-        val observer = LifecycleEventObserver { _, event ->
-            when (event) {
-                Lifecycle.Event.ON_STOP -> appInBackground = true
-                Lifecycle.Event.ON_START -> appInBackground = false
-                else -> Unit
-            }
-        }
-        lifecycleOwner.lifecycle.addObserver(observer)
+    DisposableEffect(playbackSourceUrl) {
         onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
-            if (!appInBackground && playbackSourceUrl != null) {
+            if (playbackSourceUrl != null) {
                 onStopPlayback()
             }
         }

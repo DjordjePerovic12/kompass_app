@@ -23,6 +23,6 @@ val premiumModule = module {
     factory { StartPremiumCheckoutUseCase(get()) }
     factory { VerifyPremiumCheckoutUseCase(get()) }
     viewModel { PremiumBundlesViewModel(get(), get(), get()) }
-    viewModel { MyGuidesViewModel(get(), get(), get()) }
+    viewModel { MyGuidesViewModel(get(), get(), get(), get(), get(), get()) }
     viewModel { (sessionId: String) -> PaymentCheckoutViewModel(sessionId, get(), get(), get()) }
 }

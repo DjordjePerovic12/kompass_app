@@ -1,6 +1,7 @@
 package llc.bokadev.kompass.presentation.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -33,7 +34,7 @@ import llc.bokadev.kompass.presentation.screens.services.ServiceDetailScreen
 @Composable
 fun KompassNavHost(isFirstLaunch: Boolean) {
     val navController = rememberNavController()
-    val startDestination: Route = if (isFirstLaunch) Route.LanguagePicker else Route.Main
+    val startDestination: Route = if (isFirstLaunch) Route.LanguagePicker else Route.Main()
 
     NavHost(
         navController = navController,
@@ -42,7 +43,7 @@ fun KompassNavHost(isFirstLaunch: Boolean) {
         composable<Route.LanguagePicker> {
             LanguagePickerScreen(
                 onLanguageSelected = {
-                    navController.navigate(Route.Main) {
+                    navController.navigate(Route.Main()) {
                         popUpTo<Route.LanguagePicker> { inclusive = true }
                     }
                 }
@@ -57,8 +58,25 @@ fun KompassNavHost(isFirstLaunch: Boolean) {
             )
         }
 
-        composable<Route.Main> {
+        composable<Route.Main> { backStackEntry ->
+            val route: Route.Main = backStackEntry.toRoute()
+            val navigateToRootTab: (BottomTab) -> Unit = { tab ->
+                navController.navigate(Route.Main(tab.name)) {
+                    popUpTo<Route.Main> { inclusive = true }
+                    launchSingleTop = true
+                }
+            }
+            val navigateToRootTabWithBackTarget: (BottomTab, BottomTab?) -> Unit = { tab, backTab ->
+                navController.navigate(Route.Main(tab.name, backTab?.name)) {
+                    popUpTo<Route.Main> { inclusive = true }
+                    launchSingleTop = true
+                }
+            }
             MainShell(
+                initialTab = runCatching { BottomTab.valueOf(route.tab) }.getOrElse { BottomTab.Home },
+                backTab = route.backTab?.let { runCatching { BottomTab.valueOf(it) }.getOrNull() },
+                onSelectRootTab = navigateToRootTab,
+                onSelectRootTabWithBackTarget = navigateToRootTabWithBackTarget,
                 onNavigateToPlaceDetail = { id -> navController.navigate(Route.PlaceDetail(id)) },
                 onNavigateToEventDetail = { id -> navController.navigate(Route.EventDetail(id)) },
                 onNavigateToEvents = { navController.navigate(Route.Events) },
@@ -67,9 +85,7 @@ fun KompassNavHost(isFirstLaunch: Boolean) {
                 onNavigateToItineraryDetail = { id -> navController.navigate(Route.ItineraryDetail(id)) },
                 onNavigateToPlacesList = { category -> navController.navigate(Route.CategoryItemsList(category)) },
                 onNavigateToMustSeePlaces = { navController.navigate(Route.MustSeePlaces) },
-                onNavigateToActivities = { navController.navigate(Route.Activities) },
                 onNavigateToNearbyPlaces = { navController.navigate(Route.NearbyPlaces) },
-                onNavigateToEssentials = { navController.navigate(Route.Essentials) },
                 onNavigateToServices = { navController.navigate(Route.Services) },
                 onNavigateToInfoCenter = { navController.navigate(Route.InfoCenter) },
                 onNavigateToMyGuides = { navController.navigate(Route.MyGuides) },
@@ -159,15 +175,21 @@ fun KompassNavHost(isFirstLaunch: Boolean) {
         }
 
         composable<Route.Activities> {
-            ExperiencesScreen(
-                vmKey = "activities-route",
-                onNavigateToExperienceDetail = { id -> navController.navigate(Route.ExperienceDetail(id)) },
-                onBack = { navController.popBackStack() }
-            )
+            LaunchedEffect(Unit) {
+                navController.navigate(Route.Main(BottomTab.Activities.name)) {
+                    popUpTo<Route.Main> { inclusive = true }
+                    launchSingleTop = true
+                }
+            }
         }
 
         composable<Route.Essentials> {
-            EssentialsScreen(onBack = { navController.popBackStack() })
+            LaunchedEffect(Unit) {
+                navController.navigate(Route.Main(BottomTab.Essentials.name)) {
+                    popUpTo<Route.Main> { inclusive = true }
+                    launchSingleTop = true
+                }
+            }
         }
 
         composable<Route.Services> {
