@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.IconButton
@@ -67,6 +68,8 @@ import llc.bokadev.kompass.presentation.screens.home.components.FeaturedPlaceCar
 import llc.bokadev.kompass.presentation.screens.home.components.NearbyDiscoveryCard
 import llc.bokadev.kompass.presentation.screens.home.components.SectionHeader
 import llc.bokadev.kompass.presentation.theme.KompassTheme
+import llc.bokadev.kompass.presentation.theme.colorDustySage
+import llc.bokadev.kompass.presentation.theme.colorRoseClay
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import llc.bokadev.kompass.presentation.theme.helveticaBold48
@@ -83,6 +86,8 @@ import kotlin.time.Instant
 fun HomeScreenContent(
     state: HomeState,
     favoriteKeySet: Set<FavoriteKey>,
+    showOrientationLayer: Boolean,
+    onboardingContext: String,
     onPlaceClick: (String) -> Unit,
     onEventClick: (String) -> Unit,
     onNoticeClick: (String) -> Unit,
@@ -123,6 +128,11 @@ fun HomeScreenContent(
             onChangeLanguageClick = onChangeLanguageClick,
             strings = strings
         )
+//        if (showOrientationLayer) {
+//            OrientationLayer(
+//                context = onboardingContext
+//            )
+//        }
         MustSeeSection(
             places = state.mustSeePlaces.favoritePlacesFirst(favoriteKeySet),
             isLoading = state.isLoading,
@@ -172,6 +182,89 @@ fun HomeScreenContent(
                 .height(90.dp)
                 .background(colors.colorWhite)
         )
+    }
+}
+
+@Composable
+private fun OrientationLayer(
+    context: String
+) {
+    val colors = KompassTheme.colors
+    val nearbyLine = if (context == "already_here") {
+        "Places around you shift as you move through the bay."
+    } else {
+        "Save your rhythm now, then let places around you rearrange themselves once you arrive."
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 18.dp)
+            .clip(RoundedCornerShape(28.dp))
+            .background(colors.colorWhite)
+            .border(1.dp, colors.colorSurfaceMid.copy(alpha = 0.72f), RoundedCornerShape(28.dp))
+            .padding(horizontal = 18.dp, vertical = 18.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Text(
+            text = "A quiet orientation",
+            style = helveticaMedium11(),
+            color = colors.colorNavy.copy(alpha = 0.54f),
+            letterSpacing = 1.8.sp
+        )
+
+        OrientationCallout(
+            title = "Nearby exploration",
+            body = nearbyLine,
+            accent = colors.colorOrangeMain
+        )
+        OrientationCallout(
+            title = "Saved places",
+            body = "Save places quietly for later — before arriving or while wandering.",
+            accent = colorDustySage
+        )
+        OrientationCallout(
+            title = "Audio moments",
+            body = "Some places include optional audio moments designed for slower exploration.",
+            accent = colorRoseClay
+        )
+    }
+}
+
+@Composable
+private fun OrientationCallout(
+    title: String,
+    body: String,
+    accent: Color
+) {
+    val colors = KompassTheme.colors
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.Top
+    ) {
+        Box(
+            modifier = Modifier
+                .padding(top = 6.dp)
+                .size(10.dp)
+                .clip(CircleShape)
+                .background(accent)
+        )
+
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium.copy(
+                    letterSpacing = (-0.2).sp
+                ),
+                color = colors.colorNavy
+            )
+            Text(
+                text = body,
+                style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 22.sp),
+                color = colors.colorNavy.copy(alpha = 0.72f)
+            )
+        }
     }
 }
 

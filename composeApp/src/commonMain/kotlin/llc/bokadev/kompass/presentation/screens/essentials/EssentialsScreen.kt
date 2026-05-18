@@ -30,7 +30,7 @@ fun EssentialsScreen(
         topBar = {
             KompassSharedTopBar(
                 slug = strings.essentialsSlug,
-                title = strings.essentialsTitle,
+                title = strings.bottomEssentials,
                 showBack = true,
                 onBackClick = onBack
             )
