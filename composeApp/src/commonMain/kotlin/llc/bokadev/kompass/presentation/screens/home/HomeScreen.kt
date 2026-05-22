@@ -73,7 +73,6 @@ fun HomeScreen(
     }
 
     LaunchedEffect(Unit) {
-        analytics.trackScreenView("home")
         if (!locationProvider.hasPermission() && preferences.hasSeenLocationEducationPrompt()) {
             shouldRequestLocation = true
         }

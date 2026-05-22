@@ -54,6 +54,9 @@ sealed interface Route {
     data object Essentials : Route
 
     @Serializable
+    data class UtilityMap(val category: String) : Route
+
+    @Serializable
     data object Services : Route
 
     @Serializable

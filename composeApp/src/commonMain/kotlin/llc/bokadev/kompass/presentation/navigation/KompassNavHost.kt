@@ -6,6 +6,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import llc.bokadev.kompass.domain.model.UtilityCategory
 import llc.bokadev.kompass.presentation.screens.eventdetail.EventDetailScreen
 import llc.bokadev.kompass.presentation.screens.events.EventsScreen
 import llc.bokadev.kompass.presentation.screens.experiencedetail.ExperienceDetailScreen
@@ -22,6 +23,7 @@ import llc.bokadev.kompass.presentation.screens.placedetail.PlaceDetailScreen
 import llc.bokadev.kompass.presentation.screens.placedetail.PlaceGuideScreen
 import llc.bokadev.kompass.presentation.screens.category_items_list.CategoryItemsListScreen
 import llc.bokadev.kompass.presentation.screens.essentials.EssentialsScreen
+import llc.bokadev.kompass.presentation.screens.essentials.UtilityMapScreen
 import llc.bokadev.kompass.presentation.screens.nearby.NearbyPlacesScreen
 import llc.bokadev.kompass.presentation.screens.search.SearchScreen
 import llc.bokadev.kompass.presentation.screens.payment.PaymentCheckoutScreen
@@ -92,7 +94,10 @@ fun KompassNavHost(isFirstLaunch: Boolean) {
                 onNavigateToFavorites = { navController.navigate(Route.Favorites) },
                 onNavigateToSearch = { navController.navigate(Route.Search) },
                 onNavigateToChangeLanguage = { navController.navigate(Route.ChangeLanguage) },
-                onNavigateToLocalFinds = { navController.navigate(Route.LocalFinds) }
+                onNavigateToLocalFinds = { navController.navigate(Route.LocalFinds) },
+                onNavigateToUtilityMap = { category ->
+                    navController.navigate(Route.UtilityMap(category.name))
+                }
             )
         }
 
@@ -190,6 +195,14 @@ fun KompassNavHost(isFirstLaunch: Boolean) {
                     launchSingleTop = true
                 }
             }
+        }
+
+        composable<Route.UtilityMap> { backStackEntry ->
+            val route: Route.UtilityMap = backStackEntry.toRoute()
+            UtilityMapScreen(
+                vmKey = "utility-map-${route.category}",
+                onBack = { navController.popBackStack() }
+            )
         }
 
         composable<Route.Services> {

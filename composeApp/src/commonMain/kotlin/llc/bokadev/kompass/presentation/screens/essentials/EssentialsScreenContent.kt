@@ -36,9 +36,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import llc.bokadev.kompass.core.util.buildMapsUrl
-import llc.bokadev.kompass.core.util.buildNearbyUtilityMapsUrl
 import llc.bokadev.kompass.core.util.currentAppLanguage
-import llc.bokadev.kompass.core.util.openUtilityCategoryInMaps
 import llc.bokadev.kompass.domain.model.CityEssential
 import llc.bokadev.kompass.domain.model.EssentialCategory
 import llc.bokadev.kompass.domain.model.GeoPoint
@@ -56,7 +54,8 @@ import llc.bokadev.kompass.presentation.theme.colorSandGold
 @Composable
 fun EssentialsScreenContent(
     state: EssentialsState,
-    onIntent: (EssentialsEvent) -> Unit
+    onIntent: (EssentialsEvent) -> Unit,
+    onOpenUtilityCategoryMap: (UtilityCategory) -> Unit
 ) {
     val colors = KompassTheme.colors
 
@@ -102,7 +101,8 @@ fun EssentialsScreenContent(
                         items(state.sections, key = { it.category.name }) { section ->
                             UtilityCategoryCard(
                                 section = section,
-                                currentLocation = if (section.showCurrentLocation) state.currentLocation else null
+                                currentLocation = if (section.showCurrentLocation) state.currentLocation else null,
+                                onOpenUtilityCategoryMap = onOpenUtilityCategoryMap
                             )
                         }
                     }
@@ -174,20 +174,11 @@ private fun EssentialsModeSwitch(
 @Composable
 private fun UtilityCategoryCard(
     section: UtilityCategorySection,
-    currentLocation: GeoPoint?
+    currentLocation: GeoPoint?,
+    onOpenUtilityCategoryMap: (UtilityCategory) -> Unit
 ) {
     val colors = KompassTheme.colors
-    val uriHandler = LocalUriHandler.current
     val accent = section.category.accentColor(colors)
-    val mapUrl = buildNearbyUtilityMapsUrl(
-        categoryQuery = section.category.mapQuery(),
-        centerLat = section.mapCenter.latitude,
-        centerLng = section.mapCenter.longitude,
-        currentLat = currentLocation?.latitude,
-        currentLng = currentLocation?.longitude,
-        fallbackLat = section.previewUtilities.firstOrNull()?.latitude,
-        fallbackLng = section.previewUtilities.firstOrNull()?.longitude
-    )
 
     val contextLine = when {
         section.nearbyCount > 0 && section.closestDistanceMeters != null ->
@@ -205,21 +196,7 @@ private fun UtilityCategoryCard(
             point = GeoPoint(lat, lng)
         )
     }
-    val openMapAction = {
-        val handledNatively = openUtilityCategoryInMaps(
-            categoryQuery = section.category.mapQuery(),
-            centerLat = section.mapCenter.latitude,
-            centerLng = section.mapCenter.longitude,
-            currentLat = currentLocation?.latitude,
-            currentLng = currentLocation?.longitude,
-            fallbackLat = section.previewUtilities.firstOrNull()?.latitude,
-            fallbackLng = section.previewUtilities.firstOrNull()?.longitude,
-            pins = pins
-        )
-        if (!handledNatively) {
-            uriHandler.openUri(mapUrl)
-        }
-    }
+    val openMapAction = { onOpenUtilityCategoryMap(section.category) }
 
     Column(
         modifier = Modifier
@@ -305,7 +282,7 @@ private fun UtilityCategoryCard(
             )
 
             Text(
-                text = "Open in Map",
+                text = "Open Map",
                 style = MaterialTheme.typography.bodyMedium.copy(
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 14.sp
@@ -524,6 +501,7 @@ private fun UtilityCategory.title(): String = when (this) {
     UtilityCategory.SHOP -> "Shops"
     UtilityCategory.PARKING -> "Parking"
     UtilityCategory.GAS_STATION -> "Gas Stations"
+    UtilityCategory.EMERGENCY -> "Emergency"
 }
 
 private fun UtilityCategory.mapQuery(): String = when (this) {
@@ -533,6 +511,7 @@ private fun UtilityCategory.mapQuery(): String = when (this) {
     UtilityCategory.SHOP -> "Shop"
     UtilityCategory.PARKING -> "Parking"
     UtilityCategory.GAS_STATION -> "Gas Station"
+    UtilityCategory.EMERGENCY -> "Emergency"
 }
 
 private fun EssentialCategory.label(): String = when (this) {
@@ -550,6 +529,7 @@ private fun UtilityCategory.accentColor(colors: KompassColors): Color = when (th
     UtilityCategory.SHOP -> colors.colorAmberDark
     UtilityCategory.PARKING -> colorSandGold
     UtilityCategory.GAS_STATION -> colorMain
+    UtilityCategory.EMERGENCY -> Color(0xFFB65246)
 }
 
 private fun EssentialCategory.accentColor(colors: KompassColors): Color = when (this) {
@@ -670,6 +650,25 @@ private fun DrawScope.drawUtilityGlyph(
             )
             drawLine(color, Offset(size.width * 0.58f, size.height * 0.38f), Offset(size.width * 0.76f, size.height * 0.32f), 1.8.dp.toPx())
             drawLine(color, Offset(size.width * 0.76f, size.height * 0.32f), Offset(size.width * 0.76f, size.height * 0.66f), 1.8.dp.toPx())
+        }
+        UtilityCategory.EMERGENCY -> {
+            drawCircle(
+                color = color,
+                radius = size.minDimension * 0.34f,
+                style = Stroke(width = 1.8.dp.toPx())
+            )
+            drawLine(
+                color,
+                Offset(size.width * 0.5f, size.height * 0.26f),
+                Offset(size.width * 0.5f, size.height * 0.74f),
+                2.dp.toPx()
+            )
+            drawLine(
+                color,
+                Offset(size.width * 0.26f, size.height * 0.5f),
+                Offset(size.width * 0.74f, size.height * 0.5f),
+                2.dp.toPx()
+            )
         }
     }
 }

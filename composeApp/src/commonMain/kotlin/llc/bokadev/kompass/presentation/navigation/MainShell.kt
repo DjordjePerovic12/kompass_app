@@ -13,6 +13,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import llc.bokadev.kompass.domain.model.UtilityCategory
 import llc.bokadev.kompass.presentation.screens.categories.CategoriesScreen
 import llc.bokadev.kompass.presentation.screens.experiences.ExperiencesScreen
 import llc.bokadev.kompass.presentation.screens.home.HomeScreen
@@ -39,7 +40,8 @@ fun MainShell(
     onNavigateToFavorites: () -> Unit,
     onNavigateToSearch: () -> Unit,
     onNavigateToChangeLanguage: () -> Unit,
-    onNavigateToLocalFinds: () -> Unit
+    onNavigateToLocalFinds: () -> Unit,
+    onNavigateToUtilityMap: (UtilityCategory) -> Unit
 ) {
     val selectedTab = initialTab
     var homeVersion by rememberSaveable { mutableIntStateOf(0) }
@@ -116,7 +118,8 @@ fun MainShell(
 
                 BottomTab.Essentials -> llc.bokadev.kompass.presentation.screens.essentials.EssentialsScreen(
                     vmKey = "essentials-$essentialsVersion",
-                    onBack = { navigateBackFromRootTab() }
+                    onBack = { navigateBackFromRootTab() },
+                    onOpenUtilityCategoryMap = onNavigateToUtilityMap
                 )
             }
 

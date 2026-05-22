@@ -6,6 +6,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import llc.bokadev.kompass.core.presentation.base.BaseContentView
 import llc.bokadev.kompass.core.util.rememberAppStrings
+import llc.bokadev.kompass.domain.model.UtilityCategory
 import llc.bokadev.kompass.domain.repository.AnalyticsRepository
 import llc.bokadev.kompass.presentation.shared.KompassSharedTopBar
 import org.koin.compose.koinInject
@@ -14,7 +15,8 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun EssentialsScreen(
     vmKey: String = "essentials",
-    onBack: () -> Unit = {}
+    onBack: () -> Unit = {},
+    onOpenUtilityCategoryMap: (UtilityCategory) -> Unit = {}
 ) {
     val vm: EssentialsViewModel = koinViewModel(key = vmKey)
     val state by vm.state.collectAsState()
@@ -38,7 +40,8 @@ fun EssentialsScreen(
     ) {
         EssentialsScreenContent(
             state = state,
-            onIntent = vm::onIntent
+            onIntent = vm::onIntent,
+            onOpenUtilityCategoryMap = onOpenUtilityCategoryMap
         )
     }
 }

@@ -72,6 +72,7 @@ import llc.bokadev.kompass.presentation.theme.colorDustySage
 import llc.bokadev.kompass.presentation.theme.colorRoseClay
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import llc.bokadev.kompass.presentation.theme.helveticaBold44
 import llc.bokadev.kompass.presentation.theme.helveticaBold48
 import llc.bokadev.kompass.presentation.theme.helveticaMedium11
 import llc.bokadev.kompass.presentation.theme.helveticaMedium16
@@ -352,7 +353,7 @@ private fun HeroHeader(
                 )
                 Text(
                     text = strings.heroTitle,
-                    style = helveticaBold48(),
+                    style = helveticaBold44(),
                     lineHeight = 56.sp,
                     color = colors.colorWhite,
                     letterSpacing = 0.8.sp

@@ -10,6 +10,9 @@ actual fun buildMapsUrl(query: String): String {
 actual fun buildMapsUrlForCoords(lat: Double, lng: Double): String =
     "geo:$lat,$lng?q=$lat,$lng"
 
+actual fun buildMapsDirectionsUrlForCoords(lat: Double, lng: Double): String =
+    "google.navigation:q=$lat,$lng"
+
 actual fun buildNearbyUtilityMapsUrl(
     categoryQuery: String,
     centerLat: Double,

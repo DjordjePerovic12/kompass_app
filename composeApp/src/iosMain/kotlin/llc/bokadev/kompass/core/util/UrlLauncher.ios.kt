@@ -9,7 +9,10 @@ actual fun buildMapsUrl(query: String): String {
 }
 
 actual fun buildMapsUrlForCoords(lat: Double, lng: Double): String =
-    "maps://?ll=$lat,$lng"
+    "https://maps.apple.com/?ll=$lat,$lng"
+
+actual fun buildMapsDirectionsUrlForCoords(lat: Double, lng: Double): String =
+    "https://maps.apple.com/?daddr=$lat,$lng&dirflg=d"
 
 actual fun buildNearbyUtilityMapsUrl(
     categoryQuery: String,
@@ -40,5 +43,6 @@ private fun String.appleMapsUtilityQuery(): String = when (trim().lowercase()) {
     "shop" -> "Convenience Store"
     "parking" -> "Parking"
     "gas station" -> "Gas Station"
+    "emergency" -> "Emergency Room"
     else -> this
 }
