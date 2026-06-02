@@ -9,13 +9,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -26,8 +26,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.dp
 import llc.bokadev.kompass.core.presentation.base.BaseContentView
-import llc.bokadev.kompass.core.util.currentAppLanguage
-import llc.bokadev.kompass.core.util.rememberAppStrings
 import llc.bokadev.kompass.domain.model.PremiumProduct
 import llc.bokadev.kompass.domain.repository.AnalyticsRepository
 import llc.bokadev.kompass.presentation.shared.KompassSharedTopBar
@@ -38,14 +36,11 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun PremiumBundlesScreen(
     onBack: () -> Unit,
-    onNavigateToCheckout: (String) -> Unit,
     unlockTargetActivityId: String? = null,
     onNavigateToGuide: (String) -> Unit = {}
 ) {
     val vm: PremiumBundlesViewModel = koinViewModel()
     val state by vm.state.collectAsState()
-    val locale = currentAppLanguage()
-    val strings = rememberAppStrings()
     val colors = KompassTheme.colors
     val analytics = koinInject<AnalyticsRepository>()
 
@@ -55,10 +50,10 @@ fun PremiumBundlesScreen(
         analytics.trackPremiumBundleOpen(contentOrigin = if (unlockTargetActivityId != null) "activity_upsell" else "premium")
     }
 
-    LaunchedEffect(state.pendingCheckoutSession?.sessionId) {
-        state.pendingCheckoutSession?.let { session ->
-            onNavigateToCheckout(session.sessionId)
-            vm.onIntent(PremiumBundlesEvent.CheckoutNavigationHandled)
+    LaunchedEffect(state.justUnlockedDeep) {
+        if (state.justUnlockedDeep && unlockTargetActivityId != null) {
+            onNavigateToGuide(unlockTargetActivityId)
+            vm.onIntent(PremiumBundlesEvent.DeepNavigationHandled)
         }
     }
 
@@ -94,19 +89,23 @@ fun PremiumBundlesScreen(
                 DeepIntroCard(
                     product = product,
                     isUnlocked = state.entitlements.hasAccess(product.tier),
-                    isProcessing = state.activeCheckoutProductId == product.id,
+                    isProcessing = state.activePurchaseProductId == product.id,
                     onUnlock = {
                         vm.onIntent(
                             PremiumBundlesEvent.StartCheckout(
-                                productId = product.id,
-                                locale = locale
+                                productId = product.id
                             )
                         )
-                        if (product.tier == "audio_pass") {
-                            unlockTargetActivityId?.let(onNavigateToGuide)
-                        }
                     }
                 )
+            }
+
+            TextButton(
+                onClick = { vm.onIntent(PremiumBundlesEvent.RestorePurchases) },
+                enabled = !state.isRestoring && !state.isLoading,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            ) {
+                Text(if (state.isRestoring) "RESTORING..." else "Restore purchases")
             }
 
             if (state.error != null) {
@@ -208,7 +207,7 @@ private fun DeepIntroCard(
             Text(
                 when {
                     isUnlocked -> "UNLOCKED"
-                    isProcessing -> "OPENING CHECKOUT..."
+                    isProcessing -> "STARTING PURCHASE..."
                     else -> "GET DEEP — ${product.priceLabel}"
                 }
             )

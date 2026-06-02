@@ -144,7 +144,7 @@ private fun InfoCenterDetailBody(
         ) {
             Box {
                 PlacePhotoHeader(
-                    imageUrl = notice.imageUrl,
+                    imageUrls = listOfNotNull(notice.imageUrl),
                     imageAspectRatio = 0.94f
                 )
 

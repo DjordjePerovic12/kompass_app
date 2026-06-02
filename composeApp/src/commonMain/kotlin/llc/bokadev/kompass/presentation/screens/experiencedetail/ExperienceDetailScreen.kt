@@ -198,7 +198,7 @@ private fun ExperienceDetailBody(
         ) {
             Box {
                 PlacePhotoHeader(
-                    imageUrl = activity.photos.firstOrNull()?.let { buildPhotoUrl(it) },
+                    imageUrls = activity.photos.map(::buildPhotoUrl),
                     imageAspectRatio = 0.94f
                 )
 

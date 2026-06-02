@@ -156,7 +156,7 @@ private fun EventDetailBody(
         ) {
             Box {
                 PlacePhotoHeader(
-                    imageUrl = event.photos.firstOrNull()?.let { buildPhotoUrl(it) },
+                    imageUrls = event.photos.map(::buildPhotoUrl),
                     imageAspectRatio = 0.94f
                 )
 

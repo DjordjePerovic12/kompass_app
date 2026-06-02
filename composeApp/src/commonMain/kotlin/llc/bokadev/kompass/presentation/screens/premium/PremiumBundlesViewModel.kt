@@ -5,34 +5,34 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import llc.bokadev.kompass.core.presentation.base.BaseEvent
 import llc.bokadev.kompass.core.presentation.base.BaseState
-import llc.bokadev.kompass.data.repository.PaymentCheckoutSessionStore
-import llc.bokadev.kompass.domain.model.PaymentCheckoutSession
+import llc.bokadev.kompass.core.presentation.base.BaseViewModel
 import llc.bokadev.kompass.domain.model.PremiumCatalog
 import llc.bokadev.kompass.domain.model.PremiumEntitlements
 import llc.bokadev.kompass.domain.model.PremiumProduct
-import llc.bokadev.kompass.domain.usecase.StartPremiumCheckoutUseCase
-import llc.bokadev.kompass.getPlatform
+import llc.bokadev.kompass.domain.repository.DeepPurchaseRepository
+import llc.bokadev.kompass.domain.repository.PremiumRepository
 
 data class PremiumBundlesState(
     override val isLoading: Boolean = false,
     override val error: String? = null,
     val products: List<PremiumProduct> = PremiumCatalog.products,
     val entitlements: PremiumEntitlements = PremiumEntitlements(),
-    val activeCheckoutProductId: String? = null,
-    val pendingCheckoutSession: PaymentCheckoutSession? = null
+    val activePurchaseProductId: String? = null,
+    val isRestoring: Boolean = false,
+    val justUnlockedDeep: Boolean = false
 ) : BaseState()
 
 sealed interface PremiumBundlesEvent : BaseEvent {
-    data class StartCheckout(val productId: String, val locale: String) : PremiumBundlesEvent
-    data object CheckoutNavigationHandled : PremiumBundlesEvent
+    data class StartCheckout(val productId: String) : PremiumBundlesEvent
     data object RefreshEntitlements : PremiumBundlesEvent
+    data object RestorePurchases : PremiumBundlesEvent
+    data object DeepNavigationHandled : PremiumBundlesEvent
 }
 
 class PremiumBundlesViewModel(
-    private val startPremiumCheckout: StartPremiumCheckoutUseCase,
-    private val premiumRepository: llc.bokadev.kompass.domain.repository.PremiumRepository,
-    private val sessionStore: PaymentCheckoutSessionStore
-) : llc.bokadev.kompass.core.presentation.base.BaseViewModel<PremiumBundlesState, PremiumBundlesEvent>() {
+    private val deepPurchaseRepository: DeepPurchaseRepository,
+    private val premiumRepository: PremiumRepository
+) : BaseViewModel<PremiumBundlesState, PremiumBundlesEvent>() {
 
     override val initialState = PremiumBundlesState(
         entitlements = premiumRepository.getEntitlements()
@@ -40,45 +40,72 @@ class PremiumBundlesViewModel(
 
     override fun onIntent(event: PremiumBundlesEvent) {
         when (event) {
-            PremiumBundlesEvent.CheckoutNavigationHandled -> {
-                _state.update { it.copy(pendingCheckoutSession = null) }
+            PremiumBundlesEvent.DeepNavigationHandled -> {
+                _state.update { it.copy(justUnlockedDeep = false) }
             }
-            PremiumBundlesEvent.RefreshEntitlements -> {
-                _state.update { it.copy(entitlements = premiumRepository.getEntitlements()) }
-            }
-            is PremiumBundlesEvent.StartCheckout -> startCheckout(
-                productId = event.productId,
-                locale = event.locale
-            )
+            PremiumBundlesEvent.RefreshEntitlements -> refresh()
+            PremiumBundlesEvent.RestorePurchases -> restore()
+            is PremiumBundlesEvent.StartCheckout -> purchaseDeep(event.productId)
         }
     }
 
-    private fun startCheckout(productId: String, locale: String) {
-        val product = PremiumCatalog.find(productId)
-            ?: run {
-                _state.update { it.copy(error = "Unknown premium product.") }
-                return
-            }
+    private fun refresh() {
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true, error = null) }
 
+            val entitlements = deepPurchaseRepository.syncEntitlements()
+            val deepProduct = deepPurchaseRepository.getDeepProduct().getOrNull()
+
+            _state.update {
+                it.copy(
+                    isLoading = false,
+                    error = null,
+                    entitlements = entitlements,
+                    products = it.products.map { product ->
+                        if (product.tier == "audio_pass") {
+                            product.copy(
+                                title = deepProduct?.title ?: product.title,
+                                priceLabel = deepProduct?.priceLabel ?: product.priceLabel
+                            )
+                        } else {
+                            product
+                        }
+                    }
+                )
+            }
+        }
+    }
+
+    private fun purchaseDeep(productId: String) {
         viewModelScope.launch {
             _state.update {
                 it.copy(
                     isLoading = true,
                     error = null,
-                    activeCheckoutProductId = productId
+                    activePurchaseProductId = productId
                 )
             }
 
-            startPremiumCheckout(product, locale, getPlatform().name)
-                .onSuccess { session ->
-                    sessionStore.put(session)
+            deepPurchaseRepository.purchaseDeep()
+                .onSuccess { entitlements ->
+                    val refreshedProduct = deepPurchaseRepository.getDeepProduct().getOrNull()
                     _state.update {
                         it.copy(
                             isLoading = false,
                             error = null,
-                            activeCheckoutProductId = null,
-                            pendingCheckoutSession = session,
-                            entitlements = premiumRepository.getEntitlements()
+                            activePurchaseProductId = null,
+                            entitlements = entitlements,
+                            justUnlockedDeep = entitlements.audioPass,
+                            products = it.products.map { product ->
+                                if (product.tier == "audio_pass") {
+                                    product.copy(
+                                        title = refreshedProduct?.title ?: product.title,
+                                        priceLabel = refreshedProduct?.priceLabel ?: product.priceLabel
+                                    )
+                                } else {
+                                    product
+                                }
+                            }
                         )
                     }
                 }
@@ -86,8 +113,36 @@ class PremiumBundlesViewModel(
                     _state.update {
                         it.copy(
                             isLoading = false,
-                            activeCheckoutProductId = null,
-                            error = error.message ?: "We couldn't start checkout right now."
+                            activePurchaseProductId = null,
+                            error = error.message ?: "We couldn't start the purchase right now."
+                        )
+                    }
+                }
+        }
+    }
+
+    private fun restore() {
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true, error = null, isRestoring = true) }
+
+            deepPurchaseRepository.restoreDeep()
+                .onSuccess { entitlements ->
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            error = null,
+                            isRestoring = false,
+                            entitlements = entitlements,
+                            justUnlockedDeep = entitlements.audioPass
+                        )
+                    }
+                }
+                .onFailure { error ->
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            isRestoring = false,
+                            error = error.message ?: "We couldn't restore purchases right now."
                         )
                     }
                 }

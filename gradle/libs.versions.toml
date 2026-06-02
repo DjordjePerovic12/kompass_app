@@ -26,6 +26,7 @@ navigation = "2.9.0"
 play-services-maps = "19.2.0"
 supabase = "3.1.4"
 turbine = "1.2.0"
+purchases-kmp = "2.10.2+17.55.1"
 
 [libraries]
 # Kotlin
@@ -96,6 +97,7 @@ kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serializa
 
 # Testing
 turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
+purchases-core = { module = "com.revenuecat.purchases:purchases-kmp-core", version.ref = "purchases-kmp" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

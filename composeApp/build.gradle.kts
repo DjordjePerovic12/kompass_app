@@ -72,6 +72,7 @@ kotlin {
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.napier)
             implementation(libs.ktor.client.logging)
+            implementation(libs.purchases.core)
         }
 
         iosMain.dependencies {
@@ -130,6 +131,10 @@ buildkonfig {
         buildConfigField(STRING, "PAYMENT_RETURN_URL_BASE", localProps.getProperty("PAYMENT_RETURN_URL_BASE", "https://kompass.app/payments"))
         buildConfigField(STRING, "ANALYTICS_BACKEND_BASE_URL", localProps.getProperty("ANALYTICS_BACKEND_BASE_URL", ""))
         buildConfigField(STRING, "GOOGLE_MAPS_API_KEY", localProps.getProperty("GOOGLE_MAPS_API_KEY", ""))
+        buildConfigField(STRING, "REVENUECAT_ANDROID_API_KEY", localProps.getProperty("REVENUECAT_ANDROID_API_KEY", ""))
+        buildConfigField(STRING, "REVENUECAT_IOS_API_KEY", localProps.getProperty("REVENUECAT_IOS_API_KEY", ""))
+        buildConfigField(STRING, "REVENUECAT_DEEP_ENTITLEMENT_ID", localProps.getProperty("REVENUECAT_DEEP_ENTITLEMENT_ID", "deep"))
+        buildConfigField(STRING, "REVENUECAT_DEEP_OFFERING_ID", localProps.getProperty("REVENUECAT_DEEP_OFFERING_ID", ""))
         buildConfigField(STRING, "APP_VERSION", "1.0")
     }
 

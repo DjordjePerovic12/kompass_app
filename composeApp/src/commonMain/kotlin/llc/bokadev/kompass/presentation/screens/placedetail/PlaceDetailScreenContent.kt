@@ -151,7 +151,7 @@ private fun PlaceDetailBody(
         ) {
             Box {
                 PlacePhotoHeader(
-                    imageUrl = place.photos.firstOrNull()?.let { buildPhotoUrl(it) },
+                    imageUrls = place.photos.map(::buildPhotoUrl),
                     imageAspectRatio = 0.94f
                 )
 

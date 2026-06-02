@@ -13,7 +13,15 @@ data class CityEssentialDto(
     @SerialName("location") val location: Map<String, String>? = null,
     @SerialName("latitude") val latitude: Double? = null,
     @SerialName("longitude") val longitude: Double? = null,
+    @SerialName("locations") val locations: List<CityEssentialLocationDto>? = null,
     @SerialName("links") val links: List<String>? = null,
     @SerialName("sort_order") val sortOrder: Int = 0,
     @SerialName("is_active") val isActive: Boolean = true
+)
+
+@Serializable
+data class CityEssentialLocationDto(
+    @SerialName("title") val title: String = "",
+    @SerialName("latitude") val latitude: Double? = null,
+    @SerialName("longitude") val longitude: Double? = null
 )

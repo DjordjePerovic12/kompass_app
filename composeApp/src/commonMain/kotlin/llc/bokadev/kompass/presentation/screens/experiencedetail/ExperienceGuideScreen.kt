@@ -207,7 +207,7 @@ private fun ExperienceGuideScreenContent(
                         .padding(bottom = 32.dp)
                 ) {
                     PlacePhotoHeader(
-                        imageUrl = activity.photos.firstOrNull()?.let { buildPhotoUrl(it) },
+                        imageUrls = activity.photos.map(::buildPhotoUrl),
                         modifier = Modifier.height(320.dp),
                         imageAspectRatio = null
                     )

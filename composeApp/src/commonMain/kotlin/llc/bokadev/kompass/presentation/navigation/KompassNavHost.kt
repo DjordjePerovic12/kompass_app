@@ -266,9 +266,6 @@ fun KompassNavHost(isFirstLaunch: Boolean) {
             val route: Route.PremiumBundles = backStackEntry.toRoute()
             PremiumBundlesScreen(
                 onBack = { navController.popBackStack() },
-                onNavigateToCheckout = { sessionId ->
-                    navController.navigate(Route.PaymentCheckout(sessionId))
-                },
                 unlockTargetActivityId = route.activityId,
                 onNavigateToGuide = { id ->
                     navController.navigate(Route.ExperienceGuide(id, deep = true)) {

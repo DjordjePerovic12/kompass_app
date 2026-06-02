@@ -2,6 +2,7 @@ package llc.bokadev.kompass.data.mapper
 
 import llc.bokadev.kompass.data.remote.dto.CityEssentialDto
 import llc.bokadev.kompass.domain.model.CityEssential
+import llc.bokadev.kompass.domain.model.EssentialLocationPoint
 import llc.bokadev.kompass.domain.model.EssentialCategory
 
 fun CityEssentialDto.toDomain(): CityEssential = CityEssential(
@@ -13,6 +14,13 @@ fun CityEssentialDto.toDomain(): CityEssential = CityEssential(
     location = location,
     latitude = latitude,
     longitude = longitude,
+    locations = locations?.map {
+        EssentialLocationPoint(
+            title = it.title,
+            latitude = it.latitude,
+            longitude = it.longitude
+        )
+    } ?: emptyList(),
     links = links ?: emptyList(),
     sortOrder = sortOrder
 )

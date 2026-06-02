@@ -1,6 +1,7 @@
 package llc.bokadev.kompass.presentation.screens.essentials
 
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import llc.bokadev.kompass.core.presentation.base.BaseEvent
@@ -41,10 +42,14 @@ class EssentialsViewModel(
     private val userLocationProvider: UserLocationProvider
 ) : BaseViewModel<EssentialsState, EssentialsEvent>() {
 
+    private var cachedEssentials: List<CityEssential> = emptyList()
+    private var cachedUtilities = emptyList<llc.bokadev.kompass.domain.model.Utility>()
+
     override val initialState = EssentialsState()
 
     init {
         load()
+        startLocationRefresh()
     }
 
     override fun onIntent(event: EssentialsEvent) {
@@ -65,8 +70,11 @@ class EssentialsViewModel(
             val essentialsResult = getEssentials()
             val utilitiesResult = getUtilities()
 
-            val groupedEssentials = essentialsResult.getOrDefault(emptyList()).groupBy { it.category }
-            val sections = utilitiesResult.getOrDefault(emptyList())
+            cachedEssentials = essentialsResult.getOrDefault(emptyList())
+            cachedUtilities = utilitiesResult.getOrDefault(emptyList())
+
+            val groupedEssentials = cachedEssentials.groupBy { it.category }
+            val sections = cachedUtilities
                 .filter { it.latitude != null && it.longitude != null }
                 .groupBy { it.category }
                 .mapNotNull { (category, items) ->
@@ -86,6 +94,42 @@ class EssentialsViewModel(
                     currentLocation = currentLocation
                 )
             }
+        }
+    }
+
+    private fun startLocationRefresh() {
+        viewModelScope.launch {
+            while (true) {
+                delay(5_000L)
+                refreshLocationContext()
+            }
+        }
+    }
+
+    private suspend fun refreshLocationContext() {
+        if (!userLocationProvider.hasPermission()) {
+            _state.update { current ->
+                if (current.currentLocation == null) current else current.copy(currentLocation = null)
+            }
+            return
+        }
+
+        val currentLocation = runCatching { userLocationProvider.getCurrentLocation() }.getOrNull()
+        val origin = currentLocation ?: KOTOR_OLD_TOWN_CENTER
+        val sections = cachedUtilities
+            .filter { it.latitude != null && it.longitude != null }
+            .groupBy { it.category }
+            .mapNotNull { (category, items) ->
+                buildUtilitySection(category, items, origin, currentLocation)
+            }
+            .sortedBy { it.category.orderIndex() }
+
+        _state.update {
+            it.copy(
+                groupedEssentials = if (cachedEssentials.isEmpty()) it.groupedEssentials else cachedEssentials.groupBy { essential -> essential.category },
+                sections = sections,
+                currentLocation = currentLocation
+            )
         }
     }
 

@@ -8,7 +8,7 @@ actual fun buildMapsUrl(query: String): String {
 }
 
 actual fun buildMapsUrlForCoords(lat: Double, lng: Double): String =
-    "geo:$lat,$lng?q=$lat,$lng"
+    "https://www.google.com/maps/search/?api=1&query=$lat,$lng"
 
 actual fun buildMapsDirectionsUrlForCoords(lat: Double, lng: Double): String =
     "google.navigation:q=$lat,$lng"

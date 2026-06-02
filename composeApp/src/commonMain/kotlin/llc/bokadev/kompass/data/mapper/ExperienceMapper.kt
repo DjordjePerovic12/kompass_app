@@ -15,7 +15,7 @@ fun ExperienceDto.toDomain(): Experience = Experience(
     audioFile = audioFile,
     deepText = deepText,
     deepAudioFile = deepAudioFile,
-    deepPhotos = deepPhotos,
+    deepPhotos = deepPhotos.sanitizePhotoPaths(),
     deepAnchorMode = deepAnchorMode,
     deepLatitude = deepLatitude,
     deepLongitude = deepLongitude,
@@ -27,7 +27,7 @@ fun ExperienceDto.toDomain(): Experience = Experience(
     bestTime = bestTime.toBestTime(),
     latitude = latitude,
     longitude = longitude,
-    photos = photos,
+    photos = photos.sanitizePhotoPaths(),
     isActive = isActive,
     sortOrder = sortOrder
 )

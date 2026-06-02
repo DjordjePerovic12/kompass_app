@@ -646,20 +646,20 @@ private fun NearbyYouSection(
                     color = colors.colorSlate
                 )
             } else {
-                nearbyPlaces.firstOrNull()?.let { nearbyPlace ->
-                    val place = nearbyPlace.place
-                    NearbyDiscoveryCard(
-                        name = place.localizedName(lang),
-                        category = place.category.toEditorialPlaceCategory(),
-                        zone = place.zone?.prettyUiLabel() ?: "Kotor",
-                        distance = nearbyPlace.distanceKm.toNearbyDistanceLine(),
-                        meta = nearbyPlace.toNearbyMeta(),
-                        imageUrl = place.photos.firstOrNull()?.let { buildPhotoUrl(it) },
-                        isFavorited = favoriteKeySet.contains(FavoriteKey(FavoriteItemType.PLACE, place.id)),
-                        onFavoriteClick = { onPlaceFavoriteToggle(place.id) },
-                        onClick = { onPlaceClick(place.id) }
-                    )
-                }
+//                nearbyPlaces.firstOrNull()?.let { nearbyPlace ->
+//                    val place = nearbyPlace.place
+//                    NearbyDiscoveryCard(
+//                        name = place.localizedName(lang),
+//                        category = place.category.toEditorialPlaceCategory(),
+//                        zone = place.zone?.prettyUiLabel() ?: "Kotor",
+//                        distance = nearbyPlace.distanceKm.toNearbyDistanceLine(),
+//                        meta = nearbyPlace.toNearbyMeta(),
+//                        imageUrl = place.photos.firstOrNull()?.let { buildPhotoUrl(it) },
+//                        isFavorited = favoriteKeySet.contains(FavoriteKey(FavoriteItemType.PLACE, place.id)),
+//                        onFavoriteClick = { onPlaceFavoriteToggle(place.id) },
+//                        onClick = { onPlaceClick(place.id) }
+//                    )
+//                }
 
                 nearbyPlaces.drop(1).take(3).forEach { nearbyPlace ->
                     val place = nearbyPlace.place

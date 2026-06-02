@@ -19,7 +19,7 @@ fun EventDto.toDomain(): Event = Event(
     price = price,
     ticketUrl = ticketUrl,
     isRecurring = isRecurring,
-    photos = photos
+    photos = photos.sanitizePhotoPaths()
 )
 
 fun EventFilterDto.toDomain(): EventFilter = EventFilter(

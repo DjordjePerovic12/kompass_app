@@ -203,7 +203,7 @@ private fun PlaceGuideScreenContent(
                         .padding(bottom = 32.dp)
                 ) {
                     PlacePhotoHeader(
-                        imageUrl = place.photos.firstOrNull()?.let { buildPhotoUrl(it) },
+                        imageUrls = place.photos.map(::buildPhotoUrl),
                         modifier = Modifier.height(320.dp),
                         imageAspectRatio = null
                     )

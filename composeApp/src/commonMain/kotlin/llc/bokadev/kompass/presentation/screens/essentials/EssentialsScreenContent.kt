@@ -36,9 +36,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import llc.bokadev.kompass.core.util.buildMapsUrl
+import llc.bokadev.kompass.core.util.buildMapsUrlForCoords
 import llc.bokadev.kompass.core.util.currentAppLanguage
 import llc.bokadev.kompass.domain.model.CityEssential
 import llc.bokadev.kompass.domain.model.EssentialCategory
+import llc.bokadev.kompass.domain.model.EssentialLocationPoint
 import llc.bokadev.kompass.domain.model.GeoPoint
 import llc.bokadev.kompass.domain.model.UtilityCategory
 import llc.bokadev.kompass.presentation.shared.NativeUtilityPreviewMapView
@@ -108,6 +110,10 @@ fun EssentialsScreenContent(
                     }
 
                     EssentialsTab.INFO -> {
+                        item {
+                            EssentialsInfoIntroCard()
+                        }
+
                         CATEGORY_ORDER.forEach { category ->
                             val items = state.groupedEssentials[category] ?: return@forEach
 
@@ -115,12 +121,36 @@ fun EssentialsScreenContent(
                                 CategorySectionHeader(category = category)
                             }
 
-                            items(items, key = { it.id }) { essential ->
-                                EssentialInfoCard(
-                                    essential = essential,
-                                    expanded = essential.id in state.expandedIds,
-                                    onClick = { onIntent(EssentialsEvent.ToggleItem(essential.id)) }
-                                )
+                            if (category == EssentialCategory.TRANSPORT) {
+                                item(key = "transport_intro") {
+                                    GettingAroundIntroCard()
+                                }
+
+                                val groupedModules = items.groupBy { it.transportModule() }
+                                TRANSPORT_MODULE_ORDER.forEach { module ->
+                                    val moduleItems = groupedModules[module].orEmpty()
+                                    if (moduleItems.isNotEmpty()) {
+                                        item(key = "transport_module_${module.name}") {
+                                            TransportModuleHeader(module = module)
+                                        }
+
+                                        items(moduleItems, key = { it.id }) { essential ->
+                                            EssentialInfoCard(
+                                                essential = essential,
+                                                expanded = essential.id in state.expandedIds,
+                                                onClick = { onIntent(EssentialsEvent.ToggleItem(essential.id)) }
+                                            )
+                                        }
+                                    }
+                                }
+                            } else {
+                                items(items, key = { it.id }) { essential ->
+                                    EssentialInfoCard(
+                                        essential = essential,
+                                        expanded = essential.id in state.expandedIds,
+                                        onClick = { onIntent(EssentialsEvent.ToggleItem(essential.id)) }
+                                    )
+                                }
                             }
 
                             item(key = "spacer_${category.name}") { Spacer(Modifier.height(10.dp)) }
@@ -180,11 +210,14 @@ private fun UtilityCategoryCard(
     val colors = KompassTheme.colors
     val accent = section.category.accentColor(colors)
 
+    val closestDistanceMeters = section.closestDistanceMeters?.takeIf { it <= 100_000.0 }
     val contextLine = when {
-        section.nearbyCount > 0 && section.closestDistanceMeters != null ->
-            "${section.nearbyCount} nearby • Closest ${section.closestDistanceMeters.prettyDistance()}"
-        section.closestDistanceMeters != null ->
-            "Closest ${section.closestDistanceMeters.prettyDistance()}"
+        section.nearbyCount > 0 && closestDistanceMeters != null ->
+            "${section.nearbyCount} nearby • Closest ${closestDistanceMeters.prettyDistance()}"
+        closestDistanceMeters != null ->
+            "Closest ${closestDistanceMeters.prettyDistance()}"
+        section.nearbyCount > 0 ->
+            "${section.nearbyCount} nearby"
         else -> "${section.totalCount} available"
     }
 
@@ -300,26 +333,134 @@ private fun UtilityCategoryCard(
 @Composable
 private fun CategorySectionHeader(category: EssentialCategory) {
     val colors = KompassTheme.colors
-    Row(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 6.dp, bottom = 2.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        Box(
-            modifier = Modifier
-                .size(width = 4.dp, height = 18.dp)
-                .clip(RoundedCornerShape(2.dp))
-                .background(category.accentColor(colors))
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(width = 4.dp, height = if (category == EssentialCategory.TRANSPORT) 22.dp else 18.dp)
+                    .clip(RoundedCornerShape(2.dp))
+                    .background(category.accentColor(colors))
+            )
+            Text(
+                text = category.label().uppercase(),
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontWeight = if (category == EssentialCategory.TRANSPORT) FontWeight.SemiBold else FontWeight.Medium,
+                    letterSpacing = 1.6.sp
+                ),
+                color = colors.colorSlate.copy(alpha = if (category == EssentialCategory.TRANSPORT) 0.82f else 0.72f)
+            )
+        }
+        Text(
+            text = category.sectionDescription(),
+            style = MaterialTheme.typography.bodySmall.copy(
+                fontSize = 13.sp,
+                lineHeight = 18.sp
+            ),
+            color = colors.colorSlate.copy(alpha = 0.74f),
+            modifier = Modifier.padding(start = 12.dp)
+        )
+    }
+}
+
+@Composable
+private fun EssentialsInfoIntroCard() {
+    val colors = KompassTheme.colors
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(24.dp))
+            .background(colors.colorWhite)
+            .border(1.dp, colors.colorSlateGhost.copy(alpha = 0.9f), RoundedCornerShape(24.dp))
+            .padding(horizontal = 18.dp, vertical = 18.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Text(
+            text = "Helping you move, arrive, and navigate Kotor confidently.",
+            style = MaterialTheme.typography.bodyLarge.copy(
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 19.sp,
+                lineHeight = 25.sp,
+                letterSpacing = (-0.25).sp
+            ),
+            color = colors.colorNavy
         )
         Text(
-            text = category.label().uppercase(),
-            style = MaterialTheme.typography.labelSmall.copy(
-                fontWeight = FontWeight.Medium,
-                letterSpacing = 1.6.sp
+            text = "Practical local information collected in one place — from airport transfers and transport realities to payments, connectivity, and small local movement tips.",
+            style = MaterialTheme.typography.bodyMedium.copy(
+                fontSize = 15.sp,
+                lineHeight = 22.sp
             ),
-            color = colors.colorSlate.copy(alpha = 0.72f)
+            color = colors.colorSlate.copy(alpha = 0.84f)
+        )
+    }
+}
+
+@Composable
+private fun GettingAroundIntroCard() {
+    val colors = KompassTheme.colors
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(22.dp))
+            .background(colors.colorWhite)
+            .border(1.dp, colorMutedSky.copy(alpha = 0.16f), RoundedCornerShape(22.dp))
+            .padding(horizontal = 18.dp, vertical = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Text(
+            text = "A quieter layer for arriving, moving, and getting your bearings.",
+            style = MaterialTheme.typography.bodyLarge.copy(
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 18.sp,
+                lineHeight = 24.sp,
+                letterSpacing = (-0.2).sp
+            ),
+            color = colors.colorNavy
+        )
+        Text(
+            text = "This section keeps the practical side of Kotor in one place, so you do not have to piece together taxis, airport transfers, local transport, payment habits, and connectivity from five different sources.",
+            style = MaterialTheme.typography.bodyMedium.copy(
+                fontSize = 15.sp,
+                lineHeight = 22.sp
+            ),
+            color = colors.colorSlate.copy(alpha = 0.86f)
+        )
+    }
+}
+
+@Composable
+private fun TransportModuleHeader(module: TransportModule) {
+    val colors = KompassTheme.colors
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 4.dp, bottom = 2.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Text(
+            text = module.title,
+            style = MaterialTheme.typography.bodyMedium.copy(
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 16.sp,
+                lineHeight = 22.sp
+            ),
+            color = colors.colorNavy
+        )
+        Text(
+            text = module.description,
+            style = MaterialTheme.typography.bodySmall.copy(
+                fontSize = 13.sp,
+                lineHeight = 18.sp
+            ),
+            color = colors.colorSlate.copy(alpha = 0.74f)
         )
     }
 }
@@ -334,18 +475,26 @@ private fun EssentialInfoCard(
     val uriHandler = LocalUriHandler.current
     val lang = currentAppLanguage()
     val accent = essential.category.accentColor(colors)
-    val hasMap = essential.latitude != null && essential.longitude != null
+    val resolvedLocations = essential.resolvedLocations(lang)
+    val mappedLocations = resolvedLocations.filter { it.latitude != null && it.longitude != null }
+    val hasMap = mappedLocations.isNotEmpty()
+    val isTouristRegistration = essential.isTouristRegistration()
     val compactMeta = buildList {
-        if (hasMap) add("Map")
+        if (hasMap) {
+            add(if (mappedLocations.size == 1) "Map" else "${mappedLocations.size} locations")
+        }
         if (essential.links.isNotEmpty()) add("${essential.links.size} link${if (essential.links.size == 1) "" else "s"}")
-    }.joinToString(" • ").ifBlank { essential.category.cardMetaLabel() }
+    }.joinToString(" • ").ifBlank { essential.contextLine() }
+    val isPrimaryOperational = essential.category == EssentialCategory.TRANSPORT || isTouristRegistration
+    val borderAlpha = if (isPrimaryOperational) 0.28f else 0.22f
+    val iconAlpha = if (isPrimaryOperational) 0.24f else 0.18f
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(22.dp))
             .background(colors.colorWhite)
-            .border(1.dp, accent.copy(alpha = 0.22f), RoundedCornerShape(22.dp))
+            .border(1.dp, accent.copy(alpha = borderAlpha), RoundedCornerShape(22.dp))
             .clickable(onClick = onClick)
             .padding(horizontal = 18.dp, vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -359,8 +508,8 @@ private fun EssentialInfoCard(
                 modifier = Modifier
                     .size(50.dp)
                     .clip(RoundedCornerShape(999.dp))
-                    .background(accent.copy(alpha = 0.18f))
-                    .border(1.dp, accent.copy(alpha = 0.18f), RoundedCornerShape(999.dp)),
+                    .background(accent.copy(alpha = iconAlpha))
+                    .border(1.dp, accent.copy(alpha = iconAlpha), RoundedCornerShape(999.dp)),
                 contentAlignment = Alignment.Center
             ) {
                 Canvas(modifier = Modifier.size(19.dp)) {
@@ -372,6 +521,20 @@ private fun EssentialInfoCard(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
+                if (isTouristRegistration) {
+                    Text(
+                        text = "TIME-SENSITIVE",
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontWeight = FontWeight.SemiBold,
+                            letterSpacing = 1.2.sp
+                        ),
+                        color = accent.copy(alpha = 0.92f),
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(999.dp))
+                            .background(accent.copy(alpha = 0.12f))
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                    )
+                }
                 Text(
                     text = essential.localizedTitle(lang),
                     style = MaterialTheme.typography.bodyLarge.copy(
@@ -426,13 +589,22 @@ private fun EssentialInfoCard(
                 color = colors.colorSlate.copy(alpha = 0.92f)
             )
 
-            if (essential.latitude != null && essential.longitude != null) {
-                EssentialDetailRow(
-                    label = "Map",
-                    value = "Open in Maps",
-                    accent = accent,
-                    onClick = { uriHandler.openUri(buildMapsUrl("${essential.latitude},${essential.longitude}")) }
-                )
+            if (mappedLocations.isNotEmpty()) {
+                mappedLocations.forEachIndexed { index, locationPoint ->
+                    EssentialDetailRow(
+                        label = locationPoint.mapRowLabel(index),
+                        value = "Show on Map",
+                        accent = accent,
+                        onClick = {
+                            uriHandler.openUri(
+                                buildMapsUrlForCoords(
+                                    locationPoint.latitude!!,
+                                    locationPoint.longitude!!
+                                )
+                            )
+                        }
+                    )
+                }
             }
 
             essential.links.forEach { link ->
@@ -445,6 +617,11 @@ private fun EssentialInfoCard(
             }
         }
     }
+}
+
+private fun EssentialLocationPoint.mapRowLabel(index: Int): String {
+    val trimmedTitle = title.trim()
+    return if (trimmedTitle.isNotEmpty()) trimmedTitle else "Location ${index + 1}"
 }
 
 @Composable
@@ -516,10 +693,143 @@ private fun UtilityCategory.mapQuery(): String = when (this) {
 
 private fun EssentialCategory.label(): String = when (this) {
     EssentialCategory.TRANSPORT -> "Getting Around"
-    EssentialCategory.CUSTOMS -> "Local Customs"
+    EssentialCategory.CUSTOMS -> "Registration & Formalities"
     EssentialCategory.EMERGENCY -> "Emergency"
     EssentialCategory.TIPS -> "Tips & Advice"
     EssentialCategory.PRACTICAL -> "Practical Info"
+}
+
+private fun EssentialCategory.sectionDescription(): String = when (this) {
+    EssentialCategory.TRANSPORT -> "Arrival, movement, payments, and connectivity gathered in one calm operational layer."
+    EssentialCategory.CUSTOMS -> "Registration, tax, and other local formalities that are easier to handle early and without uncertainty."
+    EssentialCategory.EMERGENCY -> "Important local fallback information for moments when speed and clarity matter most."
+    EssentialCategory.TIPS -> "Useful timing notes, congestion awareness, and small practical guidance for exploring more smoothly."
+    EssentialCategory.PRACTICAL -> "Everyday local notes that reduce small frictions once you are already here."
+}
+
+private enum class TransportModule(
+    val title: String,
+    val description: String,
+    val metaLabel: String
+) {
+    AIRPORT_TRANSFERS(
+        title = "Airport Transfers",
+        description = "Arrival options, timing expectations, and transfer confidence before you land.",
+        metaLabel = "Arrival guidance"
+    ),
+    LOCAL_TRANSPORT(
+        title = "Local Transport",
+        description = "How movement actually works once you are here — buses, taxis, walking realities, and local friction points.",
+        metaLabel = "Mobility guidance"
+    ),
+    CASH_AND_PAYMENTS(
+        title = "Cash & Payments",
+        description = "What still tends to require cash, where cards are normal, and the small habits that make payment feel easier.",
+        metaLabel = "Payment guidance"
+    ),
+    CONNECTIVITY(
+        title = "Connectivity",
+        description = "Lightweight help for staying connected once you arrive, without turning into a telecom comparison engine.",
+        metaLabel = "Connectivity guidance"
+    ),
+    GENERAL(
+        title = "Practical Notes",
+        description = "Useful movement notes that do not need a larger transport sub-category of their own.",
+        metaLabel = "Practical note"
+    )
+}
+
+private val TRANSPORT_MODULE_ORDER = listOf(
+    TransportModule.AIRPORT_TRANSFERS,
+    TransportModule.LOCAL_TRANSPORT,
+    TransportModule.CASH_AND_PAYMENTS,
+    TransportModule.CONNECTIVITY,
+    TransportModule.GENERAL
+)
+
+private fun CityEssential.transportModule(): TransportModule {
+    val text = buildString {
+        append(key)
+        append(' ')
+        append(localizedTitle("en"))
+        append(' ')
+        append(localizedContent("en"))
+    }.lowercase()
+
+    return when {
+        listOf("airport", "tivat", "podgorica", "transfer", "arrival").any(text::contains) ->
+            TransportModule.AIRPORT_TRANSFERS
+
+        listOf("cash", "card", "payment", "atm", "withdraw", "euro").any(text::contains) ->
+            TransportModule.CASH_AND_PAYMENTS
+
+        listOf("esim", "sim", "roaming", "network", "mobile", "internet", "connectivity").any(text::contains) ->
+            TransportModule.CONNECTIVITY
+
+        listOf("taxi", "bus", "station", "walking", "walk", "parking", "ferry", "transport", "drive").any(text::contains) ->
+            TransportModule.LOCAL_TRANSPORT
+
+        else -> TransportModule.GENERAL
+    }
+}
+
+private fun CityEssential.contextLine(): String {
+    if (isTouristRegistration()) {
+        return "Recommended within first 24 hours • cash only"
+    }
+    return if (category == EssentialCategory.TRANSPORT) {
+        transportContextLine()
+    } else {
+        category.cardMetaLabel()
+    }
+}
+
+private fun CityEssential.isTouristRegistration(): Boolean {
+    val text = buildString {
+        append(key)
+        append(' ')
+        append(localizedTitle("en"))
+        append(' ')
+        append(localizedContent("en"))
+    }.lowercase()
+
+    return listOf("tourist tax", "tourist registration", "registration", "stay tax")
+        .any(text::contains)
+}
+
+private fun CityEssential.transportContextLine(): String {
+    val text = buildString {
+        append(key)
+        append(' ')
+        append(localizedTitle("en"))
+        append(' ')
+        append(localizedContent("en"))
+    }.lowercase()
+
+    return when {
+        listOf("taxi", "cab").any(text::contains) ->
+            "Trusted local operators • airport transfers • pricing guidance"
+
+        listOf("traffic", "congestion", "depart", "departure").any(text::contains) ->
+            "Seasonal congestion tips • departure timing guidance"
+
+        listOf("airport", "tivat", "podgorica", "transfer").any(text::contains) ->
+            "Transfer options • travel durations • arrival confidence"
+
+        listOf("bus", "station", "regional").any(text::contains) ->
+            "Regional routes • station realities • timing expectations"
+
+        listOf("cash", "card", "payment", "atm", "withdraw").any(text::contains) ->
+            "Card expectations • cash realities • ATM guidance"
+
+        listOf("esim", "sim", "roaming", "network", "internet", "mobile").any(text::contains) ->
+            "eSIM suggestions • roaming realities • staying connected"
+
+        listOf("walk", "walking", "parking", "drive", "ferry").any(text::contains) ->
+            "Movement realities • local friction points • practical timing"
+
+        else -> transportModule().metaLabel
+    }
 }
 
 private fun UtilityCategory.accentColor(colors: KompassColors): Color = when (this) {
