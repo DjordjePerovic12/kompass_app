@@ -20,8 +20,7 @@ import llc.bokadev.kompass.domain.usecase.GetActivitiesUseCase
 import llc.bokadev.kompass.domain.usecase.GetSignedAudioUrlUseCase
 
 enum class GuideFilter {
-    ALL,
-    DEEP
+    ALL
 }
 
 data class MyGuidesState(
@@ -108,9 +107,9 @@ class MyGuidesViewModel(
                     entitlements = entitlements,
                     placeGuides = places.filter { place -> !place.audioFile.isNullOrEmpty() }.sortedBy { place -> place.sortOrder },
                     activityGuides = activities.filter { activity -> !activity.audioFile.isNullOrEmpty() }.sortedBy { activity -> activity.sortOrder },
-                    deepPlaceGuides = places.filter { place -> entitlements.audioPass && !place.deepAudioFile.isNullOrEmpty() }.sortedBy { place -> place.sortOrder },
-                    deepActivityGuides = activities.filter { activity -> entitlements.audioPass && !activity.deepAudioFile.isNullOrEmpty() }.sortedBy { activity -> activity.sortOrder },
-                    selectedFilter = if (!entitlements.audioPass) GuideFilter.ALL else it.selectedFilter
+                    deepPlaceGuides = emptyList(),
+                    deepActivityGuides = emptyList(),
+                    selectedFilter = GuideFilter.ALL
                 )
             }
         }

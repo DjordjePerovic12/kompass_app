@@ -62,11 +62,8 @@ fun PlaceDetailScreenContent(
     onFavoriteClick: () -> Unit,
     onIntent: (PlaceDetailEvent) -> Unit,
     onBack: () -> Unit,
-    onLearnMore: () -> Unit,
     freeGuideState: PlaceGuideState,
-    onFreeGuideIntent: (PlaceGuideEvent) -> Unit,
-    deepGuideState: PlaceGuideState,
-    onDeepGuideIntent: (PlaceGuideEvent) -> Unit
+    onFreeGuideIntent: (PlaceGuideEvent) -> Unit
 ) {
     val colors = KompassTheme.colors
 
@@ -102,11 +99,8 @@ fun PlaceDetailScreenContent(
                     isFavorited = isFavorited,
                     onFavoriteClick = onFavoriteClick,
                     onBack = onBack,
-                    onLearnMore = onLearnMore,
                     freeGuideState = freeGuideState,
-                    onFreeGuideIntent = onFreeGuideIntent,
-                    deepGuideState = deepGuideState,
-                    onDeepGuideIntent = onDeepGuideIntent
+                    onFreeGuideIntent = onFreeGuideIntent
                 )
             }
         }
@@ -122,11 +116,8 @@ private fun PlaceDetailBody(
     isFavorited: Boolean,
     onFavoriteClick: () -> Unit,
     onBack: () -> Unit,
-    onLearnMore: () -> Unit,
     freeGuideState: PlaceGuideState,
-    onFreeGuideIntent: (PlaceGuideEvent) -> Unit,
-    deepGuideState: PlaceGuideState,
-    onDeepGuideIntent: (PlaceGuideEvent) -> Unit
+    onFreeGuideIntent: (PlaceGuideEvent) -> Unit
 ) {
     val colors = KompassTheme.colors
     val lang = currentAppLanguage()
@@ -267,42 +258,6 @@ private fun PlaceDetailBody(
                     )
                 }
 
-                if (place.hasDeepContent(lang)) {
-                    val deepBody = place.localizedDeepText(lang)
-                    if (hasDetailAccess) {
-                        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                            DeepCompanionSection(
-                                title = "KOMPASS Deep",
-                                body = deepBody.ifBlank {
-                                    "A quieter companion layer for this place with extra atmosphere, context, and guided awareness."
-                                },
-                                ctaLabel = null,
-                                isLocked = false,
-                                onPrimaryAction = null
-                            )
-                            if (!place.deepAudioFile.isNullOrEmpty()) {
-                                InlinePlaceAudioGuideSection(
-                                    place = place,
-                                    guideState = deepGuideState,
-                                    hasAudioAccess = hasDetailAccess,
-                                    onIntent = onDeepGuideIntent,
-                                    title = "Deep Audio",
-                                    description = "A quieter companion layer with additional context, atmosphere, and spatial guidance.",
-                                    availabilityText = "Deep audio ready"
-                                )
-                            }
-                        }
-                    } else {
-                        DeepCompanionSection(
-                            title = "KOMPASS Deep",
-                            body = "Beyond landmarks, routes, and viewpoints, Deep adds a quieter companion layer with short contextual moments across selected places and experiences in Kotor.",
-                            ctaLabel = "What is Deep?",
-                            isLocked = true,
-                            onPrimaryAction = onLearnMore
-                        )
-                    }
-                }
-
                 place.localizedLocalsTip(lang)
                     .takeIf { it.isNotBlank() }
                     ?.let { tip ->
@@ -402,7 +357,7 @@ private fun InlinePlaceAudioGuideSection(
                 GuideMetaLine(
                     when {
                         isCurrentSource && playback.isBuffering -> "Preparing playback"
-                        !hasAudioAccess -> "Available with KOMPASS Deep"
+                        !hasAudioAccess -> "Audio is unavailable right now"
                         guideState.audioUrl != null -> availabilityText
                         else -> "Audio is still preparing"
                     }

@@ -13,21 +13,15 @@ import org.koin.core.parameter.parametersOf
 @Composable
 fun PlaceDetailScreen(
     id: String,
-    onBack: () -> Unit = {},
-    onLearnMore: () -> Unit = {}
+    onBack: () -> Unit = {}
 ) {
     val vm: PlaceDetailViewModel = koinViewModel()
     val freeGuideVm: PlaceGuideViewModel = koinViewModel(
         key = "place-guide-free-$id",
         parameters = { parametersOf(id, false, false) }
     )
-    val deepGuideVm: PlaceGuideViewModel = koinViewModel(
-        key = "place-guide-deep-$id",
-        parameters = { parametersOf(id, false, true) }
-    )
     val state by vm.state.collectAsState()
     val freeGuideState by freeGuideVm.state.collectAsState()
-    val deepGuideState by deepGuideVm.state.collectAsState()
     val favoritesRepository = koinInject<FavoritesRepository>()
     val favorites by favoritesRepository.favoritesFlow.collectAsState()
 
@@ -39,10 +33,7 @@ fun PlaceDetailScreen(
         onFavoriteClick = { favoritesRepository.toggleFavorite(FavoriteItemType.PLACE, id) },
         onIntent = vm::onIntent,
         onBack = onBack,
-        onLearnMore = onLearnMore,
         freeGuideState = freeGuideState,
-        onFreeGuideIntent = freeGuideVm::onIntent,
-        deepGuideState = deepGuideState,
-        onDeepGuideIntent = deepGuideVm::onIntent
+        onFreeGuideIntent = freeGuideVm::onIntent
     )
 }

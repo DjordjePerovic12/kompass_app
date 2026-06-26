@@ -77,10 +77,6 @@ fun MyGuidesScreen(
                 addAll(state.placeGuides.map { AudioLibraryItem.PlaceItem(it, false) })
                 addAll(state.activityGuides.map { AudioLibraryItem.ActivityItem(it, false) })
             }
-            GuideFilter.DEEP -> {
-                addAll(state.deepPlaceGuides.map { AudioLibraryItem.PlaceItem(it, true) })
-                addAll(state.deepActivityGuides.map { AudioLibraryItem.ActivityItem(it, true) })
-            }
         }
     }.sortedBy { it.title(lang) }
 
@@ -100,11 +96,7 @@ fun MyGuidesScreen(
             KompassSharedTopBar(
                 slug = "",
                 title = "Audio Guides",
-                subtitle = if (state.entitlements.audioPass) {
-                    "Free and Deep audio ready to play"
-                } else {
-                    "Free audio ready to play"
-                },
+                subtitle = "Free audio ready to play",
                 showBack = true,
                 onBackClick = onBack
             )
@@ -115,27 +107,6 @@ fun MyGuidesScreen(
                 .fillMaxSize()
                 .background(KompassTheme.colors.colorHomeCanvas)
         ) {
-            if (state.entitlements.audioPass) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 18.dp, vertical = 14.dp),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    GuideFilter.values().forEach { filter ->
-                        FilterChip(
-                            selected = state.selectedFilter == filter,
-                            onClick = { vm.onIntent(MyGuidesEvent.SelectFilter(filter)) },
-                            label = { Text(if (filter == GuideFilter.ALL) "All" else "Deep") },
-                            colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = KompassTheme.colors.colorOrangeMain.copy(alpha = 0.12f),
-                                selectedLabelColor = KompassTheme.colors.colorSignalStrong
-                            )
-                        )
-                    }
-                }
-            }
-
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(horizontal = 18.dp, vertical = 4.dp),

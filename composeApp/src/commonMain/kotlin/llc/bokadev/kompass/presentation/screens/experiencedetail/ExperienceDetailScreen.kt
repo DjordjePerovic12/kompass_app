@@ -63,21 +63,15 @@ import org.koin.core.parameter.parametersOf
 @Composable
 fun ExperienceDetailScreen(
     id: String,
-    onBack: () -> Unit = {},
-    onLearnMore: () -> Unit = {}
+    onBack: () -> Unit = {}
 ) {
     val vm: ExperienceDetailViewModel = koinViewModel(parameters = { parametersOf(id) })
     val freeGuideVm: ExperienceGuideViewModel = koinViewModel(
         key = "experience-guide-free-$id",
         parameters = { parametersOf(id, false, false) }
     )
-    val deepGuideVm: ExperienceGuideViewModel = koinViewModel(
-        key = "experience-guide-deep-$id",
-        parameters = { parametersOf(id, false, true) }
-    )
     val state by vm.state.collectAsState()
     val freeGuideState by freeGuideVm.state.collectAsState()
-    val deepGuideState by deepGuideVm.state.collectAsState()
     val favoritesRepository = koinInject<FavoritesRepository>()
     val favorites by favoritesRepository.favoritesFlow.collectAsState()
 
@@ -87,11 +81,8 @@ fun ExperienceDetailScreen(
         onFavoriteClick = { favoritesRepository.toggleFavorite(FavoriteItemType.ACTIVITY, id) },
         onIntent = vm::onIntent,
         onBack = onBack,
-        onLearnMore = onLearnMore,
         freeGuideState = freeGuideState,
-        onFreeGuideIntent = freeGuideVm::onIntent,
-        deepGuideState = deepGuideState,
-        onDeepGuideIntent = deepGuideVm::onIntent
+        onFreeGuideIntent = freeGuideVm::onIntent
     )
 }
 
@@ -102,11 +93,8 @@ private fun ExperienceDetailScreenContent(
     onFavoriteClick: () -> Unit,
     onIntent: (ExperienceDetailEvent) -> Unit,
     onBack: () -> Unit,
-    onLearnMore: () -> Unit,
     freeGuideState: ExperienceGuideState,
-    onFreeGuideIntent: (ExperienceGuideEvent) -> Unit,
-    deepGuideState: ExperienceGuideState,
-    onDeepGuideIntent: (ExperienceGuideEvent) -> Unit
+    onFreeGuideIntent: (ExperienceGuideEvent) -> Unit
 ) {
     val colors = KompassTheme.colors
 
@@ -143,11 +131,8 @@ private fun ExperienceDetailScreenContent(
                     isFavorited = isFavorited,
                     onFavoriteClick = onFavoriteClick,
                     onBack = onBack,
-                    onLearnMore = onLearnMore,
                     freeGuideState = freeGuideState,
-                    onFreeGuideIntent = onFreeGuideIntent,
-                    deepGuideState = deepGuideState,
-                    onDeepGuideIntent = onDeepGuideIntent
+                    onFreeGuideIntent = onFreeGuideIntent
                 )
             }
         }
@@ -163,11 +148,8 @@ private fun ExperienceDetailBody(
     isFavorited: Boolean,
     onFavoriteClick: () -> Unit,
     onBack: () -> Unit,
-    onLearnMore: () -> Unit,
     freeGuideState: ExperienceGuideState,
-    onFreeGuideIntent: (ExperienceGuideEvent) -> Unit,
-    deepGuideState: ExperienceGuideState,
-    onDeepGuideIntent: (ExperienceGuideEvent) -> Unit
+    onFreeGuideIntent: (ExperienceGuideEvent) -> Unit
 ) {
     val colors = KompassTheme.colors
     val lang = currentAppLanguage()
@@ -315,42 +297,6 @@ private fun ExperienceDetailBody(
                     )
                 }
 
-                if (activity.hasDeepContent(lang)) {
-                    val deepBody = activity.localizedDeepText(lang)
-                    if (hasDetailAccess) {
-                        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                            DeepCompanionSection(
-                                title = "KOMPASS Deep",
-                                body = deepBody.ifBlank {
-                                    "A quieter companion layer for this experience with added atmosphere, context, and guided awareness."
-                                },
-                                ctaLabel = null,
-                                isLocked = false,
-                                onPrimaryAction = null
-                            )
-                            if (!activity.deepAudioFile.isNullOrEmpty()) {
-                                InlineActivityAudioGuideSection(
-                                    activity = activity,
-                                    guideState = deepGuideState,
-                                    hasAudioAccess = hasDetailAccess,
-                                    onIntent = onDeepGuideIntent,
-                                    title = "Deep Audio",
-                                    description = "A quieter companion layer with additional route context, atmosphere, and guided awareness.",
-                                    availabilityText = "Deep audio ready"
-                                )
-                            }
-                        }
-                    } else {
-                        DeepCompanionSection(
-                            title = "KOMPASS Deep",
-                            body = "Beyond routes and viewpoints, Deep adds short contextual moments and a more immersive way to experience Kotor for those who want it.",
-                            ctaLabel = "What is Deep?",
-                            isLocked = true,
-                            onPrimaryAction = onLearnMore
-                        )
-                    }
-                }
-
                 activity.externalWebsite
                     ?.takeIf(String::isNotBlank)
                     ?.let { link ->
@@ -443,7 +389,7 @@ private fun InlineActivityAudioGuideSection(
                 ActivityGuideMetaLine(
                     when {
                         isCurrentSource && playback.isBuffering -> "Preparing playback"
-                        !hasAudioAccess -> "Available with KOMPASS Deep"
+                        !hasAudioAccess -> "Audio is unavailable right now"
                         guideState.audioUrl != null -> availabilityText
                         else -> "Audio is still preparing"
                     }

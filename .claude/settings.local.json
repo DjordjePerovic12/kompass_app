@@ -29,7 +29,10 @@
       "WebFetch(domain:www.ancient-origins.net)",
       "WebFetch(domain:en.wikipedia.org)",
       "WebFetch(domain:www.spottinghistory.com)",
-      "WebFetch(domain:www.livetheworld.com)"
+      "WebFetch(domain:www.livetheworld.com)",
+      "Bash(./gradlew :composeApp:linkDebugFrameworkIosSimulatorArm64)",
+      "Bash(sort -t_ -k1)",
+      "Bash(zcat ~/Library/Developer/Xcode/DerivedData/iosApp-amnaniqacyqjmrazszmbxuswkzqj/Logs/Build/35213BBE-6986-4975-A686-AD08785F3BFE.xcactivitylog)"
     ]
   }
 }

@@ -27,7 +27,6 @@ import llc.bokadev.kompass.presentation.screens.essentials.UtilityMapScreen
 import llc.bokadev.kompass.presentation.screens.nearby.NearbyPlacesScreen
 import llc.bokadev.kompass.presentation.screens.search.SearchScreen
 import llc.bokadev.kompass.presentation.screens.payment.PaymentCheckoutScreen
-import llc.bokadev.kompass.presentation.screens.premium.PremiumBundlesScreen
 import llc.bokadev.kompass.presentation.screens.localfinds.LocalFindDetailScreen
 import llc.bokadev.kompass.presentation.screens.localfinds.LocalFindsScreen
 import llc.bokadev.kompass.presentation.screens.services.ServicesScreen
@@ -112,8 +111,7 @@ fun KompassNavHost(isFirstLaunch: Boolean) {
             val route: Route.PlaceDetail = backStackEntry.toRoute()
             PlaceDetailScreen(
                 id = route.id,
-                onBack = { navController.popBackStack() },
-                onLearnMore = { navController.navigate(Route.PremiumBundles()) }
+                onBack = { navController.popBackStack() }
             )
         }
 
@@ -136,8 +134,7 @@ fun KompassNavHost(isFirstLaunch: Boolean) {
             val route: Route.ExperienceDetail = backStackEntry.toRoute()
             ExperienceDetailScreen(
                 id = route.id,
-                onBack = { navController.popBackStack() },
-                onLearnMore = { navController.navigate(Route.PremiumBundles(route.id)) }
+                onBack = { navController.popBackStack() }
             )
         }
 
@@ -262,19 +259,6 @@ fun KompassNavHost(isFirstLaunch: Boolean) {
             )
         }
 
-        composable<Route.PremiumBundles> { backStackEntry ->
-            val route: Route.PremiumBundles = backStackEntry.toRoute()
-            PremiumBundlesScreen(
-                onBack = { navController.popBackStack() },
-                unlockTargetActivityId = route.activityId,
-                onNavigateToGuide = { id ->
-                    navController.navigate(Route.ExperienceGuide(id, deep = true)) {
-                        popUpTo<Route.PremiumBundles> { inclusive = true }
-                    }
-                }
-            )
-        }
-
         composable<Route.PaymentCheckout> { backStackEntry ->
             val route: Route.PaymentCheckout = backStackEntry.toRoute()
             PaymentCheckoutScreen(
@@ -294,8 +278,7 @@ fun KompassNavHost(isFirstLaunch: Boolean) {
             val route: Route.LocalFindDetail = backStackEntry.toRoute()
             LocalFindDetailScreen(
                 id = route.id,
-                onBack = { navController.popBackStack() },
-                onLearnMore = { navController.navigate(Route.PremiumBundles()) }
+                onBack = { navController.popBackStack() }
             )
         }
     }
