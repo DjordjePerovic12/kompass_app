@@ -2,8 +2,8 @@ package llc.bokadev.kompass.di
 
 import llc.bokadev.kompass.data.repository.PaymentCheckoutSessionStore
 import llc.bokadev.kompass.data.repository.PaymentRepositoryImpl
+import llc.bokadev.kompass.data.repository.PilotDeepPurchaseRepositoryImpl
 import llc.bokadev.kompass.data.repository.PremiumRepositoryImpl
-import llc.bokadev.kompass.data.repository.RevenueCatDeepPurchaseRepositoryImpl
 import llc.bokadev.kompass.domain.repository.DeepPurchaseRepository
 import llc.bokadev.kompass.domain.repository.PaymentRepository
 import llc.bokadev.kompass.domain.repository.PremiumRepository
@@ -20,7 +20,7 @@ import org.koin.dsl.module
 val premiumModule = module {
     single { PaymentCheckoutSessionStore() }
     single<PremiumRepository> { PremiumRepositoryImpl(get()) }
-    single<DeepPurchaseRepository> { RevenueCatDeepPurchaseRepositoryImpl(get()) }
+    single<DeepPurchaseRepository> { PilotDeepPurchaseRepositoryImpl(get()) }
     single<PaymentRepository> { PaymentRepositoryImpl(get(named("kompassApi"))) }
     factory { HasPremiumAccessUseCase(get()) }
     factory { StartPremiumCheckoutUseCase(get()) }

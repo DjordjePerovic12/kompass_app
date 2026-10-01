@@ -32,6 +32,7 @@ import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -121,6 +122,7 @@ private fun PlaceDetailBody(
 ) {
     val colors = KompassTheme.colors
     val lang = currentAppLanguage()
+    val uriHandler = LocalUriHandler.current
     val metaLine = listOfNotNull(
         place.subCategory?.prettyLabel(),
         place.zone?.prettyLabel()
@@ -273,6 +275,39 @@ private fun PlaceDetailBody(
                             value = hours
                         )
                     }
+
+                if (place.category == PlaceCategory.EAT_AND_DRINK) {
+                    val menuUrl = place.menuUrl?.trim().takeUnless { it.isNullOrBlank() }
+                    val bookingPhone = place.bookingPhone?.trim().takeUnless { it.isNullOrBlank() }
+
+                    if (menuUrl != null || bookingPhone != null) {
+                        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                            Text(
+                                text = "Restaurant Info",
+                                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold),
+                                color = colors.colorNavy
+                            )
+
+                            menuUrl?.let { url ->
+                                PlaceActionCard(
+                                    label = "Menu",
+                                    value = "Open menu",
+                                    actionText = "Open in browser",
+                                    onClick = { uriHandler.openUri(url) }
+                                )
+                            }
+
+                            bookingPhone?.let { phone ->
+                                PlaceActionCard(
+                                    label = "Booking",
+                                    value = phone,
+                                    actionText = "Call",
+                                    onClick = { uriHandler.openUri("tel:${phone.toDialablePhone()}") }
+                                )
+                            }
+                        }
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.height(34.dp))
@@ -663,6 +698,42 @@ private fun DetailFactCard(
     }
 }
 
+@Composable
+private fun PlaceActionCard(
+    label: String,
+    value: String,
+    actionText: String,
+    onClick: () -> Unit
+) {
+    val colors = KompassTheme.colors
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(20.dp))
+            .background(colors.colorSurface)
+            .border(1.dp, Color.Black.copy(alpha = 0.08f), RoundedCornerShape(20.dp))
+            .clickable(onClick = onClick)
+            .padding(18.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+            color = colors.colorOrangeMain
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 24.sp),
+            color = colors.colorNavy
+        )
+        Text(
+            text = actionText,
+            style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
+            color = colors.colorOrangeMain
+        )
+    }
+}
+
 private fun buildPlaceChips(place: Place): List<String> {
     val tagChips = place.tags
         .asSequence()
@@ -716,3 +787,6 @@ private fun PriceIndicator.toFriendlyLabel(): String = when (this) {
     PriceIndicator.MODERATE -> "Moderate"
     PriceIndicator.EXPENSIVE -> "Premium entry"
 }
+
+private fun String.toDialablePhone(): String =
+    filter { it.isDigit() || it == '+' || it == '*' || it == '#' || it == ',' || it == ';' }

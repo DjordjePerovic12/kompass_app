@@ -17,6 +17,8 @@ data class Place(
     val bestTime: BestTime,
     val estimatedDuration: Int?,
     val openingHours: Map<String, String>?,
+    val menuUrl: String?,
+    val bookingPhone: String?,
     val photos: List<String>,
     val audioFile: Map<String, String>?,
     val deepText: Map<String, String> = emptyMap(),

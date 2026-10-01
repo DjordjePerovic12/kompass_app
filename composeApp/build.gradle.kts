@@ -72,7 +72,6 @@ kotlin {
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.napier)
             implementation(libs.ktor.client.logging)
-            implementation(libs.purchases.core)
         }
 
         iosMain.dependencies {

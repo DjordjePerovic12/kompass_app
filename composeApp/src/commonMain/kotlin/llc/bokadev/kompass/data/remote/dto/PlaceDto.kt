@@ -20,6 +20,8 @@ data class PlaceDto(
     @SerialName("best_time") val bestTime: String,
     @SerialName("estimated_duration") val estimatedDuration: Int? = null,
     @SerialName("opening_hours") val openingHours: Map<String, String>? = null,
+    @SerialName("menu_url") val menuUrl: String? = null,
+    @SerialName("booking_phone") val bookingPhone: String? = null,
     @SerialName("photos") val photos: List<String> = emptyList(),
     @SerialName("audio_file") val audioFile: Map<String, String>? = null,
     @SerialName("audio_access_tier") val audioAccessTier: String = "audio_pass",
