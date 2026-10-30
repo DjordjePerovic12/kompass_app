@@ -4,8 +4,8 @@ import llc.bokadev.kompass.data.repository.InfoCenterRepositoryImpl
 import llc.bokadev.kompass.domain.repository.InfoCenterRepository
 import llc.bokadev.kompass.domain.usecase.GetCurrentInfoNoticesUseCase
 import llc.bokadev.kompass.domain.usecase.GetInfoNoticeByIdUseCase
-import llc.bokadev.kompass.presentation.screens.infocenter.InfoCenterDetailViewModel
-import llc.bokadev.kompass.presentation.screens.infocenter.InfoCenterViewModel
+import llc.bokadev.kompass.presentation.infocenter.detail.InfoCenterDetailViewModel
+import llc.bokadev.kompass.presentation.infocenter.InfoCenterViewModel
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 

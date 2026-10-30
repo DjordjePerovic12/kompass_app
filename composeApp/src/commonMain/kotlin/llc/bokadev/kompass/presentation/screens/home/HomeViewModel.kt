@@ -22,7 +22,7 @@ import llc.bokadev.kompass.domain.usecase.GetNearbyFallbackPlacesUseCase
 import llc.bokadev.kompass.domain.usecase.GetNearbyPlacesUseCase
 import llc.bokadev.kompass.domain.usecase.GetUpcomingEventsUseCase
 import llc.bokadev.kompass.core.navigation.Screen
-import llc.bokadev.kompass.presentation.screens.categorylist.CategoryListKind
+import llc.bokadev.kompass.domain.model.CategoryListKind
 import llc.bokadev.kompass.presentation.shared.LanguageSheetHost
 import androidx.lifecycle.viewModelScope
 

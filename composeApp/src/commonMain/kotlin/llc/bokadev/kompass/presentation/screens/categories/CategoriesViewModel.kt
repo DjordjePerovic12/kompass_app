@@ -9,7 +9,7 @@ import llc.bokadev.kompass.core.presentation.mvi.Navigator
 import llc.bokadev.kompass.core.utils.networking.onSuccess
 import llc.bokadev.kompass.domain.repository.AnalyticsRepository
 import llc.bokadev.kompass.core.navigation.Screen
-import llc.bokadev.kompass.presentation.screens.categorylist.CategoryListKind
+import llc.bokadev.kompass.domain.model.CategoryListKind
 import llc.bokadev.kompass.presentation.shared.LanguageSheetHost
 import llc.bokadev.kompass.domain.model.window
 import kotlin.time.Clock

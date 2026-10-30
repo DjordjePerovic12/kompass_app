@@ -18,7 +18,7 @@ import llc.bokadev.kompass.core.audio.NavAudioHost
 import llc.bokadev.kompass.core.presentation.SnackbarBus
 import llc.bokadev.kompass.core.utils.rememberAppStrings
 import llc.bokadev.kompass.domain.location.UserLocationProvider
-import llc.bokadev.kompass.presentation.screens.excursions.RelatedActivities
+import llc.bokadev.kompass.presentation.excursions.related_activities.RelatedActivities
 import llc.bokadev.kompass.presentation.shared.perform
 import llc.bokadev.kompass.presentation.shared.rememberExternalLauncher
 import llc.bokadev.kompass.presentation.shared.rememberLiveCurrentLocation

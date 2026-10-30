@@ -45,7 +45,7 @@ import llc.bokadev.kompass.core.utils.ListenStrings
 import llc.bokadev.kompass.core.utils.buildPhotoUrl
 import llc.bokadev.kompass.core.utils.toClockDuration
 import llc.bokadev.kompass.core.utils.uppercaseFor
-import llc.bokadev.kompass.presentation.screens.categorylist.areaLabel
+import llc.bokadev.kompass.presentation.shared.areaLabel
 import llc.bokadev.kompass.presentation.screens.home.components.ChevronLeftIcon
 import llc.bokadev.kompass.presentation.screens.home.components.HeadphonesIcon
 import llc.bokadev.kompass.presentation.screens.listen.components.DiscState
@@ -173,7 +173,7 @@ fun ListenScreenContent(
             val position = (audio as? AudioState.Playing)?.positionMs ?: (audio as? AudioState.Paused)?.positionMs ?: 0L
             val duration = knownDurations[track.id]
             val unavailable = !online && item.download != DownloadState.Downloaded && !active
-            val label = listOfNotNull(item.entry.typeLabel(strings), item.areaKey.areaLabel(strings).takeIf { it.isNotBlank() })
+            val label = listOfNotNull(item.entry.typeLabel(strings), item.areaKey.areaLabel().takeIf { it.isNotBlank() })
                 .joinToString(" · ").uppercaseFor(lang)
             val time = when {
                 active -> "${position.toClockDuration() ?: "0:00"} / ${duration?.toClockDuration() ?: "–:––"}"

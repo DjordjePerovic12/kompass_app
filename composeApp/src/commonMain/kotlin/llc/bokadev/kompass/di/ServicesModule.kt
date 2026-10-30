@@ -4,8 +4,8 @@ import llc.bokadev.kompass.data.repository.ServiceRepositoryImpl
 import llc.bokadev.kompass.domain.repository.ServiceRepository
 import llc.bokadev.kompass.domain.usecase.GetServiceByIdUseCase
 import llc.bokadev.kompass.domain.usecase.GetServicesUseCase
-import llc.bokadev.kompass.presentation.screens.services.ServiceDetailViewModel
-import llc.bokadev.kompass.presentation.screens.services.ServicesViewModel
+import llc.bokadev.kompass.presentation.services.detail.ServiceDetailViewModel
+import llc.bokadev.kompass.presentation.services.ServicesViewModel
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
