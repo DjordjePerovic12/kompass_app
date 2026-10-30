@@ -6,8 +6,8 @@ import llc.bokadev.kompass.core.utils.AppPreferences
 import llc.bokadev.kompass.core.utils.PilotFeatures
 import llc.bokadev.kompass.domain.repository.DeepPurchaseRepository
 import llc.bokadev.kompass.core.navigation.KompassAppNavigation
-import llc.bokadev.kompass.presentation.theme.KOmpassTheme
 import org.koin.compose.koinInject
+import llc.bokadev.kompass.ui.theme.KompassTheme
 
 @Composable
 fun App() {
@@ -19,7 +19,7 @@ fun App() {
         }
     }
 
-    KOmpassTheme {
+    KompassTheme {
         KompassAppNavigation(isFirstLaunch = prefs.isFirstLaunch())
     }
 }

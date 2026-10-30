@@ -19,9 +19,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import llc.bokadev.kompass.presentation.theme.LamplightShapes
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
+import llc.bokadev.kompass.ui.theme.KompassTheme
+import llc.bokadev.kompass.ui.theme.KompassShapes
 
 enum class NoticeLevel { URGENT, IMPORTANT, GENERAL }
 
@@ -40,17 +39,17 @@ fun NoticeItem(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val colors = LamplightTheme.colors
-    val shape = LamplightShapes.notice
+    val colors = KompassTheme.colors
+    val shape = KompassShapes.notice
     val isAlert = level != NoticeLevel.GENERAL
 
     Row(
         modifier = modifier
             .fillMaxWidth()
             .clip(shape)
-            .background(if (isAlert) Color.Transparent else colors.surfaceRaised)
+            .background(if (isAlert) Color.Transparent else colors.charcoal)
             .let {
-                if (isAlert) it.border(1.5.dp, colors.alert, shape) else it
+                if (isAlert) it.border(1.5.dp, colors.coralRed, shape) else it
             }
             .clickable(onClick = onClick),
         verticalAlignment = Alignment.Top
@@ -60,7 +59,7 @@ fun NoticeItem(
                 modifier = Modifier
                     .width(4.dp)
                     .fillMaxHeight()
-                    .background(colors.alert)
+                    .background(colors.coralRed)
             )
         }
         Column(
@@ -69,27 +68,27 @@ fun NoticeItem(
         ) {
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
                 if (isAlert) {
-                    WarningTriangleIcon(color = colors.alert, size = 14.dp)
+                    WarningTriangleIcon(color = colors.coralRed, size = 14.dp)
                 } else {
-                    InfoCircleIcon(color = colors.textSecondary, size = 14.dp)
+                    InfoCircleIcon(color = colors.stoneGray, size = 14.dp)
                 }
                 Text(
                     text = label,
-                    style = LamplightType.label(),
-                    color = if (isAlert) colors.alert else colors.textSecondary
+                    style = KompassTheme.typography.geologicaSemiBold11,
+                    color = if (isAlert) colors.coralRed else colors.stoneGray
                 )
             }
             Text(
                 text = title,
-                style = LamplightType.bodyL(),
-                color = colors.textPrimary,
+                style = KompassTheme.typography.geologicaSemiBold17,
+                color = colors.boneWhite,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
             Text(
                 text = summary,
-                style = LamplightType.bodyS(),
-                color = colors.textSecondary,
+                style = KompassTheme.typography.geologicaRegular14,
+                color = colors.stoneGray,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )

@@ -36,8 +36,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
+import llc.bokadev.kompass.ui.theme.KompassTheme
 
 /** One action under an expanded module: an exact-coordinate map handoff or an external link. */
 data class ModuleAction(val glyph: EssentialsGlyph, val title: String, val actionLabel: String, val onClick: () -> Unit)
@@ -66,10 +65,10 @@ fun EssentialModuleGroup(
     onToggle: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val colors = LamplightTheme.colors
-    Column(modifier = modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(colors.surfaceRaised)) {
+    val colors = KompassTheme.colors
+    Column(modifier = modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(colors.charcoal)) {
         items.forEachIndexed { index, item ->
-            if (index > 0) Box(Modifier.padding(horizontal = 16.dp).fillMaxWidth().height(1.dp).background(colors.divider))
+            if (index > 0) Box(Modifier.padding(horizontal = 16.dp).fillMaxWidth().height(1.dp).background(colors.slateDivider))
             ModuleRow(item, item.id in expandedIds, labels, reduceMotion) { onToggle(item.id) }
         }
     }
@@ -77,12 +76,12 @@ fun EssentialModuleGroup(
 
 @Composable
 private fun ModuleRow(item: ModuleItem, expanded: Boolean, labels: ModuleLabels, reduceMotion: Boolean, onToggle: () -> Unit) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     val rotation by animateFloatAsState(if (expanded) 180f else 0f, if (reduceMotion) snap() else tween(200), label = "chevron")
     Column(
         Modifier
             .fillMaxWidth()
-            .background(if (expanded) Color(0xFF232A2E) else Color.Transparent)
+            .background(if (expanded) KompassTheme.colors.slateDeep else Color.Transparent)
             .then(if (reduceMotion) Modifier else Modifier.animateContentSize())
     ) {
         Row(
@@ -98,12 +97,12 @@ private fun ModuleRow(item: ModuleItem, expanded: Boolean, labels: ModuleLabels,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text(text = item.title, style = LamplightType.bodyL(), color = if (expanded) colors.lamp else colors.textPrimary)
+                Text(text = item.title, style = KompassTheme.typography.geologicaSemiBold17, color = if (expanded) colors.lampYellow else colors.boneWhite)
                 item.subtitle?.let {
-                    Text(text = it, style = LamplightType.meta(), color = colors.textTertiary, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                    Text(text = it, style = KompassTheme.typography.geologicaRegular13, color = colors.pebbleGray, maxLines = 2, overflow = TextOverflow.Ellipsis)
                 }
             }
-            EssentialsIcon(EssentialsGlyph.ChevronDown, color = colors.textTertiary, size = 20.dp, modifier = Modifier.graphicsLayer { rotationZ = rotation })
+            EssentialsIcon(EssentialsGlyph.ChevronDown, color = colors.pebbleGray, size = 20.dp, modifier = Modifier.graphicsLayer { rotationZ = rotation })
         }
         if (expanded) ModuleBody(item, labels)
     }
@@ -111,7 +110,7 @@ private fun ModuleRow(item: ModuleItem, expanded: Boolean, labels: ModuleLabels,
 
 @Composable
 private fun ModuleBody(item: ModuleItem, labels: ModuleLabels) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     var showAll by remember(item.id) { mutableStateOf(false) }
     var long by remember(item.id) { mutableStateOf(false) }
     Column(
@@ -121,8 +120,8 @@ private fun ModuleBody(item: ModuleItem, labels: ModuleLabels) {
         if (item.body.isNotBlank()) {
             Text(
                 text = item.body,
-                style = LamplightType.body().copy(fontSize = 15.sp, lineHeight = 24.sp, fontWeight = FontWeight.Normal),
-                color = colors.textPrimary,
+                style = KompassTheme.typography.geologicaMedium16.copy(fontSize = 15.sp, lineHeight = 24.sp, fontWeight = FontWeight.Normal),
+                color = colors.boneWhite,
                 maxLines = if (showAll || !long) Int.MAX_VALUE else 6,
                 overflow = TextOverflow.Ellipsis,
                 // More than ~8 lines collapses to 6 + Read more (spec §2.5).
@@ -131,8 +130,8 @@ private fun ModuleBody(item: ModuleItem, labels: ModuleLabels) {
             if (long) {
                 Text(
                     text = if (showAll) labels.showLess else labels.readMore,
-                    style = LamplightType.bodyS().copy(fontWeight = FontWeight.SemiBold),
-                    color = colors.lamp,
+                    style = KompassTheme.typography.geologicaRegular14.copy(fontWeight = FontWeight.SemiBold),
+                    color = colors.lampYellow,
                     modifier = Modifier
                         .heightIn(min = 44.dp)
                         .clickable { showAll = !showAll }
@@ -146,23 +145,23 @@ private fun ModuleBody(item: ModuleItem, labels: ModuleLabels) {
                     .fillMaxWidth()
                     .heightIn(min = 56.dp)
                     .clip(RoundedCornerShape(14.dp))
-                    .background(colors.surfaceMuted)
+                    .background(colors.slateDark)
                     .clickable(onClick = action.onClick)
                     .semantics(mergeDescendants = true) { role = Role.Button }
                     .padding(horizontal = 14.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                EssentialsIcon(action.glyph, color = colors.lamp, size = 20.dp)
+                EssentialsIcon(action.glyph, color = colors.lampYellow, size = 20.dp)
                 Box(Modifier.width(12.dp))
                 Text(
                     text = action.title,
-                    style = LamplightType.body().copy(fontSize = 15.sp, fontWeight = FontWeight.SemiBold),
-                    color = colors.textPrimary,
+                    style = KompassTheme.typography.geologicaMedium16.copy(fontSize = 15.sp, fontWeight = FontWeight.SemiBold),
+                    color = colors.boneWhite,
                     modifier = Modifier.weight(1f),
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
-                Text(text = action.actionLabel, style = LamplightType.bodyS().copy(fontWeight = FontWeight.SemiBold), color = colors.lamp)
+                Text(text = action.actionLabel, style = KompassTheme.typography.geologicaRegular14.copy(fontWeight = FontWeight.SemiBold), color = colors.lampYellow)
             }
         }
     }

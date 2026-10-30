@@ -21,8 +21,7 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
+import llc.bokadev.kompass.ui.theme.KompassTheme
 
 /** Which family a tile represents; the fills differ on purpose so the two read apart at a glance. */
 enum class ExploreTileStyle { Limestone, Raised }
@@ -40,15 +39,15 @@ fun ExploreTileCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     val shape = RoundedCornerShape(24.dp)
     val limestone = style == ExploreTileStyle.Limestone
     Column(
         modifier = modifier
             .heightIn(min = 190.dp)
             .clip(shape)
-            .background(if (limestone) colors.limestone else colors.surfaceRaised)
-            .then(if (limestone) Modifier else Modifier.border(1.dp, colors.divider, shape))
+            .background(if (limestone) colors.limestone else colors.charcoal)
+            .then(if (limestone) Modifier else Modifier.border(1.dp, colors.slateDivider, shape))
             .clickable(onClick = onClick)
             .clearAndSetSemantics {
                 role = Role.Button
@@ -58,17 +57,17 @@ fun ExploreTileCard(
             .padding(18.dp),
         verticalArrangement = Arrangement.SpaceBetween
     ) {
-        ExploreIcon(glyph, color = if (limestone) colors.night else colors.lamp, size = 28.dp)
+        ExploreIcon(glyph, color = if (limestone) colors.nightBlack else colors.lampYellow, size = 28.dp)
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(
                 text = title,
-                style = LamplightType.sectionTitleS(),
-                color = if (limestone) colors.night else colors.textPrimary
+                style = KompassTheme.typography.gloockRegular26,
+                color = if (limestone) colors.nightBlack else colors.boneWhite
             )
             Text(
                 text = subtitle,
-                style = LamplightType.bodyS().copy(fontSize = 14.sp),
-                color = if (limestone) colors.textOnLimestone else colors.textSecondary
+                style = KompassTheme.typography.geologicaRegular14.copy(fontSize = 14.sp),
+                color = if (limestone) colors.inkGray else colors.stoneGray
             )
         }
     }

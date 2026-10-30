@@ -53,10 +53,8 @@ import llc.bokadev.kompass.presentation.screens.placedetail.toDetailLabel
 import llc.bokadev.kompass.presentation.screens.placedetail.toVisitLength
 import llc.bokadev.kompass.presentation.shared.StatusBarIconsEffect
 import llc.bokadev.kompass.presentation.shared.rememberReduceMotion
-import llc.bokadev.kompass.presentation.theme.HomePalette
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
-import llc.bokadev.kompass.presentation.theme.pageGradientBackground
+import llc.bokadev.kompass.ui.theme.KompassTheme
+import llc.bokadev.kompass.ui.theme.pageGradientBackground
 
 /**
  * Lamplight activity detail: the same template as place detail (hero, type label, Gloock title,
@@ -202,7 +200,7 @@ private fun DetailBody(
 
 @Composable
 private fun TitleBlock(activity: Experience, name: String, area: String?, lang: String, strings: AppStrings, listen: @Composable () -> Unit) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     val type = activity.category?.trim()?.takeIf { it.isNotBlank() }?.prettyLabel() ?: strings.detail.activity
     Column(
         modifier = Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, top = 4.dp),
@@ -211,17 +209,17 @@ private fun TitleBlock(activity: Experience, name: String, area: String?, lang: 
         // The CMS location is often a sentence; only a short place name belongs in the label
         // (the full text stays under "Where it is").
         val shortArea = area?.takeIf { it.length <= 24 && !it.contains(',') }
-        Text(text = listOfNotNull(type, shortArea).joinToString(" · ").uppercaseFor(lang), style = LamplightType.label(), color = colors.lamp)
+        Text(text = listOfNotNull(type, shortArea).joinToString(" · ").uppercaseFor(lang), style = KompassTheme.typography.geologicaSemiBold11, color = colors.lampYellow)
         Text(
             text = name,
-            style = LamplightType.cardTitleXL().copy(fontSize = 40.sp, lineHeight = 41.sp),
-            color = colors.textPrimary,
+            style = KompassTheme.typography.gloockRegular34.copy(fontSize = 40.sp, lineHeight = 41.sp),
+            color = colors.boneWhite,
             modifier = Modifier.semantics { heading() }
         )
         // Right under the title: the first view always shows how to listen.
         listen()
         activity.localizedDescription(lang).trim().takeIf { it.isNotBlank() }?.let { short ->
-            Text(text = short, style = LamplightType.body().copy(fontWeight = FontWeight.Normal, lineHeight = 24.sp), color = HomePalette.onGradientSecondary)
+            Text(text = short, style = KompassTheme.typography.geologicaMedium16.copy(fontWeight = FontWeight.Normal, lineHeight = 24.sp), color = KompassTheme.colors.white85)
         }
     }
 }

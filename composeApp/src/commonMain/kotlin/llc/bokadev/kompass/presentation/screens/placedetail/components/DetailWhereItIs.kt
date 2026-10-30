@@ -21,8 +21,7 @@ import androidx.compose.ui.unit.dp
 import llc.bokadev.kompass.domain.model.GeoPoint
 import llc.bokadev.kompass.domain.model.distanceKmTo
 import llc.bokadev.kompass.presentation.shared.NativeDetailMapView
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
+import llc.bokadev.kompass.ui.theme.KompassTheme
 
 /**
  * "Where it is": a pannable map with the user's dot for quick orientation (owner's call, over
@@ -41,12 +40,12 @@ fun DetailWhereItIs(
 ) {
     // (0, 0) is how a missing coordinate arrives from the CMS; never pin the Gulf of Guinea.
     if (destination.latitude == 0.0 && destination.longitude == 0.0) return
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     Column(
         modifier = modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, top = 30.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
-        Text(text = title, style = LamplightType.sectionTitleS(), color = colors.textPrimary, modifier = Modifier.semantics { heading() })
+        Text(text = title, style = KompassTheme.typography.gloockRegular26, color = colors.boneWhite, modifier = Modifier.semantics { heading() })
         Box(Modifier.fillMaxWidth().height(180.dp).clip(RoundedCornerShape(20.dp))) {
             // The map frames the place and the user together, so a user far away (another country,
             // an emulator's default location) would zoom it out to a continent: show them only nearby.
@@ -54,7 +53,7 @@ fun DetailWhereItIs(
             NativeDetailMapView(placeName = name, destination = destination, currentLocation = nearbyUser, modifier = Modifier.fillMaxSize())
         }
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text(text = areaLabel.orEmpty(), style = LamplightType.bodyS(), color = colors.textSecondary, modifier = Modifier.weight(1f))
+            Text(text = areaLabel.orEmpty(), style = KompassTheme.typography.geologicaRegular14, color = colors.stoneGray, modifier = Modifier.weight(1f))
             DetailPillButton(label = openInMapsLabel, glyph = DetailGlyph.ArrowUpRight, filled = false, height = 48.dp, onClick = onOpenMaps)
         }
     }

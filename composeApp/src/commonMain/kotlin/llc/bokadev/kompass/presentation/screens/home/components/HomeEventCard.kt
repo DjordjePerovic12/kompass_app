@@ -29,9 +29,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
-import llc.bokadev.kompass.presentation.theme.LamplightShapes
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
+import llc.bokadev.kompass.ui.theme.KompassTheme
+import llc.bokadev.kompass.ui.theme.KompassShapes
 
 /**
  * "Lamplight" event card (spec §3.5). Home-exclusive — not a restyle of the shared
@@ -50,16 +49,16 @@ fun HomeEventCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     val hasUrl = !imageUrl.isNullOrBlank()
     var loadFailed by remember(imageUrl) { mutableStateOf(false) }
-    val cardShape = LamplightShapes.cardEvent
+    val cardShape = KompassShapes.cardEvent
 
     Column(
         modifier = modifier
             .clip(cardShape)
-            .background(colors.surfaceRaised)
-            .border(1.dp, colors.divider, cardShape)
+            .background(colors.charcoal)
+            .border(1.dp, colors.slateDivider, cardShape)
             .clickable(onClick = onClick)
             .padding(10.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -71,14 +70,14 @@ fun HomeEventCard(
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
                     onError = { loadFailed = true },
-                    modifier = Modifier.fillMaxSize().clip(LamplightShapes.imageInner)
+                    modifier = Modifier.fillMaxSize().clip(KompassShapes.imageInner)
                 )
             } else {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .clip(LamplightShapes.imageInner)
-                        .background(colors.surfaceMuted)
+                        .clip(KompassShapes.imageInner)
+                        .background(colors.slateDark)
                 )
             }
             Box(
@@ -86,29 +85,29 @@ fun HomeEventCard(
                     .align(Alignment.TopEnd)
                     .padding(8.dp)
                     .clip(RoundedCornerShape(8.dp))
-                    .background(colors.lamp)
+                    .background(colors.lampYellow)
                     .padding(horizontal = 7.dp, vertical = 4.dp)
             ) {
                 Text(
                     text = dateTag,
-                    style = LamplightType.label().copy(fontSize = 12.sp, fontWeight = FontWeight.Bold),
-                    color = colors.night
+                    style = KompassTheme.typography.geologicaSemiBold11.copy(fontSize = 12.sp, fontWeight = FontWeight.Bold),
+                    color = colors.nightBlack
                 )
             }
         }
 
         Text(
             text = name,
-            style = LamplightType.body(),
-            color = colors.textPrimary,
+            style = KompassTheme.typography.geologicaMedium16,
+            color = colors.boneWhite,
             maxLines = 3,
             overflow = TextOverflow.Ellipsis
         )
         if (venueLine.isNotBlank()) {
             Text(
                 text = venueLine,
-                style = LamplightType.meta(),
-                color = colors.textTertiary,
+                style = KompassTheme.typography.geologicaRegular13,
+                color = colors.pebbleGray,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -124,18 +123,18 @@ fun HomeEventCard(
         ) {
             Text(
                 text = startTime,
-                style = LamplightType.bodyL(),
-                color = colors.textPrimary
+                style = KompassTheme.typography.geologicaSemiBold17,
+                color = colors.boneWhite
             )
             Box(
                 modifier = Modifier
                     .size(44.dp)
                     .clip(RoundedCornerShape(12.dp))
-                    .background(colors.divider)
+                    .background(colors.slateDivider)
                     .clickable(onClick = onClick),
                 contentAlignment = Alignment.Center
             ) {
-                ArrowRightIcon(color = colors.lamp, size = 16.dp)
+                ArrowRightIcon(color = colors.lampYellow, size = 16.dp)
             }
         }
     }

@@ -73,10 +73,8 @@ import llc.bokadev.kompass.presentation.screens.search.components.SearchGlyphIco
 import llc.bokadev.kompass.presentation.screens.search.components.SearchHeader
 import llc.bokadev.kompass.presentation.screens.search.components.SearchResultRow
 import llc.bokadev.kompass.presentation.screens.search.components.SearchTypeChip
-import llc.bokadev.kompass.presentation.theme.HomePalette
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
-import llc.bokadev.kompass.presentation.theme.pageGradientBackground
+import llc.bokadev.kompass.ui.theme.KompassTheme
+import llc.bokadev.kompass.ui.theme.pageGradientBackground
 
 private data class SearchActions(
     val onBack: () -> Unit,
@@ -171,8 +169,8 @@ fun SearchScreenContent(
                         item(key = "more") {
                             Text(
                                 text = s.showMore,
-                                style = LamplightType.body().copy(fontWeight = FontWeight.SemiBold),
-                                color = LamplightTheme.colors.lamp,
+                                style = KompassTheme.typography.geologicaMedium16.copy(fontWeight = FontWeight.SemiBold),
+                                color = KompassTheme.colors.lampYellow,
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clickable(onClick = actions.onShowMore)
@@ -189,7 +187,7 @@ fun SearchScreenContent(
 
 @Composable
 private fun SectionLabel(text: String, modifier: Modifier = Modifier) {
-    Text(text = text, style = LamplightType.label(), color = LamplightTheme.colors.textTertiary, modifier = modifier.semantics { heading() })
+    Text(text = text, style = KompassTheme.typography.geologicaSemiBold11, color = KompassTheme.colors.pebbleGray, modifier = modifier.semantics { heading() })
 }
 
 @Composable
@@ -208,14 +206,14 @@ private fun RecentHeader(strings: AppStrings, onClear: () -> Unit) {
                 .padding(horizontal = 12.dp),
             contentAlignment = Alignment.Center
         ) {
-            Text(strings.search.clear, style = LamplightType.bodyS().copy(fontWeight = FontWeight.SemiBold), color = LamplightTheme.colors.lamp)
+            Text(strings.search.clear, style = KompassTheme.typography.geologicaRegular14.copy(fontWeight = FontWeight.SemiBold), color = KompassTheme.colors.lampYellow)
         }
     }
 }
 
 @Composable
 private fun RecentRow(query: String, onClick: () -> Unit) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -226,15 +224,15 @@ private fun RecentRow(query: String, onClick: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(14.dp)
     ) {
-        SearchGlyphIcon(SearchGlyph.Clock, colors.textTertiary, 18.dp)
-        Text(query, style = LamplightType.body(), color = colors.textPrimary, maxLines = 1)
+        SearchGlyphIcon(SearchGlyph.Clock, colors.pebbleGray, 18.dp)
+        Text(query, style = KompassTheme.typography.geologicaMedium16, color = colors.boneWhite, maxLines = 1)
     }
 }
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun TrySuggestions(strings: AppStrings, lang: String, onRun: (String) -> Unit) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     Column(Modifier.padding(start = 20.dp, end = 20.dp, top = 22.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         SectionLabel(strings.search.tryLabel.uppercaseFor(lang))
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -243,12 +241,12 @@ private fun TrySuggestions(strings: AppStrings, lang: String, onRun: (String) ->
                     Modifier
                         .heightIn(min = 40.dp)
                         .clip(RoundedCornerShape(20.dp))
-                        .border(1.5.dp, colors.borderStrong, RoundedCornerShape(20.dp))
+                        .border(1.5.dp, colors.slateGray, RoundedCornerShape(20.dp))
                         .clickable { onRun(suggestion) }
                         .semantics { role = Role.Button }
                         .padding(horizontal = 16.dp, vertical = 9.dp),
                     contentAlignment = Alignment.Center
-                ) { Text(suggestion, style = LamplightType.bodyS().copy(fontWeight = FontWeight.Medium), color = colors.textPrimary) }
+                ) { Text(suggestion, style = KompassTheme.typography.geologicaRegular14.copy(fontWeight = FontWeight.Medium), color = colors.boneWhite) }
             }
         }
     }
@@ -281,7 +279,7 @@ private fun StatusLine(state: SearchState, strings: AppStrings) {
         announced = text
     }
     Box(Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, top = 14.dp, bottom = 4.dp)) {
-        Text(text, style = LamplightType.meta(), color = LamplightTheme.colors.textTertiary)
+        Text(text, style = KompassTheme.typography.geologicaRegular13, color = KompassTheme.colors.pebbleGray)
         Box(Modifier.size(1.dp).semantics { liveRegion = LiveRegionMode.Polite; contentDescription = announced })
     }
 }
@@ -318,17 +316,17 @@ private fun KindIcon(item: SearchIndexItem, color: Color) = when (item.kind) {
 /** Some sources failed and weren't cached: say so, with Retry, above results or "nothing". */
 @Composable
 private fun IncompleteNotice(strings: AppStrings, onRetry: () -> Unit) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     Row(
         modifier = Modifier.fillMaxWidth().padding(start = 20.dp, end = 8.dp, top = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        EssentialsIcon(EssentialsGlyph.Warning, colors.lamp, 18.dp)
+        EssentialsIcon(EssentialsGlyph.Warning, colors.lampYellow, 18.dp)
         Text(
             text = strings.search.incomplete,
-            style = LamplightType.bodyS(),
-            color = HomePalette.onGradientSecondary,
+            style = KompassTheme.typography.geologicaRegular14,
+            color = KompassTheme.colors.white85,
             modifier = Modifier.weight(1f).semantics { liveRegion = LiveRegionMode.Polite }
         )
         Box(
@@ -340,32 +338,32 @@ private fun IncompleteNotice(strings: AppStrings, onRetry: () -> Unit) {
                 .padding(horizontal = 12.dp),
             contentAlignment = Alignment.Center
         ) {
-            Text(strings.search.retry, style = LamplightType.bodyS().copy(fontWeight = FontWeight.SemiBold), color = colors.lamp)
+            Text(strings.search.retry, style = KompassTheme.typography.geologicaRegular14.copy(fontWeight = FontWeight.SemiBold), color = colors.lampYellow)
         }
     }
 }
 
 @Composable
 private fun NoResults(query: String, strings: AppStrings, onBrowseExplore: () -> Unit) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     val title = strings.search.nothingFor.replace("{q}", query)
     Column(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 28.dp, vertical = 40.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        SearchGlyphIcon(SearchGlyph.SearchMinus, colors.lamp, 44.dp)
+        SearchGlyphIcon(SearchGlyph.SearchMinus, colors.lampYellow, 44.dp)
         Text(
             text = title,
-            style = LamplightType.sectionTitleS(),
-            color = colors.textPrimary,
+            style = KompassTheme.typography.gloockRegular26,
+            color = colors.boneWhite,
             textAlign = TextAlign.Center,
             modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite; heading() }
         )
         Text(
             text = strings.search.nothingBody,
-            style = LamplightType.body().copy(fontSize = 15.sp, lineHeight = 23.sp, fontWeight = FontWeight.Normal),
-            color = HomePalette.onGradientSecondary,
+            style = KompassTheme.typography.geologicaMedium16.copy(fontSize = 15.sp, lineHeight = 23.sp, fontWeight = FontWeight.Normal),
+            color = KompassTheme.colors.white85,
             textAlign = TextAlign.Center
         )
         OutlinePill(strings.search.browseExplore, onBrowseExplore, Modifier.padding(top = 8.dp))
@@ -374,7 +372,7 @@ private fun NoResults(query: String, strings: AppStrings, onBrowseExplore: () ->
 
 @Composable
 private fun NotReady(strings: AppStrings, onRetry: () -> Unit) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     Column(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 28.dp, vertical = 40.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -382,8 +380,8 @@ private fun NotReady(strings: AppStrings, onRetry: () -> Unit) {
     ) {
         Text(
             text = strings.search.notReady,
-            style = LamplightType.body().copy(fontSize = 15.sp, lineHeight = 23.sp),
-            color = HomePalette.onGradientSecondary,
+            style = KompassTheme.typography.geologicaMedium16.copy(fontSize = 15.sp, lineHeight = 23.sp),
+            color = KompassTheme.colors.white85,
             textAlign = TextAlign.Center,
             modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }
         )
@@ -393,17 +391,17 @@ private fun NotReady(strings: AppStrings, onRetry: () -> Unit) {
 
 @Composable
 private fun OutlinePill(text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     Box(
         modifier
             .heightIn(min = 48.dp)
             .clip(RoundedCornerShape(24.dp))
-            .border(1.5.dp, colors.borderStrong, RoundedCornerShape(24.dp))
+            .border(1.5.dp, colors.slateGray, RoundedCornerShape(24.dp))
             .clickable(onClick = onClick)
             .semantics { role = Role.Button }
             .padding(horizontal = 22.dp, vertical = 12.dp),
         contentAlignment = Alignment.Center
-    ) { Text(text, style = LamplightType.body().copy(fontWeight = FontWeight.SemiBold), color = colors.textPrimary) }
+    ) { Text(text, style = KompassTheme.typography.geologicaMedium16.copy(fontWeight = FontWeight.SemiBold), color = colors.boneWhite) }
 }
 
 private fun SearchKind.pluralLabel(strings: AppStrings): String = when (this) {

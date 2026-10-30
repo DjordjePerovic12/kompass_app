@@ -17,15 +17,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import llc.bokadev.kompass.core.utils.rememberAppStrings
-import llc.bokadev.kompass.presentation.theme.HomePalette
-import llc.bokadev.kompass.presentation.theme.helveticaBold24
-import llc.bokadev.kompass.presentation.theme.helveticaMedium13
+import llc.bokadev.kompass.ui.theme.KompassTheme
 
 @Composable
 fun SectionHeader(
     title: String,
     onSeeAll: (() -> Unit)?,
-    titleColor: Color = HomePalette.surface,
+    titleColor: Color = KompassTheme.colors.white,
     labelColor: Color = titleColor,
     localSurfaceColor: Color? = null
 ) {
@@ -46,7 +44,7 @@ fun SectionHeader(
     ) {
         Text(
             text = title,
-            style = helveticaBold24().copy(fontSize = 22.sp, lineHeight = 28.sp),
+            style = KompassTheme.typography.helveticaBold24.copy(fontSize = 22.sp, lineHeight = 28.sp),
             color = titleColor
         )
         if (onSeeAll != null) {
@@ -60,7 +58,7 @@ fun SectionHeader(
             ) {
                 Text(
                     text = strings.seeAll,
-                    style = helveticaMedium13(),
+                    style = KompassTheme.typography.helveticaMedium13,
                     color = labelColor
                 )
             }

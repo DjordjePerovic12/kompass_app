@@ -23,8 +23,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
+import llc.bokadev.kompass.ui.theme.KompassTheme
 
 /** A localism, or a story without a photo: `limestone` card, a faint Gloock “, the phrase large. */
 @Composable
@@ -38,7 +37,7 @@ fun StoryQuoteCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     Box(
         modifier
             .fillMaxWidth()
@@ -49,28 +48,28 @@ fun StoryQuoteCard(
     ) {
         Text(
             "“",
-            style = LamplightType.areaTitle().copy(fontSize = 120.sp, lineHeight = 120.sp),
-            color = colors.night.copy(alpha = 0.14f),
+            style = KompassTheme.typography.gloockRegular40.copy(fontSize = 120.sp, lineHeight = 120.sp),
+            color = colors.nightBlack.copy(alpha = 0.14f),
             modifier = Modifier.align(Alignment.TopEnd).padding(end = 14.dp).offset(y = (-14).dp)
         )
         Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(label, style = LamplightType.label(), color = colors.textOnLimestone)
+            Text(label, style = KompassTheme.typography.geologicaSemiBold11, color = colors.inkGray)
             Text(
                 title,
-                style = LamplightType.cardTitleXL().copy(fontSize = 34.sp, lineHeight = 34.sp),
-                color = colors.night,
+                style = KompassTheme.typography.gloockRegular34.copy(fontSize = 34.sp, lineHeight = 34.sp),
+                color = colors.nightBlack,
                 modifier = Modifier.padding(end = 40.dp)
             )
             excerpt?.let {
                 Text(
                     it,
-                    style = LamplightType.body().copy(fontSize = 15.sp, lineHeight = 22.sp, fontWeight = FontWeight.Normal),
-                    color = colors.textOnLimestone,
+                    style = KompassTheme.typography.geologicaMedium16.copy(fontSize = 15.sp, lineHeight = 22.sp, fontWeight = FontWeight.Normal),
+                    color = colors.inkGray,
                     maxLines = 3,
                     overflow = TextOverflow.Ellipsis
                 )
             }
-            StoryMetaRow(readTime, listen, colors.textOnLimestone, colors.night, Modifier.padding(top = 2.dp))
+            StoryMetaRow(readTime, listen, colors.inkGray, colors.nightBlack, Modifier.padding(top = 2.dp))
         }
     }
 }

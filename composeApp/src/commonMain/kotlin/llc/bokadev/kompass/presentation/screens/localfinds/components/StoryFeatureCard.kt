@@ -24,8 +24,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
+import llc.bokadev.kompass.ui.theme.KompassTheme
 
 /** The first story: 220dp photo, label, Gloock 30 title, 3-line excerpt, meta. One focus target. */
 @Composable
@@ -40,33 +39,33 @@ fun StoryFeatureCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     Column(
         modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(24.dp))
-            .background(colors.surfaceRaised)
+            .background(colors.charcoal)
             .clickable(onClick = onClick)
             .clearAndSetSemantics { role = Role.Button; contentDescription = description }
     ) {
         if (photoUrl != null) {
-            Box(Modifier.fillMaxWidth().height(220.dp).background(colors.surfaceMuted)) {
+            Box(Modifier.fillMaxWidth().height(220.dp).background(colors.slateDark)) {
                 AsyncImage(model = photoUrl, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxWidth().height(220.dp))
             }
         }
         Column(Modifier.padding(start = 18.dp, end = 18.dp, top = 18.dp, bottom = 20.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            Text(label, style = LamplightType.label(), color = colors.lamp)
-            Text(title, style = LamplightType.cardTitleXL().copy(fontSize = 30.sp, lineHeight = 32.sp), color = colors.textPrimary)
+            Text(label, style = KompassTheme.typography.geologicaSemiBold11, color = colors.lampYellow)
+            Text(title, style = KompassTheme.typography.gloockRegular34.copy(fontSize = 30.sp, lineHeight = 32.sp), color = colors.boneWhite)
             excerpt?.let {
                 Text(
                     it,
-                    style = LamplightType.body().copy(fontSize = 16.sp, lineHeight = 25.sp, fontWeight = FontWeight.Normal),
-                    color = colors.textSecondary,
+                    style = KompassTheme.typography.geologicaMedium16.copy(fontSize = 16.sp, lineHeight = 25.sp, fontWeight = FontWeight.Normal),
+                    color = colors.stoneGray,
                     maxLines = 3,
                     overflow = TextOverflow.Ellipsis
                 )
             }
-            StoryMetaRow(readTime, listen, colors.textSecondary, colors.lamp)
+            StoryMetaRow(readTime, listen, colors.stoneGray, colors.lampYellow)
         }
     }
 }

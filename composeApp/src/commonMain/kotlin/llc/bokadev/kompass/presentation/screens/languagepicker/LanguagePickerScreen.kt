@@ -11,24 +11,21 @@ import androidx.compose.ui.Modifier
 import llc.bokadev.kompass.core.utils.currentAppLanguage
 import llc.bokadev.kompass.core.utils.rememberAppStrings
 import llc.bokadev.kompass.presentation.shared.LanguageChooser
-import llc.bokadev.kompass.presentation.theme.ProvideLamplightTheme
-import llc.bokadev.kompass.presentation.theme.pageGradientBackground
 import org.koin.compose.viewmodel.koinViewModel
+import llc.bokadev.kompass.ui.theme.pageGradientBackground
 
 /** First launch: the same language controls as the in-app sheet, full screen, with nothing to close. */
 @Composable
 fun LanguagePickerScreen() {
     val vm: LanguagePickerViewModel = koinViewModel()
     val strings = rememberAppStrings()
-    ProvideLamplightTheme {
-        Box(Modifier.fillMaxSize().pageGradientBackground().windowInsetsPadding(WindowInsets.statusBars), contentAlignment = Alignment.BottomCenter) {
-            LanguageChooser(
-                currentLanguage = currentAppLanguage(),
-                strings = strings.language,
-                onSelect = { vm.onAction(LanguagePickerAction.SelectLanguage(it)) },
-                onUsePhoneLanguage = { vm.onAction(LanguagePickerAction.UsePhoneLanguage) },
-                onDismiss = null
-            )
-        }
+    Box(Modifier.fillMaxSize().pageGradientBackground().windowInsetsPadding(WindowInsets.statusBars), contentAlignment = Alignment.BottomCenter) {
+        LanguageChooser(
+            currentLanguage = currentAppLanguage(),
+            strings = strings.language,
+            onSelect = { vm.onAction(LanguagePickerAction.SelectLanguage(it)) },
+            onUsePhoneLanguage = { vm.onAction(LanguagePickerAction.UsePhoneLanguage) },
+            onDismiss = null
+        )
     }
 }

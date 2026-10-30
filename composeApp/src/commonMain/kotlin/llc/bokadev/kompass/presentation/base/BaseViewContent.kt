@@ -17,8 +17,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import llc.bokadev.kompass.core.utils.rememberAppStrings
 import llc.bokadev.kompass.presentation.shared.StateMessage
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
 import org.jetbrains.compose.resources.stringResource
+import llc.bokadev.kompass.ui.theme.KompassTheme
 
 /**
     A base wrapper composable for structuring screen content.
@@ -84,7 +84,7 @@ fun BaseContentView(
                     modifier = Modifier.align(
                         alignment = Alignment.Center
                     ),
-                    color = LamplightTheme.colors.lamp
+                    color = KompassTheme.colors.lampYellow
                 )
 
                 error != null && onRetry != null -> Box(

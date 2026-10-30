@@ -23,9 +23,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import llc.bokadev.kompass.presentation.screens.home.components.ArrowRightIcon
-import llc.bokadev.kompass.presentation.theme.LamplightShapes
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
+import llc.bokadev.kompass.ui.theme.KompassTheme
+import llc.bokadev.kompass.ui.theme.KompassShapes
 
 /** A compact, functional service row: name, the area it serves, and its contact (website host) when known. */
 @Composable
@@ -36,13 +35,13 @@ fun ServiceRow(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     Row(
         modifier = modifier
             .fillMaxWidth()
             .heightIn(min = 64.dp)
-            .clip(LamplightShapes.cardEvent)
-            .background(colors.surfaceRaised)
+            .clip(KompassShapes.cardEvent)
+            .background(colors.charcoal)
             .clickable(onClick = onClick)
             .clearAndSetSemantics {
                 role = Role.Button
@@ -56,15 +55,15 @@ fun ServiceRow(
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(
                 text = name,
-                style = LamplightType.cardTitle().copy(fontSize = 20.sp, lineHeight = 23.sp),
-                color = colors.textPrimary,
+                style = KompassTheme.typography.gloockRegular23.copy(fontSize = 20.sp, lineHeight = 23.sp),
+                color = colors.boneWhite,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
             val meta = listOfNotNull(area, contact).joinToString(" · ")
-            if (meta.isNotBlank()) Text(text = meta, style = LamplightType.bodyS(), color = colors.textSecondary, maxLines = 2)
+            if (meta.isNotBlank()) Text(text = meta, style = KompassTheme.typography.geologicaRegular14, color = colors.stoneGray, maxLines = 2)
         }
-        ArrowRightIcon(color = colors.textTertiary, size = 14.dp)
+        ArrowRightIcon(color = colors.pebbleGray, size = 14.dp)
     }
 }
 

@@ -12,8 +12,7 @@ import androidx.compose.ui.unit.dp
 import llc.bokadev.kompass.presentation.screens.home.components.HeadphonesIcon
 import llc.bokadev.kompass.presentation.screens.search.components.SearchGlyph
 import llc.bokadev.kompass.presentation.screens.search.components.SearchGlyphIcon
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
+import llc.bokadev.kompass.ui.theme.KompassTheme
 
 /** 📖 read time · 🎧 Listen (in [listenColor]). Either part hides when null. Decorative for TalkBack (the card describes itself). */
 @Composable
@@ -29,13 +28,13 @@ fun StoryMetaRow(
         readTime?.let {
             Row(horizontalArrangement = Arrangement.spacedBy(5.dp), verticalAlignment = Alignment.CenterVertically) {
                 SearchGlyphIcon(SearchGlyph.Book, color, 14.dp)
-                Text(it, style = LamplightType.meta(), color = color)
+                Text(it, style = KompassTheme.typography.geologicaRegular13, color = color)
             }
         }
         listen?.let {
             Row(horizontalArrangement = Arrangement.spacedBy(5.dp), verticalAlignment = Alignment.CenterVertically) {
                 HeadphonesIcon(listenColor, 13.dp)
-                Text(it, style = LamplightType.meta(), color = listenColor)
+                Text(it, style = KompassTheme.typography.geologicaRegular13, color = listenColor)
             }
         }
     }
@@ -44,5 +43,5 @@ fun StoryMetaRow(
 @Preview
 @Composable
 private fun StoryMetaRowPreview() {
-    StoryMetaRow("4 min read", "Listen", LamplightTheme.colors.textSecondary, LamplightTheme.colors.lamp)
+    StoryMetaRow("4 min read", "Listen", KompassTheme.colors.stoneGray, KompassTheme.colors.lampYellow)
 }

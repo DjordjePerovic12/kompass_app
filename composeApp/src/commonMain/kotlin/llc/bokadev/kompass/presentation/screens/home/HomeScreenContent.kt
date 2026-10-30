@@ -70,21 +70,15 @@ import llc.bokadev.kompass.presentation.screens.home.components.NearbyCardUi
 import llc.bokadev.kompass.presentation.screens.home.components.NearbyStackCarousel
 import llc.bokadev.kompass.presentation.screens.home.components.NoticeItem
 import llc.bokadev.kompass.presentation.screens.home.components.SectionHeader
-import llc.bokadev.kompass.presentation.theme.HomePalette
-import llc.bokadev.kompass.presentation.theme.pageGradientBackground
-import llc.bokadev.kompass.presentation.theme.LamplightDimens
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
-import llc.bokadev.kompass.presentation.theme.helveticaBold24
-import llc.bokadev.kompass.presentation.theme.helveticaBold44
-import llc.bokadev.kompass.presentation.theme.helveticaMedium13
-import llc.bokadev.kompass.presentation.theme.helveticaMedium16
-import llc.bokadev.kompass.presentation.theme.helveticaRegular14
 import kotlin.time.ExperimentalTime
+import llc.bokadev.kompass.ui.theme.KompassTheme
+import llc.bokadev.kompass.ui.theme.KompassDimens
+import llc.bokadev.kompass.ui.theme.pageGradientBackground
+import llc.bokadev.kompass.ui.theme.pageGradientStops
 
 /**
  * The whole screen is one continuous light-purple-to-ink gradient (see
- * [HomePalette.pageGradientStops]) — sections don't carry their own background blocks. Early
+ * [pageGradientStops]) — sections don't carry their own background blocks. Early
  * sections (masthead, area control, Nearby) land on the light part of the gradient and use
  * dark ink text; later sections (Must See, Notices, Events) land on the dark part and use
  * light surface-based text. Nearby's own white cards read fine against either.
@@ -202,7 +196,7 @@ fun HomeScreenContent(
     if (showAreaSheet) {
         ModalBottomSheet(
             onDismissRequest = { showAreaSheet = false },
-            containerColor = HomePalette.surface
+            containerColor = KompassTheme.colors.white
         ) {
             Column(
                 Modifier.padding(horizontal = 20.dp, vertical = 16.dp),
@@ -210,8 +204,8 @@ fun HomeScreenContent(
             ) {
                 Text(
                     text = strings.redesign.chooseArea,
-                    style = helveticaBold24().copy(fontSize = 22.sp, lineHeight = 28.sp),
-                    color = HomePalette.ink,
+                    style = KompassTheme.typography.helveticaBold24.copy(fontSize = 22.sp, lineHeight = 28.sp),
+                    color = KompassTheme.colors.inkBlack,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
                 HomeArea.entries.forEach { area ->
@@ -221,7 +215,7 @@ fun HomeScreenContent(
                             .fillMaxWidth()
                             .heightIn(min = 48.dp)
                             .clip(RoundedCornerShape(12.dp))
-                            .background(if (selected) HomePalette.selection else Color.Transparent)
+                            .background(if (selected) KompassTheme.colors.lavender else Color.Transparent)
                             .clickable {
                                 showAreaSheet = false
                                 onAction(HomeAction.SelectArea(area))
@@ -232,12 +226,12 @@ fun HomeScreenContent(
                     ) {
                         Text(
                             text = area.label(strings),
-                            style = helveticaMedium16().copy(fontSize = 16.sp, lineHeight = 24.sp),
-                            color = HomePalette.ink,
+                            style = KompassTheme.typography.helveticaMedium16.copy(fontSize = 16.sp, lineHeight = 24.sp),
+                            color = KompassTheme.colors.inkBlack,
                             modifier = Modifier.weight(1f)
                         )
                         if (selected) {
-                            CheckIcon(color = HomePalette.action, size = 16.dp)
+                            CheckIcon(color = KompassTheme.colors.periwinkle, size = 16.dp)
                         }
                     }
                 }
@@ -248,13 +242,13 @@ fun HomeScreenContent(
 }
 
 @Composable
-private fun homeHeadingStyle() = helveticaBold24().copy(fontSize = 22.sp, lineHeight = 28.sp)
+private fun homeHeadingStyle() = KompassTheme.typography.helveticaBold24.copy(fontSize = 22.sp, lineHeight = 28.sp)
 
 @Composable
-private fun homeBodyStyle() = helveticaMedium16().copy(fontSize = 16.sp, lineHeight = 24.sp)
+private fun homeBodyStyle() = KompassTheme.typography.helveticaMedium16.copy(fontSize = 16.sp, lineHeight = 24.sp)
 
 @Composable
-private fun homeMetaStyle() = helveticaRegular14().copy(fontSize = 14.sp, lineHeight = 20.sp)
+private fun homeMetaStyle() = KompassTheme.typography.helveticaRegular14.copy(fontSize = 14.sp, lineHeight = 20.sp)
 
 /**
  * [darkZone] sections render their heading/metadata on a local translucent ink panel rather
@@ -266,7 +260,7 @@ private fun homeMetaStyle() = helveticaRegular14().copy(fontSize = 14.sp, lineHe
  */
 @Composable
 private fun localSectionScrim(darkZone: Boolean): Color? =
-    if (darkZone) HomePalette.ink.copy(alpha = 0.34f) else null
+    if (darkZone) KompassTheme.colors.inkBlack.copy(alpha = 0.34f) else null
 
 @Composable
 private fun HomeSectionFrame(
@@ -275,8 +269,8 @@ private fun HomeSectionFrame(
 ) {
     val strings = rememberAppStrings()
     // All lettering on Home's gradient is white (owner's call, 2026-10-06).
-    val titleColor = HomePalette.surface
-    val metaColor = HomePalette.surface.copy(alpha = 0.7f)
+    val titleColor = KompassTheme.colors.white
+    val metaColor = KompassTheme.colors.white.copy(alpha = 0.7f)
     val scrim = localSectionScrim(darkZone)
     when (state.sections[section]) {
         SectionStatus.READY -> content()
@@ -302,12 +296,12 @@ private fun HomeSectionFrame(
                 // Same night-on-lamp pill as the other screens' Retry (white on periwinkle was 3.9:1).
                 Text(
                     text = strings.retry,
-                    style = helveticaMedium13(),
-                    color = LamplightTheme.colors.night,
+                    style = KompassTheme.typography.helveticaMedium13,
+                    color = KompassTheme.colors.nightBlack,
                     modifier = Modifier
-                        .heightIn(min = LamplightDimens.minTouchTarget)
+                        .heightIn(min = KompassDimens.minTouchTarget)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(LamplightTheme.colors.lamp)
+                        .background(KompassTheme.colors.lampYellow)
                         .clickable { onAction(HomeAction.RetrySection(section)) }
                         .padding(horizontal = 16.dp, vertical = 14.dp)
                 )
@@ -333,7 +327,7 @@ private fun MustSeeSection(
     onPlaceFavoriteToggle: (String) -> Unit,
     title: String
 ) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     val cardWidth = if (LocalDensity.current.fontScale >= 1.3f) 224.dp else 196.dp
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -345,14 +339,14 @@ private fun MustSeeSection(
         ) {
             Text(
                 text = title,
-                style = LamplightType.sectionTitle(),
-                color = HomePalette.surface,
+                style = KompassTheme.typography.gloockRegular32,
+                color = KompassTheme.colors.white,
                 modifier = Modifier.weight(1f).semantics { heading() }
             )
             Text(
                 text = strings.redesign.wholeBay.uppercaseFor(lang),
-                style = LamplightType.label(),
-                color = HomePalette.surface,
+                style = KompassTheme.typography.geologicaSemiBold11,
+                color = KompassTheme.colors.white,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
         }
@@ -413,16 +407,16 @@ private fun NearbyYouSection(
                 Text(
                     text = strings.home.aboutDestination.replace("{name}", name),
                     style = homeBodyStyle().copy(fontWeight = FontWeight.SemiBold),
-                    color = HomePalette.surface
+                    color = KompassTheme.colors.white
                 )
-                ArrowRightIcon(color = HomePalette.surface, size = 14.dp)
+                ArrowRightIcon(color = KompassTheme.colors.white, size = 14.dp)
             }
         }
         if (state.nearbyPlaces.isEmpty()) {
             Text(
                 text = emptyMessage,
                 style = homeMetaStyle(),
-                color = HomePalette.onGradientSecondary,
+                color = KompassTheme.colors.white85,
                 modifier = Modifier.padding(horizontal = 20.dp)
             )
         } else {
@@ -465,8 +459,8 @@ private fun UpcomingEventsSection(
         SectionHeader(
             title = title,
             onSeeAll = onSeeAll,
-            titleColor = HomePalette.surface,
-            labelColor = HomePalette.surface
+            titleColor = KompassTheme.colors.white,
+            labelColor = KompassTheme.colors.white
         )
         EqualHeightRow(
             spacing = 12.dp,
@@ -505,8 +499,8 @@ private fun InfoCenterPreviewSection(
         SectionHeader(
             title = title,
             onSeeAll = onSeeAll,
-            titleColor = HomePalette.surface,
-            labelColor = HomePalette.surface
+            titleColor = KompassTheme.colors.white,
+            labelColor = KompassTheme.colors.white
         )
         Column(
             modifier = Modifier.padding(horizontal = 20.dp),

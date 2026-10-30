@@ -20,7 +20,7 @@ import llc.bokadev.kompass.presentation.screens.home.toNoticeLabel
 import llc.bokadev.kompass.presentation.screens.home.toNoticeLevel
 import llc.bokadev.kompass.presentation.shared.LamplightCompactHeader
 import llc.bokadev.kompass.presentation.shared.StateMessage
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
+import llc.bokadev.kompass.ui.theme.KompassTheme
 
 /**
  * Local updates: what happened and its level/validity first ("Important · until 12 Oct"), where it
@@ -32,14 +32,14 @@ fun InfoCenterScreenContent(
     onAction: (InfoCenterAction) -> Unit
 ) {
     val onRetry = { onAction(InfoCenterAction.Retry) }
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     val strings = rememberAppStrings()
     val lang = currentAppLanguage()
     val s = strings.states
     val pad = Modifier.padding(horizontal = 20.dp)
 
     LazyColumn(
-        modifier = Modifier.fillMaxSize().background(colors.night),
+        modifier = Modifier.fillMaxSize().background(colors.nightBlack),
         contentPadding = PaddingValues(bottom = 26.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
@@ -53,7 +53,7 @@ fun InfoCenterScreenContent(
         }
         if (state.isLoading) {
             item(key = "progress") {
-                LinearProgressIndicator(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 8.dp), color = colors.lamp, trackColor = colors.surfaceMuted)
+                LinearProgressIndicator(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 8.dp), color = colors.lampYellow, trackColor = colors.slateDark)
             }
         }
         when {

@@ -47,12 +47,10 @@ import llc.bokadev.kompass.presentation.screens.favorites.GROUP_OTHER
 import llc.bokadev.kompass.presentation.screens.home.HomeArea
 import llc.bokadev.kompass.presentation.screens.home.components.ChevronDownIcon
 import llc.bokadev.kompass.presentation.shared.LamplightCompactHeader
-import llc.bokadev.kompass.presentation.theme.HomePalette
-import llc.bokadev.kompass.presentation.theme.LamplightShapes
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
-import llc.bokadev.kompass.presentation.theme.pageGradientBackground
 import kotlin.math.roundToInt
+import llc.bokadev.kompass.ui.theme.KompassTheme
+import llc.bokadev.kompass.ui.theme.KompassShapes
+import llc.bokadev.kompass.ui.theme.pageGradientBackground
 
 /** The shared Lamplight category list. Rows keep their order when saved; only their bookmark changes. */
 @Composable
@@ -63,7 +61,7 @@ fun CategoryListScreenContent(
 ) {
     val strings = rememberAppStrings()
     val lang = currentAppLanguage()
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     val activities = state.kind == CategoryListKind.ACTIVITIES
     val c = strings.categoryList
 
@@ -89,8 +87,8 @@ fun CategoryListScreenContent(
             ) {
                 Text(
                     text = (if (activities) c.countActivities else c.countPlaces).replace("{n}", state.count.toString()),
-                    style = LamplightType.bodyS(),
-                    color = HomePalette.onGradientSecondary,
+                    style = KompassTheme.typography.geologicaRegular14,
+                    color = KompassTheme.colors.white85,
                     modifier = Modifier.weight(1f)
                 )
                 AreaFilter(state, strings) { onAction(CategoryListAction.SetArea(it)) }
@@ -104,7 +102,7 @@ fun CategoryListScreenContent(
         }
         if (state.refreshFailed) {
             item(key = "refresh-failed") {
-                Text(text = c.couldntRefresh, style = LamplightType.meta(), color = HomePalette.onGradientSecondary, modifier = Modifier.padding(20.dp))
+                Text(text = c.couldntRefresh, style = KompassTheme.typography.geologicaRegular13, color = KompassTheme.colors.white85, modifier = Modifier.padding(20.dp))
             }
         }
     }
@@ -142,15 +140,15 @@ private fun Card(
 
 @Composable
 private fun AreaFilter(state: CategoryListState, strings: AppStrings, onArea: (String?) -> Unit) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     var open by remember { mutableStateOf(false) }
     val active = state.areaFilter
     Box {
         Row(
             modifier = Modifier
                 .heightIn(min = 44.dp)
-                .clip(LamplightShapes.pill)
-                .border(1.5.dp, if (active != null) colors.lamp else colors.borderStrong, LamplightShapes.pill)
+                .clip(KompassShapes.pill)
+                .border(1.5.dp, if (active != null) colors.lampYellow else colors.slateGray, KompassShapes.pill)
                 .clickable { if (active != null) onArea(null) else open = true }
                 .semantics(mergeDescendants = true) { role = Role.Button }
                 .padding(horizontal = 14.dp),
@@ -159,12 +157,12 @@ private fun AreaFilter(state: CategoryListState, strings: AppStrings, onArea: (S
         ) {
             Text(
                 text = active?.let { strings.categoryList.areaSelected.replace("{area}", it.areaLabel(strings)) } ?: strings.categoryList.areaAll,
-                style = LamplightType.bodyS().copy(fontWeight = FontWeight.SemiBold),
-                color = colors.textPrimary
+                style = KompassTheme.typography.geologicaRegular14.copy(fontWeight = FontWeight.SemiBold),
+                color = colors.boneWhite
             )
             // An active filter shows ✕ (tap clears it); otherwise a chevron opens the menu.
-            if (active != null) Text(text = "✕", style = LamplightType.bodyS(), color = colors.lamp)
-            else ChevronDownIcon(color = colors.textPrimary, size = 14.dp)
+            if (active != null) Text(text = "✕", style = KompassTheme.typography.geologicaRegular14, color = colors.lampYellow)
+            else ChevronDownIcon(color = colors.boneWhite, size = 14.dp)
         }
         DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
             DropdownMenuItem(text = { Text(strings.categoryList.allAreas) }, onClick = { open = false; onArea(null) })
@@ -177,23 +175,23 @@ private fun AreaFilter(state: CategoryListState, strings: AppStrings, onArea: (S
 
 @Composable
 private fun EmptyOrError(state: CategoryListState, strings: AppStrings, onAction: (CategoryListAction) -> Unit) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         val retry = state.error != null
         Text(
             text = state.error?.asString() ?: strings.categoryList.noMatch,
-            style = LamplightType.body(),
-            color = HomePalette.onGradientSecondary
+            style = KompassTheme.typography.geologicaMedium16,
+            color = KompassTheme.colors.white85
         )
         if (retry || state.areaFilter != null) {
             Text(
                 text = if (retry) strings.retry else strings.categoryList.clearFilter,
-                style = LamplightType.body().copy(fontWeight = FontWeight.SemiBold),
-                color = colors.night,
+                style = KompassTheme.typography.geologicaMedium16.copy(fontWeight = FontWeight.SemiBold),
+                color = colors.nightBlack,
                 modifier = Modifier
                     .heightIn(min = 44.dp)
-                    .clip(LamplightShapes.pill)
-                    .background(colors.lamp)
+                    .clip(KompassShapes.pill)
+                    .background(colors.lampYellow)
                     .clickable { onAction(if (retry) CategoryListAction.Retry else CategoryListAction.SetArea(null)) }
                     .padding(horizontal = 20.dp, vertical = 12.dp)
             )

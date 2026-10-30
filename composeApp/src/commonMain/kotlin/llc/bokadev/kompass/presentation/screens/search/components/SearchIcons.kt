@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import llc.bokadev.kompass.ui.theme.KompassTheme
 
 /** Stroke glyphs only Search needs (decorative; the surrounding control carries the label). */
 enum class SearchGlyph { Clock, Close, Book, SearchMinus }
@@ -57,5 +58,5 @@ fun SearchGlyphIcon(glyph: SearchGlyph, color: Color, size: Dp = 20.dp, modifier
 @Preview
 @Composable
 private fun SearchGlyphIconPreview() {
-    SearchGlyphIcon(SearchGlyph.Book, Color(0xFFFFC247), 24.dp)
+    SearchGlyphIcon(SearchGlyph.Book, KompassTheme.colors.lampYellow, 24.dp)
 }

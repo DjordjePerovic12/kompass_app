@@ -16,9 +16,8 @@ import androidx.compose.ui.unit.dp
 import llc.bokadev.kompass.core.utils.rememberAppStrings
 import llc.bokadev.kompass.domain.model.Excursion
 import llc.bokadev.kompass.presentation.screens.excursions.components.ExcursionRow
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
 import org.koin.compose.viewmodel.koinViewModel
+import llc.bokadev.kompass.ui.theme.KompassTheme
 
 /** Embedded section: hidden while loading or when the place has no related activities. */
 @Composable
@@ -32,15 +31,15 @@ fun RelatedActivities(placeId: String) {
 @Composable
 private fun RelatedActivitiesContent(placeId: String, state: RelatedActivitiesState, onAction: (RelatedActivitiesAction) -> Unit) {
     val app = rememberAppStrings()
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     val failure = state.error
     if (state.items.isEmpty() && failure == null) return
     Column(Modifier.fillMaxWidth().padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text(app.excursions.related, style = LamplightType.sectionTitleS(), color = colors.textPrimary)
-        if (state.cached) Text(app.excursions.cached, style = LamplightType.body(), color = colors.textSecondary)
-        if (failure != null) Text(failure.resolve(app), style = LamplightType.body(), color = colors.textSecondary)
+        Text(app.excursions.related, style = KompassTheme.typography.gloockRegular26, color = colors.boneWhite)
+        if (state.cached) Text(app.excursions.cached, style = KompassTheme.typography.geologicaMedium16, color = colors.stoneGray)
+        if (failure != null) Text(failure.resolve(app), style = KompassTheme.typography.geologicaMedium16, color = colors.stoneGray)
         if (failure != null || state.cached) {
-            TextButton(onClick = { onAction(RelatedActivitiesAction.Load(placeId, force = true)) }) { Text(app.retry, color = colors.lamp) }
+            TextButton(onClick = { onAction(RelatedActivitiesAction.Load(placeId, force = true)) }) { Text(app.retry, color = colors.lampYellow) }
         }
         state.items.forEach { activity ->
             key(activity.id) {

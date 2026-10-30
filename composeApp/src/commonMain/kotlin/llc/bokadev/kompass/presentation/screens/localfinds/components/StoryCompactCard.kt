@@ -29,8 +29,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
+import llc.bokadev.kompass.ui.theme.KompassTheme
 
 /** A legend with a photo: 120dp photo column (min 160dp tall), label, Gloock 22 title, 2-line excerpt, meta. */
 @Composable
@@ -45,39 +44,39 @@ fun StoryCompactCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     Row(
         modifier
             .fillMaxWidth()
             .height(IntrinsicSize.Min)
             .heightIn(min = 160.dp)
             .clip(RoundedCornerShape(22.dp))
-            .background(colors.surfaceRaised)
+            .background(colors.charcoal)
             .clickable(onClick = onClick)
             .clearAndSetSemantics { role = Role.Button; contentDescription = description }
     ) {
-        Box(Modifier.width(120.dp).fillMaxHeight().background(colors.surfaceMuted)) {
+        Box(Modifier.width(120.dp).fillMaxHeight().background(colors.slateDark)) {
             AsyncImage(model = photoUrl, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.width(120.dp).fillMaxHeight())
         }
         Column(Modifier.weight(1f).padding(start = 14.dp, end = 14.dp, top = 14.dp, bottom = 14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Text(label, style = LamplightType.label().copy(fontSize = 10.sp), color = colors.lamp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(label, style = KompassTheme.typography.geologicaSemiBold11.copy(fontSize = 10.sp), color = colors.lampYellow, maxLines = 1, overflow = TextOverflow.Ellipsis)
             Text(
                 title,
-                style = LamplightType.cardTitle().copy(fontSize = 22.sp, lineHeight = 24.sp),
-                color = colors.textPrimary,
+                style = KompassTheme.typography.gloockRegular23.copy(fontSize = 22.sp, lineHeight = 24.sp),
+                color = colors.boneWhite,
                 maxLines = 3,
                 overflow = TextOverflow.Ellipsis
             )
             excerpt?.let {
                 Text(
                     it,
-                    style = LamplightType.bodyS().copy(lineHeight = 21.sp, fontWeight = FontWeight.Normal),
-                    color = colors.textSecondary,
+                    style = KompassTheme.typography.geologicaRegular14.copy(lineHeight = 21.sp, fontWeight = FontWeight.Normal),
+                    color = colors.stoneGray,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
             }
-            StoryMetaRow(readTime, listen, colors.textSecondary, colors.lamp, Modifier.padding(top = 2.dp))
+            StoryMetaRow(readTime, listen, colors.stoneGray, colors.lampYellow, Modifier.padding(top = 2.dp))
         }
     }
 }

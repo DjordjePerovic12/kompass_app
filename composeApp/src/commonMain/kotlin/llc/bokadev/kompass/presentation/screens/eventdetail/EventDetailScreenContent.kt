@@ -44,10 +44,9 @@ import llc.bokadev.kompass.presentation.screens.placedetail.components.DetailPra
 import llc.bokadev.kompass.presentation.screens.placedetail.components.DetailTextSection
 import llc.bokadev.kompass.presentation.screens.placedetail.components.DetailWhereItIs
 import llc.bokadev.kompass.presentation.shared.StatusBarIconsEffect
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
-import llc.bokadev.kompass.presentation.theme.pageGradientBackground
 import kotlin.time.ExperimentalTime
+import llc.bokadev.kompass.ui.theme.KompassTheme
+import llc.bokadev.kompass.ui.theme.pageGradientBackground
 
 /**
  * Event detail in the shared detail language: when, where and price first, then the official
@@ -73,7 +72,7 @@ fun EventDetailScreenContent(state: EventDetailState, currentLocation: GeoPoint?
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun Body(event: Event, currentLocation: GeoPoint?, strings: AppStrings, onAction: (EventDetailAction) -> Unit) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     val lang = currentAppLanguage()
     val density = LocalDensity.current
     val name = event.localizedName(lang)
@@ -98,12 +97,12 @@ private fun Body(event: Event, currentLocation: GeoPoint?, strings: AppStrings, 
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             event.category.trim().takeIf { it.isNotBlank() }?.let {
-                Text(text = it.toTitleCaseLabel().uppercaseFor(lang), style = LamplightType.label(), color = colors.lamp)
+                Text(text = it.toTitleCaseLabel().uppercaseFor(lang), style = KompassTheme.typography.geologicaSemiBold11, color = colors.lampYellow)
             }
             Text(
                 text = name,
-                style = LamplightType.cardTitleXL().copy(fontSize = 36.sp, lineHeight = 38.sp),
-                color = colors.textPrimary,
+                style = KompassTheme.typography.gloockRegular34.copy(fontSize = 36.sp, lineHeight = 38.sp),
+                color = colors.boneWhite,
                 modifier = Modifier.semantics { heading() }
             )
         }

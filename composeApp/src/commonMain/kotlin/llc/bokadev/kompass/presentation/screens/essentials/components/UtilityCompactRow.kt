@@ -24,8 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
+import llc.bokadev.kompass.ui.theme.KompassTheme
 
 /** A secondary utility category (spec §3.5): icon, name, "{n} nearby", closest distance, chevron. */
 @Composable
@@ -37,30 +36,30 @@ fun UtilityCompactRow(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     Row(
         modifier = modifier
             .fillMaxWidth()
             .heightIn(min = 72.dp)
             .clip(RoundedCornerShape(22.dp))
-            .background(colors.surfaceRaised)
+            .background(colors.charcoal)
             .clickable(onClick = onClick)
             .semantics(mergeDescendants = true) { role = Role.Button }
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Box(Modifier.size(40.dp).clip(RoundedCornerShape(12.dp)).background(colors.surfaceMuted), contentAlignment = Alignment.Center) {
-            EssentialsIcon(glyph, color = colors.lamp, size = 20.dp)
+        Box(Modifier.size(40.dp).clip(RoundedCornerShape(12.dp)).background(colors.slateDark), contentAlignment = Alignment.Center) {
+            EssentialsIcon(glyph, color = colors.lampYellow, size = 20.dp)
         }
         Column(Modifier.weight(1f)) {
-            Text(text = title, style = LamplightType.bodyL(), color = colors.textPrimary)
-            Text(text = subtitle, style = LamplightType.meta(), color = colors.textTertiary)
+            Text(text = title, style = KompassTheme.typography.geologicaSemiBold17, color = colors.boneWhite)
+            Text(text = subtitle, style = KompassTheme.typography.geologicaRegular13, color = colors.pebbleGray)
         }
         closestDistance?.let {
-            Text(text = it, style = LamplightType.body().copy(fontSize = 15.sp, fontWeight = FontWeight.SemiBold), color = colors.lamp)
+            Text(text = it, style = KompassTheme.typography.geologicaMedium16.copy(fontSize = 15.sp, fontWeight = FontWeight.SemiBold), color = colors.lampYellow)
         }
-        EssentialsIcon(EssentialsGlyph.ChevronDown, color = colors.textTertiary, size = 20.dp, modifier = Modifier.graphicsLayer { rotationZ = -90f })
+        EssentialsIcon(EssentialsGlyph.ChevronDown, color = colors.pebbleGray, size = 20.dp, modifier = Modifier.graphicsLayer { rotationZ = -90f })
     }
 }
 

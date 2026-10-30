@@ -42,11 +42,8 @@ import llc.bokadev.kompass.presentation.screens.home.components.BookmarkIcon
 import llc.bokadev.kompass.presentation.screens.home.components.PlayIcon
 import llc.bokadev.kompass.presentation.screens.placedetail.components.DetailGlyph
 import llc.bokadev.kompass.presentation.screens.placedetail.components.DetailIcon
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
+import llc.bokadev.kompass.ui.theme.KompassTheme
 
-private val SavedCardFill = Color(0xFF22262A)
-private val SavedButtonFill = Color(0xFF2A2516)
 private val CardShape = RoundedCornerShape(22.dp)
 
 /**
@@ -68,7 +65,7 @@ fun CategoryListCard(
     onOpen: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     val haptics = LocalHapticFeedback.current
     var imageFailed by remember(imageUrl) { mutableStateOf(false) }
 
@@ -76,7 +73,7 @@ fun CategoryListCard(
         modifier = modifier
             .fillMaxWidth()
             .clip(CardShape)
-            .background(if (saved) SavedCardFill else colors.surfaceRaised)
+            .background(if (saved) colors.charcoalLight else colors.charcoal)
             .padding(10.dp),
         horizontalArrangement = Arrangement.spacedBy(14.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -94,19 +91,19 @@ fun CategoryListCard(
             horizontalArrangement = Arrangement.spacedBy(14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(Modifier.size(96.dp).clip(RoundedCornerShape(16.dp)).background(colors.surfaceMuted), contentAlignment = Alignment.Center) {
+            Box(Modifier.size(96.dp).clip(RoundedCornerShape(16.dp)).background(colors.slateDark), contentAlignment = Alignment.Center) {
                 if (!imageUrl.isNullOrBlank() && !imageFailed) {
                     AsyncImage(model = imageUrl, contentDescription = null, contentScale = ContentScale.Crop, onError = { imageFailed = true }, modifier = Modifier.fillMaxSize())
                 } else {
-                    DetailIcon(DetailGlyph.Landmark, color = colors.textTertiary, size = 28.dp)
+                    DetailIcon(DetailGlyph.Landmark, color = colors.pebbleGray, size = 28.dp)
                 }
             }
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                label?.let { Text(text = it, style = LamplightType.label().copy(fontSize = 10.sp), color = colors.lamp, maxLines = 2, overflow = TextOverflow.Ellipsis) }
+                label?.let { Text(text = it, style = KompassTheme.typography.geologicaSemiBold11.copy(fontSize = 10.sp), color = colors.lampYellow, maxLines = 2, overflow = TextOverflow.Ellipsis) }
                 Text(
                     text = title,
-                    style = LamplightType.cardTitle().copy(fontSize = 20.sp, lineHeight = 22.sp),
-                    color = colors.textPrimary,
+                    style = KompassTheme.typography.gloockRegular23.copy(fontSize = 20.sp, lineHeight = 22.sp),
+                    color = colors.boneWhite,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -114,11 +111,11 @@ fun CategoryListCard(
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         if (hasAudio) {
                             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                                PlayIcon(color = colors.textPrimary, size = 10.dp)
-                                Text(text = audioLabel, style = LamplightType.meta().copy(fontWeight = FontWeight.SemiBold), color = colors.textPrimary)
+                                PlayIcon(color = colors.boneWhite, size = 10.dp)
+                                Text(text = audioLabel, style = KompassTheme.typography.geologicaRegular13.copy(fontWeight = FontWeight.SemiBold), color = colors.boneWhite)
                             }
                         }
-                        meta?.let { Text(text = it, style = LamplightType.meta(), color = colors.textTertiary, maxLines = 1) }
+                        meta?.let { Text(text = it, style = KompassTheme.typography.geologicaRegular13, color = colors.pebbleGray, maxLines = 1) }
                     }
                 }
             }
@@ -127,7 +124,7 @@ fun CategoryListCard(
             Modifier
                 .size(44.dp)
                 .clip(CircleShape)
-                .background(if (saved) SavedButtonFill else colors.surfaceMuted)
+                .background(if (saved) colors.lampShadow else colors.slateDark)
                 .clickable {
                     if (!saved) haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                     onToggle()
@@ -139,7 +136,7 @@ fun CategoryListCard(
                 },
             contentAlignment = Alignment.Center
         ) {
-            BookmarkIcon(filled = saved, color = if (saved) colors.lamp else colors.textSecondary, size = 16.dp)
+            BookmarkIcon(filled = saved, color = if (saved) colors.lampYellow else colors.stoneGray, size = 16.dp)
         }
     }
 }

@@ -33,10 +33,9 @@ import androidx.compose.ui.unit.em
 import llc.bokadev.kompass.core.utils.currentAppLanguage
 import llc.bokadev.kompass.presentation.screens.home.components.GlobeIcon
 import llc.bokadev.kompass.presentation.screens.home.components.SearchIcon
-import llc.bokadev.kompass.presentation.theme.LamplightDimens
-import llc.bokadev.kompass.presentation.theme.LamplightShapes
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
+import llc.bokadev.kompass.ui.theme.KompassTheme
+import llc.bokadev.kompass.ui.theme.KompassShapes
+import llc.bokadev.kompass.ui.theme.KompassDimens
 
 /**
  * The yellow Lamplight header shared by Home, Explore and Essentials: wordmark + language button,
@@ -53,24 +52,24 @@ fun LamplightHeader(
     footer: @Composable ColumnScope.() -> Unit = {},
     headline: @Composable ColumnScope.() -> Unit
 ) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     val languageCode = currentAppLanguage().uppercase()
 
-    Box(modifier = modifier.fillMaxWidth().background(colors.lamp)) {
+    Box(modifier = modifier.fillMaxWidth().background(colors.lampYellow)) {
         Canvas(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(170.dp)
                 .align(Alignment.TopEnd)
         ) {
-            drawZigzag(colors.night)
+            drawZigzag(colors.nightBlack)
         }
 
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .windowInsetsPadding(WindowInsets.statusBars)
-                .padding(horizontal = LamplightDimens.screenPadding)
+                .padding(horizontal = KompassDimens.screenPadding)
                 .padding(top = 4.dp, bottom = 20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
@@ -81,22 +80,22 @@ fun LamplightHeader(
             ) {
                 Text(
                     text = "KOMPASS",
-                    style = LamplightType.label().copy(letterSpacing = 0.3.em, fontWeight = FontWeight.Bold),
-                    color = colors.night
+                    style = KompassTheme.typography.geologicaSemiBold11.copy(letterSpacing = 0.3.em, fontWeight = FontWeight.Bold),
+                    color = colors.nightBlack
                 )
                 Row(
                     modifier = Modifier
                         .heightIn(min = 44.dp)
-                        .clip(LamplightShapes.pill)
-                        .background(colors.night.copy(alpha = 0.1f))
+                        .clip(KompassShapes.pill)
+                        .background(colors.nightBlack.copy(alpha = 0.1f))
                         .semantics { contentDescription = "Language: $languageCode" }
                         .clickable(onClick = onLanguageClick)
                         .padding(horizontal = 14.dp, vertical = 8.dp),
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    GlobeIcon(color = colors.night, size = 16.dp)
-                    Text(text = languageCode, style = LamplightType.body(), color = colors.night)
+                    GlobeIcon(color = colors.nightBlack, size = 16.dp)
+                    Text(text = languageCode, style = KompassTheme.typography.geologicaMedium16, color = colors.nightBlack)
                 }
             }
 
@@ -107,16 +106,16 @@ fun LamplightHeader(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(48.dp)
-                        .clip(LamplightShapes.searchField)
-                        .background(colors.night)
+                        .clip(KompassShapes.searchField)
+                        .background(colors.nightBlack)
                         .semantics { contentDescription = searchPlaceholder }
                         .clickable(onClick = onSearchClick)
                         .padding(horizontal = 16.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    SearchIcon(color = colors.textTertiary, size = 18.dp)
-                    Text(text = searchPlaceholder, style = LamplightType.body(), color = colors.textTertiary)
+                    SearchIcon(color = colors.pebbleGray, size = 18.dp)
+                    Text(text = searchPlaceholder, style = KompassTheme.typography.geologicaMedium16, color = colors.pebbleGray)
                 }
             }
 
@@ -147,6 +146,6 @@ private fun DrawScope.drawZigzag(color: Color) {
 @Composable
 private fun LamplightHeaderPreview() {
     LamplightHeader(searchPlaceholder = "Search Kotor and the bay", onLanguageClick = {}, onSearchClick = {}) {
-        Text("Explore", style = LamplightType.areaTitle(), color = LamplightTheme.colors.night)
+        Text("Explore", style = KompassTheme.typography.gloockRegular40, color = KompassTheme.colors.nightBlack)
     }
 }

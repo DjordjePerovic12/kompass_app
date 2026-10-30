@@ -19,7 +19,7 @@ import llc.bokadev.kompass.presentation.screens.essentials.linkTitle
 import llc.bokadev.kompass.presentation.screens.services.components.ServiceRow
 import llc.bokadev.kompass.presentation.shared.LamplightCompactHeader
 import llc.bokadev.kompass.presentation.shared.StateMessage
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
+import llc.bokadev.kompass.ui.theme.KompassTheme
 
 /** Services as compact functional rows; no trust/official labels without a validation process behind them. */
 @Composable
@@ -27,7 +27,7 @@ fun ServicesScreenContent(
     state: ServicesState,
     onAction: (ServicesAction) -> Unit
 ) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     val strings = rememberAppStrings()
     val lang = currentAppLanguage()
     val s = strings.states
@@ -35,7 +35,7 @@ fun ServicesScreenContent(
     val retry = { onAction(ServicesAction.Retry) }
 
     LazyColumn(
-        modifier = Modifier.fillMaxSize().background(colors.night),
+        modifier = Modifier.fillMaxSize().background(colors.nightBlack),
         contentPadding = PaddingValues(bottom = 26.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
@@ -49,7 +49,7 @@ fun ServicesScreenContent(
         }
         if (state.isLoading) {
             item(key = "progress") {
-                LinearProgressIndicator(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 8.dp), color = colors.lamp, trackColor = colors.surfaceMuted)
+                LinearProgressIndicator(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 8.dp), color = colors.lampYellow, trackColor = colors.slateDark)
             }
         }
         when {

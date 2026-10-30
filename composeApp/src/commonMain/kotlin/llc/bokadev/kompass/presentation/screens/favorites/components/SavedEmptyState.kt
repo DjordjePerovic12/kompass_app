@@ -30,9 +30,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import llc.bokadev.kompass.presentation.screens.home.components.ArrowRightIcon
 import llc.bokadev.kompass.presentation.screens.home.components.BookmarkIcon
-import llc.bokadev.kompass.presentation.theme.LamplightShapes
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
+import llc.bokadev.kompass.ui.theme.KompassTheme
+import llc.bokadev.kompass.ui.theme.KompassShapes
 
 private val Arch = RoundedCornerShape(topStartPercent = 50, topEndPercent = 50)
 
@@ -45,32 +44,32 @@ fun SavedEmptyState(
     onExplore: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     Column(
         modifier = modifier.fillMaxWidth().padding(top = 40.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
         Box(Modifier.size(width = 100.dp, height = 108.dp).clearAndSetSemantics { }) {
-            Box(Modifier.size(width = 92.dp, height = 104.dp).offset((-0).dp, 4.dp).background(colors.night, Arch))
+            Box(Modifier.size(width = 92.dp, height = 104.dp).offset((-0).dp, 4.dp).background(colors.nightBlack, Arch))
             Box(
-                Modifier.size(width = 92.dp, height = 104.dp).offset(8.dp, 0.dp).clip(Arch).background(colors.lamp),
+                Modifier.size(width = 92.dp, height = 104.dp).offset(8.dp, 0.dp).clip(Arch).background(colors.lampYellow),
                 contentAlignment = Alignment.Center
             ) {
-                BookmarkIcon(filled = false, color = colors.night, size = 40.dp)
+                BookmarkIcon(filled = false, color = colors.nightBlack, size = 40.dp)
             }
         }
         Text(
             text = title,
-            style = LamplightType.sectionTitle().copy(fontSize = 30.sp, lineHeight = 33.sp),
-            color = colors.textPrimary,
+            style = KompassTheme.typography.gloockRegular32.copy(fontSize = 30.sp, lineHeight = 33.sp),
+            color = colors.boneWhite,
             textAlign = TextAlign.Center,
             modifier = Modifier.semantics { heading() }
         )
         Text(
             text = body,
-            style = LamplightType.body().copy(fontSize = 15.sp, lineHeight = 23.sp, fontWeight = FontWeight.Normal),
-            color = colors.textSecondary,
+            style = KompassTheme.typography.geologicaMedium16.copy(fontSize = 15.sp, lineHeight = 23.sp, fontWeight = FontWeight.Normal),
+            color = colors.stoneGray,
             textAlign = TextAlign.Center,
             modifier = Modifier.widthIn(max = 290.dp)
         )
@@ -78,16 +77,16 @@ fun SavedEmptyState(
             modifier = Modifier
                 .padding(top = 6.dp)
                 .heightIn(min = 52.dp)
-                .clip(LamplightShapes.pill)
-                .background(colors.lamp)
+                .clip(KompassShapes.pill)
+                .background(colors.lampYellow)
                 .clickable(onClick = onExplore)
                 .semantics(mergeDescendants = true) { role = Role.Button }
                 .padding(horizontal = 24.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text(text = actionLabel, style = LamplightType.body().copy(fontSize = 15.sp, fontWeight = FontWeight.SemiBold), color = colors.night)
-            ArrowRightIcon(color = colors.night, size = 16.dp)
+            Text(text = actionLabel, style = KompassTheme.typography.geologicaMedium16.copy(fontSize = 15.sp, fontWeight = FontWeight.SemiBold), color = colors.nightBlack)
+            ArrowRightIcon(color = colors.nightBlack, size = 16.dp)
         }
     }
 }

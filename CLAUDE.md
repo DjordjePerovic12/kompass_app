@@ -45,7 +45,6 @@ composeApp/
                 CompactPlaceCard.kt
                 EventCard.kt
                 SectionHeader.kt
-          theme/        # KOmpassTheme, Colors, Typography, Shapes
         di/             # Koin modules per feature + root appModule
     androidMain/        # Android Application class, expect/actual implementations
     iosMain/            # iOS entry point, expect/actual implementations
@@ -72,44 +71,14 @@ Rules:
 - `components/` — reusable composables that could be used by other screens or will grow complex. One public `@Composable` per file. No private helpers here — those stay in ScreenContent.
 - Never put UI logic in Screen.kt. Never put VM wiring in ScreenContent.kt.
 
-## Color System
+## Theme (`ui/theme/`)
 
-All colors defined in `presentation/theme/Color.kt`. Access ONLY via `KompassTheme.colors.X` — never import raw color vals directly in UI files.
+One theme, `KompassTheme`, following the amplitudo-kmp-compose `theme.md` pattern:
+- `Color.kt`: raw color vals named by how they look (`lampYellow`, `nightBlack`, `charcoal`, `boneWhite`, `stoneGray`, ...), `KompassColors`, `LocalKompassColors`, `kompassColors`.
+- `Type.kt`: `KompassTypography` styles named `<font><Weight><size>` (`gloockRegular40`, `geologicaMedium16`, `geologicaRegular14`, `helveticaBold24`, ...). Font families hold every weight file, so `.copy(fontWeight = …)` uses the real font.
+- `Shape.kt` (`KompassShapes`, `KompassDimens`), `Gradient.kt` (`Modifier.pageGradientBackground()`), `Theme.kt` (`KompassTheme { }` + `object KompassTheme { colors; typography }`; it also supplies the Material scheme only so Material components keep their look).
 
-```kotlin
-// CORRECT
-Text(color = KompassTheme.colors.colorNavy)
-
-// WRONG — never do this in UI files
-import llc.bokadev.kompass.presentation.theme.colorNavy
-Text(color = colorNavy)
-```
-
-### Color Token Reference
-
-| Token | Description | Hex |
-|---|---|---|
-| `colorNavy` | Primary brand navy — text, backgrounds, icons | `#102A43` |
-| `colorNavyMedium` | Secondary navy shade | `#243B53` |
-| `colorNavySubtle` | Tertiary navy shade | `#334E68` |
-| `colorNavyMuted` | Muted navy — surface variants | `#486581` |
-| `colorSlate` | Secondary text, subdued labels | `#627D98` |
-| `colorSlateLight` | Inactive icons, placeholders | `#829AB1` |
-| `colorSlateSoft` | Outlines, dividers | `#9FB3C8` |
-| `colorSlatePale` | Subtle outlines | `#BCCCDC` |
-| `colorSlateGhost` | Borders, thumbnail backgrounds | `#D9E2EC` |
-| `colorSlateFaint` | Hover states, faint backgrounds | `#F0F4F8` |
-| `colorAmberDark` | Accent dark — "See all" links | `#D97706` |
-| `colorAmber` | Primary accent — badges, highlights | `#F59E0B` |
-| `colorAmberLight` | Amber mid-tone | `#FBBF24` |
-| `colorAmberSubtle` | Amber tints — date blocks, indicators | `#FEF3C7` |
-| `colorWhite` | Cards, nav bar background | `#FFFFFF` |
-| `colorSurface` | Page background | `#F8F9FB` |
-| `colorSurfaceMid` | Input backgrounds, surface variants | `#F1F3F7` |
-| `colorSurfaceStrong` | Dividers, strong surfaces | `#E4E7ED` |
-| `colorSuccess` | Success states | `#059669` |
-| `colorError` | Error states | `#DC2626` |
-| `colorSponsored` | Sponsored badge | `#F59E0B` |
+In UI code read `KompassTheme.colors.X` / `KompassTheme.typography.X`. Never `Color(0x…)` in `presentation/`; add a token to `Color.kt` instead.
 
 ## MVI Pattern (Amplitudo-style, `core/presentation/mvi`)
 
@@ -199,7 +168,7 @@ Top-level: Eat & Drink, See & Visit, Activities, Hidden Gems, Practical. Sub-fil
 - translations jsonb: always fall back to "en" if current locale missing
 - Kotlin 2.4.21 caps AGP at 9.3.1 — check the KMP compatibility table before bumping AGP
 - Use @Preview (org.jetbrains.compose.ui.tooling.preview.Preview) — unified annotation
-- Never import raw color vals (colorNavy, colorAmber, etc.) in UI files — always use KompassTheme.colors.X
+- Never import raw color vals in UI files — always use KompassTheme.colors.X
 
 ## Related Projects
 

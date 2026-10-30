@@ -32,8 +32,7 @@ import llc.bokadev.kompass.presentation.screens.placedetail.components.DetailPra
 import llc.bokadev.kompass.presentation.screens.placedetail.components.DetailTextSection
 import llc.bokadev.kompass.presentation.screens.placedetail.components.DetailWhereItIs
 import llc.bokadev.kompass.presentation.shared.LamplightCompactHeader
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
+import llc.bokadev.kompass.ui.theme.KompassTheme
 
 /** A service: area and contact first, then what it offers; the website/map only when valid data exists. */
 @Composable
@@ -44,14 +43,14 @@ fun ServiceDetailScreenContent(
 ) {
     val onRetry = { onAction(ServiceDetailAction.Retry) }
     val onBack = { onAction(ServiceDetailAction.Back) }
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     val strings = rememberAppStrings()
     val lang = currentAppLanguage()
     val s = strings.states
     BaseContentView(
         state = state,
         onRetry = onRetry,
-        modifier = Modifier.background(colors.night),
+        modifier = Modifier.background(colors.nightBlack),
         loading = { DetailLoadState(null, strings.retry, strings.detail.back, onRetry, onBack) },
         error = { message -> DetailLoadState(message, strings.retry, strings.detail.back, onRetry, onBack) }
     ) {
@@ -64,8 +63,8 @@ fun ServiceDetailScreenContent(
             Column(Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, top = 20.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text(
                     text = name,
-                    style = LamplightType.cardTitleXL().copy(fontSize = 32.sp, lineHeight = 35.sp),
-                    color = colors.textPrimary,
+                    style = KompassTheme.typography.gloockRegular34.copy(fontSize = 32.sp, lineHeight = 35.sp),
+                    color = colors.boneWhite,
                     modifier = Modifier.semantics { heading() }
                 )
             }

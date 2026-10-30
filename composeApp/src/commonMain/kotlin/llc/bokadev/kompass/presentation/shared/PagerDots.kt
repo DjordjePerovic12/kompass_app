@@ -17,7 +17,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
+import llc.bokadev.kompass.ui.theme.KompassTheme
 
 private const val MAX_DOTS = 5
 
@@ -29,7 +29,7 @@ private const val MAX_DOTS = 5
 @Composable
 fun PagerDots(current: Int, total: Int, modifier: Modifier = Modifier) {
     if (total <= 1) return
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     Row(
         modifier = modifier.clearAndSetSemantics { },
         horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -43,7 +43,7 @@ fun PagerDots(current: Int, total: Int, modifier: Modifier = Modifier) {
                     .width(width)
                     .height(8.dp)
                     .clip(CircleShape)
-                    .background(if (selected) colors.lamp else colors.textPrimary.copy(alpha = 0.55f))
+                    .background(if (selected) colors.lampYellow else colors.boneWhite.copy(alpha = 0.55f))
             )
         }
     }

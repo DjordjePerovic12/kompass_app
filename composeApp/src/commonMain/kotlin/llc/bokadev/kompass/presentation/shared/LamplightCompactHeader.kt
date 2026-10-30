@@ -31,8 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import llc.bokadev.kompass.presentation.screens.home.components.ChevronLeftIcon
 import llc.bokadev.kompass.presentation.screens.home.components.SearchIcon
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
+import llc.bokadev.kompass.ui.theme.KompassTheme
 
 /**
  * The yellow header for second-level Lamplight screens (category lists): a back button, an
@@ -48,11 +47,11 @@ fun LamplightCompactHeader(
     onSearch: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .background(colors.lamp)
+            .background(colors.lampYellow)
             .windowInsetsPadding(WindowInsets.statusBars)
             .padding(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 20.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -62,33 +61,33 @@ fun LamplightCompactHeader(
                 Modifier
                     .size(44.dp)
                     .clip(CircleShape)
-                    .background(colors.night)
+                    .background(colors.nightBlack)
                     .clickable(onClick = onBack)
                     .semantics { role = Role.Button; contentDescription = backLabel },
                 contentAlignment = Alignment.Center
-            ) { ChevronLeftIcon(color = colors.lamp, size = 18.dp) }
+            ) { ChevronLeftIcon(color = colors.lampYellow, size = 18.dp) }
             Spacer(Modifier.weight(1f))
             if (onSearch != null) {
                 Box(
                     Modifier
                         .size(44.dp)
                         .clip(CircleShape)
-                        .border(1.5.dp, colors.night, CircleShape)
+                        .border(1.5.dp, colors.nightBlack, CircleShape)
                         .clickable(onClick = onSearch)
                         .semantics { role = Role.Button; contentDescription = searchLabel.orEmpty() },
                     contentAlignment = Alignment.Center
-                ) { SearchIcon(color = colors.night, size = 18.dp) }
+                ) { SearchIcon(color = colors.nightBlack, size = 18.dp) }
             }
         }
         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(
                 text = title,
-                style = LamplightType.areaTitle().copy(fontSize = 44.sp, lineHeight = 44.sp),
-                color = colors.night,
+                style = KompassTheme.typography.gloockRegular40.copy(fontSize = 44.sp, lineHeight = 44.sp),
+                color = colors.nightBlack,
                 modifier = Modifier.semantics { heading() }
             )
             subtitle?.let {
-                Text(text = it, style = LamplightType.body().copy(fontSize = 15.sp, fontWeight = FontWeight.Medium), color = colors.night)
+                Text(text = it, style = KompassTheme.typography.geologicaMedium16.copy(fontSize = 15.sp, fontWeight = FontWeight.Medium), color = colors.nightBlack)
             }
         }
     }

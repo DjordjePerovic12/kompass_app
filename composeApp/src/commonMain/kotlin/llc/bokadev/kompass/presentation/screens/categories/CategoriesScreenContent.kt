@@ -37,9 +37,8 @@ import llc.bokadev.kompass.presentation.screens.categories.components.ExploreTil
 import llc.bokadev.kompass.presentation.screens.categories.components.ExploreTileStyle
 import llc.bokadev.kompass.presentation.screens.categories.components.ExploreWideArchCard
 import llc.bokadev.kompass.presentation.shared.LamplightHeader
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
-import llc.bokadev.kompass.presentation.theme.pageGradientBackground
+import llc.bokadev.kompass.ui.theme.KompassTheme
+import llc.bokadev.kompass.ui.theme.pageGradientBackground
 
 /**
  * Lamplight Explore (Explore spec): a grouped discovery hub where each group has a deliberately
@@ -53,7 +52,7 @@ fun CategoriesScreenContent(
     onAction: (CategoriesAction) -> Unit
 ) {
     fun open(destination: ExploreDestination): () -> Unit = { onAction(CategoriesAction.Open(destination)) }
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     val lang = currentAppLanguage()
     val copy = strings.redesign
     val stackTiles = LocalDensity.current.fontScale >= 1.3f
@@ -72,14 +71,14 @@ fun CategoriesScreenContent(
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(
                     text = copy.explore,
-                    style = LamplightType.areaTitle(),
-                    color = colors.night,
+                    style = KompassTheme.typography.gloockRegular40,
+                    color = colors.nightBlack,
                     modifier = Modifier.semantics { heading() }
                 )
                 Text(
                     text = copy.exploreSubtitle,
-                    style = LamplightType.body().copy(fontSize = 15.sp, fontWeight = FontWeight.Medium),
-                    color = colors.night
+                    style = KompassTheme.typography.geologicaMedium16.copy(fontSize = 15.sp, fontWeight = FontWeight.Medium),
+                    color = colors.nightBlack
                 )
             }
         }
@@ -118,8 +117,8 @@ fun CategoriesScreenContent(
 
         Text(
             text = strings.explore.whatsOn,
-            style = LamplightType.sectionTitleS(),
-            color = colors.textPrimary,
+            style = KompassTheme.typography.gloockRegular26,
+            color = colors.boneWhite,
             modifier = Modifier
                 .padding(start = 20.dp, end = 20.dp, top = 30.dp, bottom = 12.dp)
                 .semantics { heading() }

@@ -40,9 +40,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import llc.bokadev.kompass.core.utils.RedesignStrings
 import llc.bokadev.kompass.core.utils.redesignStringsFor
-import llc.bokadev.kompass.presentation.theme.LamplightShapes
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
+import llc.bokadev.kompass.ui.theme.KompassTheme
+import llc.bokadev.kompass.ui.theme.KompassShapes
 
 /** Card geometry (cut-out spec B2, 390dp reference). Mirrored by `CardSpec` in `tools/cutout/make_cutout.py`. */
 private val cardHeight = 410.dp
@@ -74,7 +73,7 @@ fun NearbyCard(
     onToggleSave: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     val density = LocalDensity.current
     val haptics = LocalHapticFeedback.current
     var titleLines by remember(title) { mutableIntStateOf(1) }
@@ -96,8 +95,8 @@ fun NearbyCard(
         modifier = modifier
             .fillMaxWidth()
             .then(if (photoFree) Modifier else Modifier.height(cardHeight))
-            .clip(LamplightShapes.cardL)
-            .background(colors.lamp)
+            .clip(KompassShapes.cardL)
+            .background(colors.lampYellow)
             .clickable(onClick = onClick)
             .semantics(mergeDescendants = true) {
                 contentDescription = listOf(title, meta).filter { it.isNotBlank() }.joinToString(". ")
@@ -126,8 +125,8 @@ fun NearbyCard(
         ) {
             Text(
                 text = title,
-                style = LamplightType.cardTitleXL(),
-                color = colors.night,
+                style = KompassTheme.typography.gloockRegular34,
+                color = colors.nightBlack,
                 maxLines = 4,
                 overflow = TextOverflow.Ellipsis,
                 onTextLayout = { titleLines = it.lineCount }
@@ -135,8 +134,8 @@ fun NearbyCard(
             if (meta.isNotBlank()) {
                 Text(
                     text = meta,
-                    style = LamplightType.meta(),
-                    color = colors.textOnLimestone,
+                    style = KompassTheme.typography.geologicaRegular13,
+                    color = colors.inkGray,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -155,27 +154,27 @@ fun NearbyCard(
                 modifier = Modifier
                     .weight(1f)
                     .height(buttonSize)
-                    .clip(LamplightShapes.pill)
-                    .background(colors.chalk)
+                    .clip(KompassShapes.pill)
+                    .background(colors.chalkWhite)
                     .clickable(onClick = onPrimaryClick)
                     .semantics { role = Role.Button },
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                if (hasAudio) HeadphonesIcon(color = colors.night, size = 18.dp)
-                else ArrowRightIcon(color = colors.night, size = 16.dp)
+                if (hasAudio) HeadphonesIcon(color = colors.nightBlack, size = 18.dp)
+                else ArrowRightIcon(color = colors.nightBlack, size = 16.dp)
                 Spacer(Modifier.width(8.dp))
                 Text(
                     text = if (hasAudio) strings.listen else strings.open,
-                    style = LamplightType.body().copy(fontSize = 15.sp, fontWeight = FontWeight.SemiBold),
-                    color = colors.night
+                    style = KompassTheme.typography.geologicaMedium16.copy(fontSize = 15.sp, fontWeight = FontWeight.SemiBold),
+                    color = colors.nightBlack
                 )
             }
             Box(
                 modifier = Modifier
                     .size(buttonSize)
                     .clip(CircleShape)
-                    .background(colors.chalk)
+                    .background(colors.chalkWhite)
                     .clickable(onClick = toggleSave)
                     .semantics {
                         role = Role.Button
@@ -184,7 +183,7 @@ fun NearbyCard(
                     },
                 contentAlignment = Alignment.Center
             ) {
-                BookmarkIcon(filled = isSaved, color = colors.night, size = 18.dp)
+                BookmarkIcon(filled = isSaved, color = colors.nightBlack, size = 18.dp)
             }
         }
     }

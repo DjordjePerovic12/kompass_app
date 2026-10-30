@@ -46,16 +46,12 @@ import llc.bokadev.kompass.core.utils.languageStringsFor
 import llc.bokadev.kompass.presentation.screens.home.components.CheckIcon
 import llc.bokadev.kompass.presentation.screens.placedetail.components.DetailGlyph
 import llc.bokadev.kompass.presentation.screens.placedetail.components.DetailIcon
-import llc.bokadev.kompass.presentation.theme.HomePalette
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
-import llc.bokadev.kompass.presentation.theme.pageGradientBackground
+import llc.bokadev.kompass.ui.theme.KompassTheme
+import llc.bokadev.kompass.ui.theme.pageGradientBackground
 
 private val SheetShape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
 
 /** Purple accents for the selected language, from the page gradient's family (owner's call over lamp yellow). */
-private val AccentFill = HomePalette.action
-private val AccentText = HomePalette.canvas
 
 /**
  * The language picker as a bottom sheet on the app's purple page gradient: each language by its
@@ -97,7 +93,7 @@ internal fun LanguageChooser(
     onDismiss: (() -> Unit)?,
     modifier: Modifier = Modifier
 ) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -117,18 +113,18 @@ internal fun LanguageChooser(
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text(
                     text = strings.title,
-                    style = LamplightType.sectionTitle().copy(fontSize = 40.sp, lineHeight = 42.sp),
+                    style = KompassTheme.typography.gloockRegular32.copy(fontSize = 40.sp, lineHeight = 42.sp),
                     color = Color.White,
                     modifier = Modifier.semantics { heading() }
                 )
-                Text(text = strings.subtitle, style = LamplightType.bodyS().copy(fontSize = 15.sp, lineHeight = 21.sp), color = HomePalette.onGradientSecondary)
+                Text(text = strings.subtitle, style = KompassTheme.typography.geologicaRegular14.copy(fontSize = 15.sp, lineHeight = 21.sp), color = KompassTheme.colors.white85)
             }
             if (onDismiss != null) Box(
                 Modifier
                     .padding(start = 12.dp)
                     .size(48.dp)
                     .clip(CircleShape)
-                    .background(HomePalette.ink.copy(alpha = 0.35f))
+                    .background(KompassTheme.colors.inkBlack.copy(alpha = 0.35f))
                     .clickable(onClick = onDismiss)
                     .semantics { role = Role.Button; contentDescription = strings.close },
                 contentAlignment = Alignment.Center
@@ -142,46 +138,46 @@ internal fun LanguageChooser(
                 .padding(top = 20.dp)
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(22.dp))
-                .background(HomePalette.ink.copy(alpha = 0.55f))
+                .background(KompassTheme.colors.inkBlack.copy(alpha = 0.55f))
                 .selectableGroup()
         ) {
             SUPPORTED_LANGUAGES.forEachIndexed { index, (code, endonym) ->
-                if (index > 0) Box(Modifier.padding(horizontal = 16.dp).fillMaxWidth().height(1.dp).background(colors.divider))
+                if (index > 0) Box(Modifier.padding(horizontal = 16.dp).fillMaxWidth().height(1.dp).background(colors.slateDivider))
                 val selected = code == currentLanguage
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .heightIn(min = 72.dp)
-                        .background(if (selected) AccentFill.copy(alpha = 0.22f) else Color.Transparent)
+                        .background(if (selected) KompassTheme.colors.periwinkle.copy(alpha = 0.22f) else Color.Transparent)
                         .selectable(selected = selected, role = Role.RadioButton, onClick = { onSelect(code) })
                         .padding(horizontal = 16.dp, vertical = 12.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
                     Box(
-                        Modifier.size(44.dp).clip(RoundedCornerShape(12.dp)).background(if (selected) AccentFill else colors.surfaceMuted),
+                        Modifier.size(44.dp).clip(RoundedCornerShape(12.dp)).background(if (selected) KompassTheme.colors.periwinkle else colors.slateDark),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
                             text = code.uppercase(),
-                            style = LamplightType.body().copy(fontSize = 15.sp, fontWeight = FontWeight.Bold),
-                            color = if (selected) Color.White else colors.textSecondary
+                            style = KompassTheme.typography.geologicaMedium16.copy(fontSize = 15.sp, fontWeight = FontWeight.Bold),
+                            color = if (selected) Color.White else colors.stoneGray
                         )
                     }
                     Column(Modifier.weight(1f)) {
-                        Text(text = endonym, style = LamplightType.bodyL(), color = if (selected) AccentText else colors.textPrimary)
+                        Text(text = endonym, style = KompassTheme.typography.geologicaSemiBold17, color = if (selected) KompassTheme.colors.lavenderLight else colors.boneWhite)
                         Text(
                             text = if (selected) strings.current else strings.names[code].orEmpty(),
-                            style = LamplightType.bodyS(),
-                            color = colors.textSecondary
+                            style = KompassTheme.typography.geologicaRegular14,
+                            color = colors.stoneGray
                         )
                     }
                     if (selected) {
-                        Box(Modifier.size(26.dp).clip(CircleShape).background(AccentFill), contentAlignment = Alignment.Center) {
+                        Box(Modifier.size(26.dp).clip(CircleShape).background(KompassTheme.colors.periwinkle), contentAlignment = Alignment.Center) {
                             CheckIcon(color = Color.White, size = 14.dp)
                         }
                     } else {
-                        Box(Modifier.size(26.dp).border(1.5.dp, colors.textTertiary, CircleShape))
+                        Box(Modifier.size(26.dp).border(1.5.dp, colors.pebbleGray, CircleShape))
                     }
                 }
             }
@@ -199,8 +195,8 @@ internal fun LanguageChooser(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            DetailIcon(DetailGlyph.Phone, color = AccentText, size = 18.dp)
-            Text(text = strings.usePhoneLanguage, style = LamplightType.body().copy(fontWeight = FontWeight.SemiBold), color = AccentText)
+            DetailIcon(DetailGlyph.Phone, color = KompassTheme.colors.lavenderLight, size = 18.dp)
+            Text(text = strings.usePhoneLanguage, style = KompassTheme.typography.geologicaMedium16.copy(fontWeight = FontWeight.SemiBold), color = KompassTheme.colors.lavenderLight)
         }
     }
 }

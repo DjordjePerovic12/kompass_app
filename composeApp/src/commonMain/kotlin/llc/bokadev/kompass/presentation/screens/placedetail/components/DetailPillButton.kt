@@ -21,9 +21,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import llc.bokadev.kompass.presentation.theme.LamplightShapes
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
+import llc.bokadev.kompass.ui.theme.KompassTheme
+import llc.bokadev.kompass.ui.theme.KompassShapes
 
 /** The detail pages' pill action: filled `lamp` (primary) or a `lamp` outline (secondary). */
 @Composable
@@ -35,13 +34,13 @@ fun DetailPillButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val colors = LamplightTheme.colors
-    val content = if (filled) colors.night else colors.lamp
+    val colors = KompassTheme.colors
+    val content = if (filled) colors.nightBlack else colors.lampYellow
     Row(
         modifier = modifier
             .height(height)
-            .clip(LamplightShapes.pill)
-            .then(if (filled) Modifier.background(colors.lamp) else Modifier.border(1.5.dp, colors.lamp, LamplightShapes.pill))
+            .clip(KompassShapes.pill)
+            .then(if (filled) Modifier.background(colors.lampYellow) else Modifier.border(1.5.dp, colors.lampYellow, KompassShapes.pill))
             .clickable(onClick = onClick)
             .semantics(mergeDescendants = true) { role = Role.Button }
             .padding(horizontal = 16.dp),
@@ -51,7 +50,7 @@ fun DetailPillButton(
         glyph?.let { DetailIcon(it, color = content, size = 16.dp) }
         Text(
             text = label,
-            style = LamplightType.body().copy(fontSize = 15.sp, fontWeight = FontWeight.SemiBold),
+            style = KompassTheme.typography.geologicaMedium16.copy(fontSize = 15.sp, fontWeight = FontWeight.SemiBold),
             color = content,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis

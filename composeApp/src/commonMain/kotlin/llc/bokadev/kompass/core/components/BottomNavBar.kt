@@ -36,10 +36,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import llc.bokadev.kompass.core.utils.rememberAppStrings
-import llc.bokadev.kompass.presentation.theme.LamplightColors
-import llc.bokadev.kompass.presentation.theme.LamplightShapes
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
+import llc.bokadev.kompass.ui.theme.KompassTheme
+import llc.bokadev.kompass.ui.theme.KompassShapes
+import llc.bokadev.kompass.ui.theme.KompassColors
 
 enum class BottomTab {
     Home,
@@ -62,8 +61,8 @@ fun KompassBottomNavBar(
     audioButton: @Composable () -> Unit
 ) {
     val strings = rememberAppStrings()
-    val colors = LamplightTheme.colors
-    val shellShape = LamplightShapes.nav
+    val colors = KompassTheme.colors
+    val shellShape = KompassShapes.nav
 
     // The pill's own fill extends through the system nav-bar/home-indicator inset
     // (navigationBarsPadding is applied *inside* the shadow/clip/background chain, not outside
@@ -89,7 +88,7 @@ fun KompassBottomNavBar(
                     spotColor = Color.Black.copy(alpha = 0.3f)
                 )
                 .clip(shellShape)
-                .background(colors.navBar)
+                .background(colors.graphite)
         )
         Row(
             modifier = Modifier
@@ -114,7 +113,7 @@ private fun BottomNavItem(
     tab: BottomTab,
     label: String,
     selected: Boolean,
-    colors: LamplightColors,
+    colors: KompassColors,
     onClick: () -> Unit
 ) {
     Column(
@@ -130,23 +129,23 @@ private fun BottomNavItem(
                 modifier = Modifier
                     .size(34.dp)
                     .clip(CircleShape)
-                    .background(colors.chalk),
+                    .background(colors.chalkWhite),
                 contentAlignment = Alignment.Center
             ) {
                 Canvas(modifier = Modifier.size(20.dp)) {
-                    drawTabIcon(tab, colors.night)
+                    drawTabIcon(tab, colors.nightBlack)
                 }
             }
         } else {
             Canvas(modifier = Modifier.size(34.dp).padding(7.dp)) {
-                drawTabIcon(tab, colors.textTertiary)
+                drawTabIcon(tab, colors.pebbleGray)
             }
         }
 
         Text(
             text = label,
-            style = LamplightType.navLabel(selected = selected),
-            color = if (selected) colors.chalk else colors.textTertiary,
+            style = (if (selected) KompassTheme.typography.geologicaBold12 else KompassTheme.typography.geologicaRegular12),
+            color = if (selected) colors.chalkWhite else colors.pebbleGray,
             maxLines = 1,
             overflow = TextOverflow.Clip,
             textAlign = TextAlign.Center

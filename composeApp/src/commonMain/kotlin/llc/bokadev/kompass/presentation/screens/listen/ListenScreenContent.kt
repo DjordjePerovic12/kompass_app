@@ -54,10 +54,8 @@ import llc.bokadev.kompass.presentation.screens.listen.components.NowPlayingCard
 import llc.bokadev.kompass.presentation.screens.listen.components.NowPlayingLabels
 import llc.bokadev.kompass.presentation.shared.LamplightSegmentedControl
 import llc.bokadev.kompass.presentation.shared.SegmentOption
-import llc.bokadev.kompass.presentation.theme.HomePalette
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
-import llc.bokadev.kompass.presentation.theme.pageGradientBackground
+import llc.bokadev.kompass.ui.theme.KompassTheme
+import llc.bokadev.kompass.ui.theme.pageGradientBackground
 
 private data class ListenActions(
     val onBack: () -> Unit,
@@ -157,8 +155,8 @@ fun ListenScreenContent(
             item(key = "incomplete") {
                 Text(
                     strings.search.incomplete,
-                    style = LamplightType.bodyS(),
-                    color = LamplightTheme.colors.textSecondary,
+                    style = KompassTheme.typography.geologicaRegular14,
+                    color = KompassTheme.colors.stoneGray,
                     modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
                 )
             }
@@ -212,26 +210,26 @@ fun ListenScreenContent(
     }
 
     removing?.let { item ->
-        val colors = LamplightTheme.colors
+        val colors = KompassTheme.colors
         AlertDialog(
             onDismissRequest = actions.onDismissRemove,
-            containerColor = colors.surfaceRaised,
-            titleContentColor = colors.textPrimary,
-            textContentColor = colors.textSecondary,
-            title = { Text(l.removeTitle, style = LamplightType.cardTitle()) },
+            containerColor = colors.charcoal,
+            titleContentColor = colors.boneWhite,
+            textContentColor = colors.stoneGray,
+            title = { Text(l.removeTitle, style = KompassTheme.typography.gloockRegular23) },
             text = {
                 Text(
                     if (item.hasOtherLanguages) l.removeBodyLanguage.replace("{lang}", item.track.lang.uppercase()) else l.removeBody,
-                    style = LamplightType.bodyS()
+                    style = KompassTheme.typography.geologicaRegular14
                 )
             },
             confirmButton = {
                 TextButton(onClick = { actions.onConfirmRemove(item) }) {
-                    Text(l.remove, color = colors.lamp, fontWeight = FontWeight.Bold)
+                    Text(l.remove, color = colors.lampYellow, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
-                TextButton(onClick = actions.onDismissRemove) { Text(l.cancel, color = colors.textPrimary) }
+                TextButton(onClick = actions.onDismissRemove) { Text(l.cancel, color = colors.boneWhite) }
             }
         )
     }
@@ -239,11 +237,11 @@ fun ListenScreenContent(
 
 @Composable
 private fun TopBar(view: ListenView, l: ListenStrings, backLabel: String, actions: ListenActions) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(colors.lamp)
+            .background(colors.lampYellow)
             .windowInsetsPadding(WindowInsets.statusBars)
             .padding(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 18.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -253,25 +251,25 @@ private fun TopBar(view: ListenView, l: ListenStrings, backLabel: String, action
                 Modifier
                     .size(44.dp)
                     .clip(CircleShape)
-                    .background(colors.night)
+                    .background(colors.nightBlack)
                     .clickable(onClick = actions.onBack)
                     .semantics { role = Role.Button; contentDescription = backLabel },
                 contentAlignment = Alignment.Center
-            ) { ChevronLeftIcon(color = colors.lamp, size = 18.dp) }
+            ) { ChevronLeftIcon(color = colors.lampYellow, size = 18.dp) }
             Spacer(Modifier.weight(1f))
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                HeadphonesIcon(colors.night, 14.dp)
-                Text(l.freeAudio, style = LamplightType.label(), color = colors.night)
+                HeadphonesIcon(colors.nightBlack, 14.dp)
+                Text(l.freeAudio, style = KompassTheme.typography.geologicaSemiBold11, color = colors.nightBlack)
             }
         }
         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(
                 l.title,
-                style = LamplightType.areaTitle().copy(fontSize = 44.sp, lineHeight = 44.sp),
-                color = colors.night,
+                style = KompassTheme.typography.gloockRegular40.copy(fontSize = 44.sp, lineHeight = 44.sp),
+                color = colors.nightBlack,
                 modifier = Modifier.semantics { heading() }
             )
-            Text(l.subtitle, style = LamplightType.body().copy(fontSize = 15.sp, fontWeight = FontWeight.Medium), color = colors.night)
+            Text(l.subtitle, style = KompassTheme.typography.geologicaMedium16.copy(fontSize = 15.sp, fontWeight = FontWeight.Medium), color = colors.nightBlack)
         }
         LamplightSegmentedControl(
             options = listOf(SegmentOption(l.allAudio), SegmentOption(l.downloaded)),
@@ -283,18 +281,18 @@ private fun TopBar(view: ListenView, l: ListenStrings, backLabel: String, action
 
 @Composable
 private fun Message(text: String, action: String?, onAction: () -> Unit) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     Column(
         Modifier.fillMaxWidth().padding(horizontal = 28.dp, vertical = 32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
-        Text(text, style = LamplightType.body().copy(fontSize = 15.sp, lineHeight = 23.sp), color = HomePalette.onGradientSecondary, textAlign = TextAlign.Center)
+        Text(text, style = KompassTheme.typography.geologicaMedium16.copy(fontSize = 15.sp, lineHeight = 23.sp), color = KompassTheme.colors.white85, textAlign = TextAlign.Center)
         if (action != null) {
             Text(
                 action,
-                style = LamplightType.body().copy(fontWeight = FontWeight.SemiBold),
-                color = colors.lamp,
+                style = KompassTheme.typography.geologicaMedium16.copy(fontWeight = FontWeight.SemiBold),
+                color = colors.lampYellow,
                 modifier = Modifier.clip(RoundedCornerShape(22.dp)).clickable(onClick = onAction).padding(horizontal = 16.dp, vertical = 10.dp)
             )
         }

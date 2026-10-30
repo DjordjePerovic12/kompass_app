@@ -1,10 +1,10 @@
-package llc.bokadev.kompass.presentation.theme
+package llc.bokadev.kompass.ui.theme
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.unit.dp
 
-/** "Lamplight" shape and spacing tokens (spec §1.3). */
-object LamplightDimens {
+/** Shape and spacing tokens (Lamplight spec §1.3). */
+object KompassDimens {
     val screenPadding = 20.dp
     val sectionTopSpacing = 32.dp // midpoint of the spec's 30-34dp range
 
@@ -18,14 +18,14 @@ object LamplightDimens {
     val minTouchTarget = 48.dp
 }
 
-object LamplightShapes {
-    val cardL = RoundedCornerShape(LamplightDimens.radiusCardL)
-    val cardMustSee = RoundedCornerShape(LamplightDimens.radiusCardMustSee)
-    val cardEvent = RoundedCornerShape(LamplightDimens.radiusCardEvent)
-    val imageInner = RoundedCornerShape(LamplightDimens.radiusImageInner)
+object KompassShapes {
+    val cardL = RoundedCornerShape(KompassDimens.radiusCardL)
+    val cardMustSee = RoundedCornerShape(KompassDimens.radiusCardMustSee)
+    val cardEvent = RoundedCornerShape(KompassDimens.radiusCardEvent)
+    val imageInner = RoundedCornerShape(KompassDimens.radiusImageInner)
     val pill = RoundedCornerShape(50)
-    val searchField = RoundedCornerShape(LamplightDimens.searchFieldRadius)
-    val nav = RoundedCornerShape(LamplightDimens.radiusNav)
+    val searchField = RoundedCornerShape(KompassDimens.searchFieldRadius)
+    val nav = RoundedCornerShape(KompassDimens.radiusNav)
 
     /** Deliberately square — notices read as operational, not as discovery (spec §1.3). */
     val notice = RoundedCornerShape(0.dp)

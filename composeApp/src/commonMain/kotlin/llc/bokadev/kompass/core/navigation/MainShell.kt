@@ -40,8 +40,6 @@ import llc.bokadev.kompass.core.utils.PlaybackRequestGuard
 import llc.bokadev.kompass.presentation.screens.onboarding.OnboardingScreen
 import llc.bokadev.kompass.presentation.screens.onboarding.OnboardingViewModel
 import org.koin.compose.viewmodel.koinViewModel
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.ProvideLamplightTheme
 import org.koin.compose.koinInject
 import llc.bokadev.kompass.core.components.BottomTab
 import llc.bokadev.kompass.core.components.KompassBottomNavBar
@@ -50,6 +48,7 @@ import llc.bokadev.kompass.core.components.NavAudioButton
 import llc.bokadev.kompass.core.navigation.utils.HomeRootResetSequencer
 import llc.bokadev.kompass.core.navigation.utils.NavigatorBridge
 import llc.bokadev.kompass.core.navigation.utils.RootTabBackHandler
+import llc.bokadev.kompass.ui.theme.KompassTheme
 
 @Composable
 fun MainShell() {
@@ -121,11 +120,10 @@ fun MainShell() {
         }
     }
     NavigatorBridge(navigator, controller, onSwitchTab = ::select)
-    ProvideLamplightTheme {
     Scaffold(
         // Explicit, not incidental: Scaffold's own containerColor defaults to
         // MaterialTheme.colorScheme.background, which is still the app's old warm off-white
-        // token (KOmpassTheme.kt's KompassColorScheme). Leaving it unset leaks that color into
+        // token (Theme.kt's materialColorScheme). Leaving it unset leaks that color into
         // any gap instead of the current screen's own content showing through.
         containerColor = Color.Transparent,
         contentWindowInsets = WindowInsets(0),
@@ -134,9 +132,9 @@ fun MainShell() {
                 Snackbar(
                     snackbarData = data,
                     shape = RoundedCornerShape(16.dp),
-                    containerColor = LamplightTheme.colors.chalk,
-                    contentColor = LamplightTheme.colors.night,
-                    actionColor = LamplightTheme.colors.night
+                    containerColor = KompassTheme.colors.chalkWhite,
+                    contentColor = KompassTheme.colors.nightBlack,
+                    actionColor = KompassTheme.colors.nightBlack
                 )
             }
         },
@@ -175,7 +173,6 @@ fun MainShell() {
                 }
             }
         }
-    }
     }
     if (languageSheetOpen) {
         LanguageSheet(

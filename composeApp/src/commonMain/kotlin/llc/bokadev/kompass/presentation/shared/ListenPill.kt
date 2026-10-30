@@ -22,9 +22,8 @@ import androidx.compose.ui.unit.dp
 import llc.bokadev.kompass.core.audio.NavAudioMode
 import llc.bokadev.kompass.presentation.screens.listen.components.DiscState
 import llc.bokadev.kompass.presentation.screens.listen.components.PlayDisc
-import llc.bokadev.kompass.presentation.theme.LamplightShapes
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
+import llc.bokadev.kompass.ui.theme.KompassTheme
+import llc.bokadev.kompass.ui.theme.KompassShapes
 
 /**
  * The explicit play control on a detail screen ("Listen to this story", "Listen to the audio guide").
@@ -40,12 +39,12 @@ fun ListenPill(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     Row(
         modifier
             .heightIn(min = 48.dp)
-            .clip(LamplightShapes.pill)
-            .background(colors.surfaceRaised)
+            .clip(KompassShapes.pill)
+            .background(colors.charcoal)
             .clickable(onClick = onClick)
             .clearAndSetSemantics { role = Role.Button; contentDescription = description }
             .alpha(if (unavailable) 0.45f else 1f)
@@ -54,7 +53,7 @@ fun ListenPill(
         horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         PlayDisc(disc, 36.dp, reduceMotion, showPause = true)
-        Text(label, style = LamplightType.bodyS().copy(fontWeight = FontWeight.SemiBold), color = colors.textPrimary)
+        Text(label, style = KompassTheme.typography.geologicaRegular14.copy(fontWeight = FontWeight.SemiBold), color = colors.boneWhite)
     }
 }
 

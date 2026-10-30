@@ -22,13 +22,12 @@ import llc.bokadev.kompass.domain.model.Excursion
 import llc.bokadev.kompass.domain.model.Place
 import llc.bokadev.kompass.domain.model.PlaceCategory
 import llc.bokadev.kompass.presentation.screens.home.components.BookmarkIcon
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
+import llc.bokadev.kompass.ui.theme.KompassTheme
 
 /** One Worth the Drive (or related-activity) row: photo, type, name, outing metadata and a save button. */
 @Composable
 fun ExcursionRow(entry: Excursion, saved: Boolean, onFavorite: () -> Unit, onClick: () -> Unit) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     val app = rememberAppStrings()
     val strings = app.excursions
     val language = currentAppLanguage()
@@ -38,21 +37,21 @@ fun ExcursionRow(entry: Excursion, saved: Boolean, onFavorite: () -> Unit, onCli
             Row(Modifier.weight(1f).clickable(onClick = onClick).padding(vertical = 8.dp), horizontalArrangement = Arrangement.spacedBy(14.dp)) {
                 entry.photo?.let { photo ->
                     AsyncImage(buildPhotoUrl(photo), contentDescription = null, contentScale = ContentScale.Crop,
-                        modifier = Modifier.size(width = 96.dp, height = 112.dp).background(colors.surfaceMuted))
+                        modifier = Modifier.size(width = 96.dp, height = 112.dp).background(colors.slateDark))
                 }
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(if (entry.place != null) strings.place else strings.activity, color = colors.lamp, style = LamplightType.body())
-                    Text(name, color = colors.textPrimary, style = LamplightType.sectionTitleS())
+                    Text(if (entry.place != null) strings.place else strings.activity, color = colors.lampYellow, style = KompassTheme.typography.geologicaMedium16)
+                    Text(name, color = colors.boneWhite, style = KompassTheme.typography.gloockRegular26)
                     val metadata = listOfNotNull(entry.timeBand, entry.planningLevel).map(strings::label).filter(String::isNotBlank)
-                    if (metadata.isNotEmpty()) Text(metadata.joinToString(" · "), color = colors.textSecondary, style = LamplightType.body())
+                    if (metadata.isNotEmpty()) Text(metadata.joinToString(" · "), color = colors.stoneGray, style = KompassTheme.typography.geologicaMedium16)
                 }
             }
             val saveLabel = (if (saved) app.redesign.removeTitleFromSaved else app.redesign.saveTitle).replace("{title}", name)
             IconButton(onClick = onFavorite, modifier = Modifier.size(48.dp).semantics { contentDescription = saveLabel }) {
-                BookmarkIcon(filled = saved, color = if (saved) colors.lamp else colors.textSecondary, size = 20.dp)
+                BookmarkIcon(filled = saved, color = if (saved) colors.lampYellow else colors.stoneGray, size = 20.dp)
             }
         }
-        HorizontalDivider(color = colors.divider, modifier = Modifier.padding(top = 14.dp))
+        HorizontalDivider(color = colors.slateDivider, modifier = Modifier.padding(top = 14.dp))
     }
 }
 

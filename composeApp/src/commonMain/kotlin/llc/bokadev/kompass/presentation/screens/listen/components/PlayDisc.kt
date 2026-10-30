@@ -19,7 +19,7 @@ import llc.bokadev.kompass.core.components.EqualizerBars
 import llc.bokadev.kompass.core.components.drawPause
 import llc.bokadev.kompass.core.components.drawPlay
 import llc.bokadev.kompass.core.components.drawRetry
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
+import llc.bokadev.kompass.ui.theme.KompassTheme
 
 /** What a play control shows (Listen spec §3). */
 enum class DiscState { Idle, Loading, Playing, Paused, Failed }
@@ -35,8 +35,8 @@ fun PlayDisc(
     size: Dp,
     reduceMotion: Boolean,
     modifier: Modifier = Modifier,
-    background: Color = LamplightTheme.colors.lamp,
-    ink: Color = LamplightTheme.colors.night,
+    background: Color = KompassTheme.colors.lampYellow,
+    ink: Color = KompassTheme.colors.nightBlack,
     showPause: Boolean = false
 ) {
     Box(modifier.size(size).clip(CircleShape).background(background), contentAlignment = Alignment.Center) {

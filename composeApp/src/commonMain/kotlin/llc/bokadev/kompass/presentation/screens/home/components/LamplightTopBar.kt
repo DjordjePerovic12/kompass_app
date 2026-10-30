@@ -27,9 +27,8 @@ import llc.bokadev.kompass.presentation.screens.home.HomeSection
 import llc.bokadev.kompass.presentation.screens.home.HomeState
 import llc.bokadev.kompass.presentation.screens.home.SectionStatus
 import llc.bokadev.kompass.presentation.shared.LamplightHeader
-import llc.bokadev.kompass.presentation.theme.LamplightDimens
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
+import llc.bokadev.kompass.ui.theme.KompassTheme
+import llc.bokadev.kompass.ui.theme.KompassDimens
 
 /**
  * "Lamplight" top bar (spec §3.1): the shared [LamplightHeader] with Home's "Around {area}" title
@@ -47,7 +46,7 @@ fun LamplightTopBar(
     onUseMyLocationClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     // With the device location in use the headline is visitor-facing ("Near you"); "Device
     // location" stays only as the option name in the area picker.
     val usingDevice = state.area == HomeArea.DEVICE && state.isUsingCurrentLocation
@@ -66,19 +65,19 @@ fun LamplightTopBar(
                 FlowRow(itemVerticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(
                         text = statusText,
-                        style = LamplightType.meta().copy(fontSize = 13.sp, fontWeight = FontWeight.Medium),
-                        color = colors.night.copy(alpha = 0.8f)
+                        style = KompassTheme.typography.geologicaRegular13.copy(fontSize = 13.sp, fontWeight = FontWeight.Medium),
+                        color = colors.nightBlack.copy(alpha = 0.8f)
                     )
                     Text(
                         text = "· ${strings.redesign.useMyLocationLink}",
-                        style = LamplightType.meta().copy(
+                        style = KompassTheme.typography.geologicaRegular13.copy(
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Medium,
                             textDecoration = TextDecoration.Underline
                         ),
-                        color = colors.night,
+                        color = colors.nightBlack,
                         modifier = Modifier
-                            .heightIn(min = LamplightDimens.minTouchTarget)
+                            .heightIn(min = KompassDimens.minTouchTarget)
                             .clickable(onClick = onUseMyLocationClick)
                             .wrapContentHeight(Alignment.CenterVertically)
                     )
@@ -89,7 +88,7 @@ fun LamplightTopBar(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .heightIn(min = LamplightDimens.minTouchTarget)
+                .heightIn(min = KompassDimens.minTouchTarget)
                 .clip(RoundedCornerShape(12.dp))
                 .clickable(onClick = onAreaClick)
                 .semantics { contentDescription = strings.home.changeAreaDescription.replace("{area}", areaBigLabel) },
@@ -98,8 +97,8 @@ fun LamplightTopBar(
             if (!usingDevice) {
                 Text(
                     text = strings.redesign.aroundLabel,
-                    style = LamplightType.body().copy(fontSize = 14.sp, fontWeight = FontWeight.Medium),
-                    color = colors.night
+                    style = KompassTheme.typography.geologicaMedium16.copy(fontSize = 14.sp, fontWeight = FontWeight.Medium),
+                    color = colors.nightBlack
                 )
             }
             Row(
@@ -109,12 +108,12 @@ fun LamplightTopBar(
             ) {
                 Text(
                     text = areaBigLabel,
-                    style = LamplightType.areaTitle(),
-                    color = colors.night,
+                    style = KompassTheme.typography.gloockRegular40,
+                    color = colors.nightBlack,
                     maxLines = 2,
                     modifier = Modifier.weight(1f, fill = false)
                 )
-                ChevronDownIcon(color = colors.night, size = 22.dp)
+                ChevronDownIcon(color = colors.nightBlack, size = 22.dp)
             }
         }
     }

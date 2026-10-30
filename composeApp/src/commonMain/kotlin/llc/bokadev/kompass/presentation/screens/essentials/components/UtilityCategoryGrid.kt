@@ -30,8 +30,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
+import llc.bokadev.kompass.ui.theme.KompassTheme
 
 /** A shortcut tile; [emergency] gives it the only red treatment on the screen. */
 data class UtilityTile(val label: String, val glyph: EssentialsGlyph, val emergency: Boolean = false, val onClick: () -> Unit)
@@ -54,14 +53,14 @@ fun UtilityCategoryGrid(tiles: List<UtilityTile>, columns: Int, modifier: Modifi
 
 @Composable
 private fun Tile(tile: UtilityTile, modifier: Modifier) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     val shape = RoundedCornerShape(18.dp)
     Column(
         modifier = modifier
             .heightIn(min = 84.dp)
             .clip(shape)
-            .background(if (tile.emergency) Color(0xFF2A1C1B) else colors.surfaceRaised)
-            .then(if (tile.emergency) Modifier.border(1.dp, Color(0xFF5A2E29), shape) else Modifier)
+            .background(if (tile.emergency) KompassTheme.colors.emberBrown else colors.charcoal)
+            .then(if (tile.emergency) Modifier.border(1.dp, KompassTheme.colors.rustBrown, shape) else Modifier)
             .clickable(onClick = tile.onClick)
             .semantics(mergeDescendants = true) { role = Role.Button }
             .padding(vertical = 10.dp, horizontal = 4.dp),
@@ -69,15 +68,15 @@ private fun Tile(tile: UtilityTile, modifier: Modifier) {
         verticalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterVertically)
     ) {
         Box(
-            Modifier.size(40.dp).clip(RoundedCornerShape(12.dp)).background(if (tile.emergency) colors.alert else colors.surfaceMuted),
+            Modifier.size(40.dp).clip(RoundedCornerShape(12.dp)).background(if (tile.emergency) colors.coralRed else colors.slateDark),
             contentAlignment = Alignment.Center
         ) {
-            EssentialsIcon(tile.glyph, color = if (tile.emergency) colors.night else colors.lamp, size = 20.dp)
+            EssentialsIcon(tile.glyph, color = if (tile.emergency) colors.nightBlack else colors.lampYellow, size = 20.dp)
         }
         Text(
             text = tile.label,
-            style = LamplightType.meta().copy(fontSize = 12.sp, lineHeight = 15.sp, fontWeight = FontWeight.SemiBold),
-            color = colors.textPrimary,
+            style = KompassTheme.typography.geologicaRegular13.copy(fontSize = 12.sp, lineHeight = 15.sp, fontWeight = FontWeight.SemiBold),
+            color = colors.boneWhite,
             textAlign = TextAlign.Center
         )
     }

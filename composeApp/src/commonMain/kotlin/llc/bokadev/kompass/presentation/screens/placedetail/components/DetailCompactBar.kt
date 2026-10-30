@@ -28,8 +28,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import llc.bokadev.kompass.presentation.screens.home.components.BookmarkIcon
 import llc.bokadev.kompass.presentation.screens.home.components.ChevronLeftIcon
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
+import llc.bokadev.kompass.ui.theme.KompassTheme
 
 /**
  * The bar that replaces the hero's buttons once it scrolls away: Back, the title, Save. Opaque
@@ -47,26 +46,26 @@ fun DetailCompactBar(
     savedStateLabel: String = "",
     onToggleSave: (() -> Unit)? = null
 ) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .background(colors.night)
+            .background(colors.nightBlack)
             .windowInsetsPadding(WindowInsets.statusBars)
             .height(56.dp)
             .padding(horizontal = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        BarButton(backLabel, null, onBack) { ChevronLeftIcon(color = colors.chalk, size = 18.dp) }
+        BarButton(backLabel, null, onBack) { ChevronLeftIcon(color = colors.chalkWhite, size = 18.dp) }
         Text(
             text = title,
-            style = LamplightType.body().copy(fontWeight = FontWeight.SemiBold),
-            color = colors.textPrimary,
+            style = KompassTheme.typography.geologicaMedium16.copy(fontWeight = FontWeight.SemiBold),
+            color = colors.boneWhite,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f).padding(horizontal = 4.dp)
         )
-        onToggleSave?.let { BarButton(saveLabel, savedStateLabel, it) { BookmarkIcon(filled = isSaved, color = colors.chalk, size = 18.dp) } }
+        onToggleSave?.let { BarButton(saveLabel, savedStateLabel, it) { BookmarkIcon(filled = isSaved, color = colors.chalkWhite, size = 18.dp) } }
     }
 }
 

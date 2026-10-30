@@ -39,11 +39,9 @@ import llc.bokadev.kompass.presentation.screens.home.components.BookmarkIcon
 import llc.bokadev.kompass.presentation.screens.home.components.PlayIcon
 import llc.bokadev.kompass.presentation.screens.placedetail.components.DetailGlyph
 import llc.bokadev.kompass.presentation.screens.placedetail.components.DetailIcon
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
+import llc.bokadev.kompass.ui.theme.KompassTheme
 
 /** The remove button's warm dark fill behind the lamp bookmark (Saved spec §3). */
-private val RemoveFill = Color(0xFF2A2516)
 
 /**
  * One saved place or activity (Saved spec §3): photo, type label, Gloock title, and a meta line
@@ -65,13 +63,13 @@ fun SavedCard(
     onRemove: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     var imageFailed by remember(imageUrl) { mutableStateOf(false) }
     Row(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(22.dp))
-            .background(colors.surfaceRaised)
+            .background(colors.charcoal)
             .padding(10.dp),
         horizontalArrangement = Arrangement.spacedBy(14.dp)
     ) {
@@ -87,7 +85,7 @@ fun SavedCard(
                 },
             horizontalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            Box(Modifier.size(104.dp).clip(RoundedCornerShape(16.dp)).background(colors.surfaceMuted), contentAlignment = Alignment.Center) {
+            Box(Modifier.size(104.dp).clip(RoundedCornerShape(16.dp)).background(colors.slateDark), contentAlignment = Alignment.Center) {
                 if (!imageUrl.isNullOrBlank() && !imageFailed) {
                     AsyncImage(
                         model = imageUrl,
@@ -97,29 +95,29 @@ fun SavedCard(
                         modifier = Modifier.fillMaxSize()
                     )
                 } else {
-                    DetailIcon(DetailGlyph.Landmark, color = colors.textTertiary, size = 28.dp)
+                    DetailIcon(DetailGlyph.Landmark, color = colors.pebbleGray, size = 28.dp)
                 }
             }
             Column(Modifier.weight(1f).padding(vertical = 6.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 typeLabel?.let {
-                    Text(text = it, style = LamplightType.label().copy(fontSize = 10.sp), color = colors.lamp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text(text = it, style = KompassTheme.typography.geologicaSemiBold11.copy(fontSize = 10.sp), color = colors.lampYellow, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
                 Text(
                     text = title,
-                    style = LamplightType.cardTitle().copy(fontSize = 21.sp, lineHeight = 23.sp),
-                    color = colors.textPrimary,
+                    style = KompassTheme.typography.gloockRegular23.copy(fontSize = 21.sp, lineHeight = 23.sp),
+                    color = colors.boneWhite,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     if (hasAudio) {
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                            PlayIcon(color = colors.textPrimary, size = 10.dp)
-                            Text(text = audioLabel, style = LamplightType.meta().copy(fontWeight = FontWeight.SemiBold), color = colors.textPrimary)
+                            PlayIcon(color = colors.boneWhite, size = 10.dp)
+                            Text(text = audioLabel, style = KompassTheme.typography.geologicaRegular13.copy(fontWeight = FontWeight.SemiBold), color = colors.boneWhite)
                         }
                     }
                     listOfNotNull(distance, hint).forEach {
-                        Text(text = it, style = LamplightType.meta(), color = colors.textTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        Text(text = it, style = KompassTheme.typography.geologicaRegular13, color = colors.pebbleGray, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     }
                 }
             }
@@ -128,12 +126,12 @@ fun SavedCard(
             Modifier
                 .size(44.dp)
                 .clip(CircleShape)
-                .background(RemoveFill)
+                .background(KompassTheme.colors.lampShadow)
                 .clickable(onClick = onRemove)
                 .semantics { role = Role.Button; contentDescription = removeDescription },
             contentAlignment = Alignment.Center
         ) {
-            BookmarkIcon(filled = true, color = colors.lamp, size = 16.dp)
+            BookmarkIcon(filled = true, color = colors.lampYellow, size = 16.dp)
         }
     }
 }

@@ -25,8 +25,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
+import llc.bokadev.kompass.ui.theme.KompassTheme
 
 /** A dialable number with its (already localized) service label. */
 data class DialEntry(val number: String, val label: String)
@@ -45,20 +44,20 @@ fun EmergencyCard(
     onDial: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     fun describe(entry: DialEntry) = callDescription.replace("{number}", entry.number).replace("{service}", entry.label)
 
     Column(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(22.dp))
-            .background(colors.surfaceRaised)
+            .background(colors.charcoal)
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            EssentialsIcon(EssentialsGlyph.Warning, color = colors.alert, size = 14.dp)
-            Text(text = title.uppercase(), style = LamplightType.label(), color = colors.alert)
+            EssentialsIcon(EssentialsGlyph.Warning, color = colors.coralRed, size = 14.dp)
+            Text(text = title.uppercase(), style = KompassTheme.typography.geologicaSemiBold11, color = colors.coralRed)
         }
         // One row: 112 first (alert outline), then the CMS numbers. Every number stays one tap away.
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -69,8 +68,8 @@ fun EmergencyCard(
                         .weight(1f)
                         .heightIn(min = 60.dp)
                         .clip(RoundedCornerShape(14.dp))
-                        .background(colors.surfaceMuted)
-                        .then(if (isPrimary) Modifier.border(1.5.dp, colors.alert, RoundedCornerShape(14.dp)) else Modifier)
+                        .background(colors.slateDark)
+                        .then(if (isPrimary) Modifier.border(1.5.dp, colors.coralRed, RoundedCornerShape(14.dp)) else Modifier)
                         .clickable { onDial(entry.number) }
                         .clearAndSetSemantics {
                             role = Role.Button
@@ -83,10 +82,10 @@ fun EmergencyCard(
                 ) {
                     Text(
                         text = entry.number,
-                        style = LamplightType.body().copy(fontSize = 19.sp, fontWeight = FontWeight.Bold),
-                        color = if (isPrimary) colors.alert else colors.textPrimary
+                        style = KompassTheme.typography.geologicaMedium16.copy(fontSize = 19.sp, fontWeight = FontWeight.Bold),
+                        color = if (isPrimary) colors.coralRed else colors.boneWhite
                     )
-                    Text(text = entry.label, style = LamplightType.meta().copy(fontSize = 12.sp), color = colors.textSecondary, textAlign = TextAlign.Center, maxLines = 2)
+                    Text(text = entry.label, style = KompassTheme.typography.geologicaRegular13.copy(fontSize = 12.sp), color = colors.stoneGray, textAlign = TextAlign.Center, maxLines = 2)
                 }
             }
         }

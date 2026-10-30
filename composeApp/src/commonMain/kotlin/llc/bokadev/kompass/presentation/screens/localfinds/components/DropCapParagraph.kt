@@ -20,8 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlin.math.ceil
 import kotlin.math.max
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
+import llc.bokadev.kompass.ui.theme.KompassTheme
 
 /**
  * A paragraph opening with a large initial (stories spec §2.2): the first lines wrap beside the
@@ -71,10 +70,10 @@ fun DropCapParagraph(
 private fun DropCapParagraphPreview() {
     DropCapParagraph(
         text = "Long before the first stone was laid, a wise fairy named Alkima warned the founders of Kotor not to build on the heights.",
-        style = LamplightType.body().copy(fontSize = 18.sp, lineHeight = 30.6.sp),
-        color = LamplightTheme.colors.textPrimary,
-        capStyle = LamplightType.areaTitle().copy(fontSize = 64.sp, lineHeight = 64.sp),
-        capColor = LamplightTheme.colors.lamp,
+        style = KompassTheme.typography.geologicaMedium16.copy(fontSize = 18.sp, lineHeight = 30.6.sp),
+        color = KompassTheme.colors.boneWhite,
+        capStyle = KompassTheme.typography.gloockRegular40.copy(fontSize = 64.sp, lineHeight = 64.sp),
+        capColor = KompassTheme.colors.lampYellow,
         enabled = true
     )
 }

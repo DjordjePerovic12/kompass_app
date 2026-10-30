@@ -43,7 +43,7 @@ import coil3.compose.AsyncImage
 import llc.bokadev.kompass.presentation.screens.home.components.BookmarkIcon
 import llc.bokadev.kompass.presentation.screens.home.components.ChevronLeftIcon
 import llc.bokadev.kompass.presentation.shared.PagerDots
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
+import llc.bokadev.kompass.ui.theme.KompassTheme
 
 /**
  * Full-bleed photo carousel at the top of the place detail screen (spec §1.2): swipeable ordered
@@ -67,7 +67,7 @@ fun DetailHero(
     modifier: Modifier = Modifier,
     parallax: () -> Float = { 0f }
 ) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     val heroHeight = if (photoUrls.isEmpty()) 200.dp else height
     val pagerState = rememberPagerState(pageCount = { photoUrls.size })
 
@@ -96,7 +96,7 @@ fun DetailHero(
             Modifier
                 .fillMaxWidth()
                 .height(130.dp)
-                .background(Brush.verticalGradient(listOf(colors.night.copy(alpha = 0.7f), Color.Transparent)))
+                .background(Brush.verticalGradient(listOf(colors.nightBlack.copy(alpha = 0.7f), Color.Transparent)))
         )
         Box(
             Modifier
@@ -105,7 +105,7 @@ fun DetailHero(
                 .height(120.dp)
                 // A soft shade for the page dots; the page behind is a gradient, not flat night,
                 // so the photo no longer fades into a solid colour.
-                .background(Brush.verticalGradient(listOf(Color.Transparent, colors.night.copy(alpha = 0.45f))))
+                .background(Brush.verticalGradient(listOf(Color.Transparent, colors.nightBlack.copy(alpha = 0.45f))))
         )
 
         Row(
@@ -115,11 +115,11 @@ fun DetailHero(
                 .padding(horizontal = 16.dp, vertical = 16.dp)
         ) {
             OverlayButton(description = backLabel, onClick = onBack) {
-                ChevronLeftIcon(color = colors.chalk, size = 18.dp)
+                ChevronLeftIcon(color = colors.chalkWhite, size = 18.dp)
             }
             Spacer(Modifier.weight(1f))
             if (onToggleSave != null) OverlayButton(description = saveLabel, stateLabel = savedStateLabel, onClick = onToggleSave) {
-                BookmarkIcon(filled = isSaved, color = colors.chalk, size = 18.dp)
+                BookmarkIcon(filled = isSaved, color = colors.chalkWhite, size = 18.dp)
             }
         }
 
@@ -142,16 +142,16 @@ private fun HeroPhoto(url: String) {
             contentDescription = null,
             contentScale = ContentScale.Crop,
             onError = { failed = true },
-            modifier = Modifier.fillMaxSize().background(LamplightTheme.colors.surfaceMuted)
+            modifier = Modifier.fillMaxSize().background(KompassTheme.colors.slateDark)
         )
     }
 }
 
 @Composable
 private fun MissingPhoto() {
-    val colors = LamplightTheme.colors
-    Box(Modifier.fillMaxSize().background(colors.surfaceMuted), contentAlignment = Alignment.Center) {
-        DetailIcon(DetailGlyph.Landmark, color = colors.textTertiary, size = 32.dp)
+    val colors = KompassTheme.colors
+    Box(Modifier.fillMaxSize().background(colors.slateDark), contentAlignment = Alignment.Center) {
+        DetailIcon(DetailGlyph.Landmark, color = colors.pebbleGray, size = 32.dp)
     }
 }
 
@@ -166,7 +166,7 @@ private fun OverlayButton(
         modifier = Modifier
             .size(44.dp)
             .clip(CircleShape)
-            .background(LamplightTheme.colors.night.copy(alpha = 0.62f))
+            .background(KompassTheme.colors.nightBlack.copy(alpha = 0.62f))
             .clickable(onClick = onClick)
             .semantics {
                 role = Role.Button

@@ -37,10 +37,9 @@ import llc.bokadev.kompass.presentation.screens.events.components.EventRow
 import llc.bokadev.kompass.presentation.shared.LamplightChip
 import llc.bokadev.kompass.presentation.shared.LamplightCompactHeader
 import llc.bokadev.kompass.presentation.shared.StateMessage
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
+import llc.bokadev.kompass.ui.theme.KompassTheme
 
 /**
  * Events in chronological Kotor-day groups (Today, Tomorrow, then dates). A festival that started
@@ -48,7 +47,7 @@ import kotlin.time.ExperimentalTime
  */
 @Composable
 fun EventsScreenContent(state: EventsState, onAction: (EventsAction) -> Unit) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     val lang = currentAppLanguage()
     val strings = rememberAppStrings()
     val s = strings.states
@@ -57,7 +56,7 @@ fun EventsScreenContent(state: EventsState, onAction: (EventsAction) -> Unit) {
     val groups = state.events.groupedByListingDay(now)
 
     LazyColumn(
-        modifier = Modifier.fillMaxSize().background(colors.night),
+        modifier = Modifier.fillMaxSize().background(colors.nightBlack),
         contentPadding = PaddingValues(bottom = 26.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
@@ -77,7 +76,7 @@ fun EventsScreenContent(state: EventsState, onAction: (EventsAction) -> Unit) {
         }
         if (state.isLoading || state.isRefreshing) {
             item(key = "progress") {
-                LinearProgressIndicator(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp), color = colors.lamp, trackColor = colors.surfaceMuted)
+                LinearProgressIndicator(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp), color = colors.lampYellow, trackColor = colors.slateDark)
             }
         }
 
@@ -114,9 +113,9 @@ fun EventsScreenContent(state: EventsState, onAction: (EventsAction) -> Unit) {
 
 @Composable
 private fun FilterRow(title: String, filters: List<EventFilter>, selectedKey: String, lang: String, onSelect: (String) -> Unit) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-        Text(text = title, style = LamplightType.label(), color = colors.textTertiary, modifier = Modifier.padding(start = 20.dp, top = 8.dp))
+        Text(text = title, style = KompassTheme.typography.geologicaSemiBold11, color = colors.pebbleGray, modifier = Modifier.padding(start = 20.dp, top = 8.dp))
         LazyRow(contentPadding = PaddingValues(horizontal = 20.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             items(filters, key = { it.key }) { filter ->
                 LamplightChip(label = filter.localizedLabel(lang), selected = filter.key == selectedKey, onClick = { onSelect(filter.key) })
@@ -129,8 +128,8 @@ private fun FilterRow(title: String, filters: List<EventFilter>, selectedKey: St
 private fun DayHeader(text: String) {
     Text(
         text = text,
-        style = LamplightType.sectionTitleS(),
-        color = LamplightTheme.colors.textPrimary,
+        style = KompassTheme.typography.gloockRegular26,
+        color = KompassTheme.colors.boneWhite,
         modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 14.dp).semantics { heading() }
     )
 }

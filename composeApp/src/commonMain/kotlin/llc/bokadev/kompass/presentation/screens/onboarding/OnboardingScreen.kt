@@ -31,41 +31,40 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import llc.bokadev.kompass.core.utils.rememberAppStrings
-import llc.bokadev.kompass.presentation.theme.LamplightShapes
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
+import llc.bokadev.kompass.ui.theme.KompassTheme
+import llc.bokadev.kompass.ui.theme.KompassShapes
 
 /** A brief, skippable first-run introduction (one screen). It only describes what the pilot offers. */
 @Composable
 fun OnboardingScreen(onAction: (OnboardingAction) -> Unit) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     val s = rememberAppStrings().onboarding
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(colors.lamp)
+            .background(colors.lampYellow)
             .windowInsetsPadding(WindowInsets.statusBars)
             .windowInsetsPadding(WindowInsets.navigationBars)
             .padding(horizontal = 24.dp, vertical = 24.dp)
     ) {
-        Text(text = "KOMPASS", style = LamplightType.label().copy(fontSize = 14.sp), color = colors.night)
+        Text(text = "KOMPASS", style = KompassTheme.typography.geologicaSemiBold11.copy(fontSize = 14.sp), color = colors.nightBlack)
         Column(
             modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(top = 40.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(
                 text = s.title,
-                style = LamplightType.areaTitle(),
-                color = colors.night,
+                style = KompassTheme.typography.gloockRegular40,
+                color = colors.nightBlack,
                 modifier = Modifier.semantics { heading() }
             )
-            Text(text = s.body, style = LamplightType.body().copy(fontSize = 17.sp, lineHeight = 25.sp), color = colors.night)
+            Text(text = s.body, style = KompassTheme.typography.geologicaMedium16.copy(fontSize = 17.sp, lineHeight = 25.sp), color = colors.nightBlack)
             Spacer(Modifier.padding(top = 4.dp))
             listOf(s.pointLocals, s.pointPractical, s.pointStories).forEach { point ->
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Box(Modifier.size(8.dp).clip(CircleShape).background(colors.night))
-                    Text(text = point, style = LamplightType.body(), color = colors.night)
+                    Box(Modifier.size(8.dp).clip(CircleShape).background(colors.nightBlack))
+                    Text(text = point, style = KompassTheme.typography.geologicaMedium16, color = colors.nightBlack)
                 }
             }
         }
@@ -73,12 +72,12 @@ fun OnboardingScreen(onAction: (OnboardingAction) -> Unit) {
             modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(min = 56.dp)
-                .clip(LamplightShapes.pill)
-                .background(colors.night)
+                .clip(KompassShapes.pill)
+                .background(colors.nightBlack)
                 .clickable(role = Role.Button) { onAction(OnboardingAction.Start) },
             contentAlignment = Alignment.Center
         ) {
-            Text(text = s.start, style = LamplightType.body().copy(fontWeight = FontWeight.SemiBold), color = colors.lamp)
+            Text(text = s.start, style = KompassTheme.typography.geologicaMedium16.copy(fontWeight = FontWeight.SemiBold), color = colors.lampYellow)
         }
     }
 }

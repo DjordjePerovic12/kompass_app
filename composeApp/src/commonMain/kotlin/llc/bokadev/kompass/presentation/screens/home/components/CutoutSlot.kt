@@ -17,7 +17,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
+import llc.bokadev.kompass.ui.theme.KompassTheme
 
 /**
  * What the Nearby card's bottom-right image slot draws (cut-out spec B8). Only [Arch] and [None]
@@ -43,8 +43,8 @@ fun CutoutSlot(mode: SlotMode, modifier: Modifier = Modifier) {
     when (mode) {
         SlotMode.None -> Unit
         is SlotMode.Arch -> {
-            val night = LamplightTheme.colors.night
-            val chalk = LamplightTheme.colors.chalk
+            val night = KompassTheme.colors.nightBlack
+            val chalk = KompassTheme.colors.chalkWhite
             var loaded by remember(mode.imageUrl) { mutableStateOf(false) }
             Box(modifier) {
                 if (loaded) {
@@ -72,7 +72,7 @@ fun CutoutSlot(mode: SlotMode, modifier: Modifier = Modifier) {
 @Preview
 @Composable
 private fun CutoutSlotPreview() {
-    Box(Modifier.size(width = 196.dp, height = 250.dp).background(LamplightTheme.colors.lamp)) {
+    Box(Modifier.size(width = 196.dp, height = 250.dp).background(KompassTheme.colors.lampYellow)) {
         CutoutSlot(SlotMode.Arch("https://example.com/cathedral.jpg"), Modifier.fillMaxSize())
     }
 }

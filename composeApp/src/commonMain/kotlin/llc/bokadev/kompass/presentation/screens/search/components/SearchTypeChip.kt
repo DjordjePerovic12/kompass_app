@@ -21,8 +21,7 @@ import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
+import llc.bokadev.kompass.ui.theme.KompassTheme
 
 /** A type filter: label + muted count. Selected = `chalk` fill, `night` 700 text; else outline. */
 @Composable
@@ -34,14 +33,14 @@ fun SearchTypeChip(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     val shape = RoundedCornerShape(20.dp)
-    val text = if (selected) colors.night else colors.textPrimary
+    val text = if (selected) colors.nightBlack else colors.boneWhite
     Row(
         modifier = modifier
             .heightIn(min = 40.dp)
             .clip(shape)
-            .then(if (selected) Modifier.background(colors.chalk) else Modifier.border(1.5.dp, colors.borderStrong, shape))
+            .then(if (selected) Modifier.background(colors.chalkWhite) else Modifier.border(1.5.dp, colors.slateGray, shape))
             .clickable(onClick = onClick)
             .clearAndSetSemantics {
                 role = Role.Tab
@@ -54,10 +53,10 @@ fun SearchTypeChip(
     ) {
         Text(
             text = label,
-            style = LamplightType.bodyS().copy(fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium),
+            style = KompassTheme.typography.geologicaRegular14.copy(fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium),
             color = text
         )
-        Text(text = count.toString(), style = LamplightType.meta(), color = text.copy(alpha = 0.6f))
+        Text(text = count.toString(), style = KompassTheme.typography.geologicaRegular13, color = text.copy(alpha = 0.6f))
     }
 }
 

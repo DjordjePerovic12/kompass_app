@@ -16,8 +16,7 @@ import llc.bokadev.kompass.core.utils.*
 import llc.bokadev.kompass.domain.model.*
 import llc.bokadev.kompass.core.presentation.mvi.asString
 import llc.bokadev.kompass.presentation.screens.excursions.components.ExcursionRow
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
+import llc.bokadev.kompass.ui.theme.KompassTheme
 
 /** Worth the Drive: an editorial collection with interest/time/planning filters. */
 @Composable
@@ -27,18 +26,18 @@ fun ExcursionsScreenContent(
 ) {
     val app = rememberAppStrings()
     val strings = app.excursions
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     val filter = state.filter
     val visible = state.items.filter(filter::matches)
-    Column(Modifier.fillMaxSize().background(colors.night).windowInsetsPadding(WindowInsets.statusBars)) {
+    Column(Modifier.fillMaxSize().background(colors.nightBlack).windowInsetsPadding(WindowInsets.statusBars)) {
         Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp)) {
-            TextButton(onClick = { onAction(ExcursionsAction.Back) }) { Text(strings.back, color = colors.lamp) }
+            TextButton(onClick = { onAction(ExcursionsAction.Back) }) { Text(strings.back, color = colors.lampYellow) }
         }
         LazyColumn(contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
             item {
-                Text(app.redesign.worthDrive, style = LamplightType.areaTitle(), color = colors.textPrimary)
+                Text(app.redesign.worthDrive, style = KompassTheme.typography.gloockRegular40, color = colors.boneWhite)
                 Spacer(Modifier.height(10.dp))
-                Text(strings.intro, style = LamplightType.body(), color = colors.textSecondary)
+                Text(strings.intro, style = KompassTheme.typography.geologicaMedium16, color = colors.stoneGray)
             }
             if (state.items.isNotEmpty()) {
                 item {
@@ -54,19 +53,19 @@ fun ExcursionsScreenContent(
                 }
             }
             if (filter != ExcursionFilter()) item {
-                TextButton(onClick = { onAction(ExcursionsAction.Filter(ExcursionFilter())) }) { Text(strings.reset, color = colors.lamp) }
+                TextButton(onClick = { onAction(ExcursionsAction.Filter(ExcursionFilter())) }) { Text(strings.reset, color = colors.lampYellow) }
             }
             if (state.cached) item {
-                Text(strings.cached, color = colors.textSecondary, style = LamplightType.body())
-                TextButton(onClick = { onAction(ExcursionsAction.Reload) }) { Text(app.retry, color = colors.lamp) }
+                Text(strings.cached, color = colors.stoneGray, style = KompassTheme.typography.geologicaMedium16)
+                TextButton(onClick = { onAction(ExcursionsAction.Reload) }) { Text(app.retry, color = colors.lampYellow) }
             }
             when {
-                state.isLoading -> item { CircularProgressIndicator(color = colors.lamp) }
+                state.isLoading -> item { CircularProgressIndicator(color = colors.lampYellow) }
                 state.error != null -> item {
-                    Text(state.error.asString(), color = colors.textPrimary)
-                    TextButton(onClick = { onAction(ExcursionsAction.Reload) }) { Text(app.retry, color = colors.lamp) }
+                    Text(state.error.asString(), color = colors.boneWhite)
+                    TextButton(onClick = { onAction(ExcursionsAction.Reload) }) { Text(app.retry, color = colors.lampYellow) }
                 }
-                visible.isEmpty() -> item { Text(if (state.items.isEmpty()) strings.empty else strings.noMatches, color = colors.textSecondary) }
+                visible.isEmpty() -> item { Text(if (state.items.isEmpty()) strings.empty else strings.noMatches, color = colors.stoneGray) }
             }
             items(visible, key = { it.id }) { entry ->
                 val type = if (entry.place != null) FavoriteItemType.PLACE else FavoriteItemType.ACTIVITY
@@ -83,14 +82,14 @@ fun ExcursionsScreenContent(
 @Composable
 private fun FilterGroup(title: String, values: List<String>, selected: Set<String>, onClick: (String) -> Unit) {
     if (values.isEmpty()) return
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     val strings = rememberAppStrings().excursions
-    Text(title, style = LamplightType.body(), color = colors.textSecondary)
+    Text(title, style = KompassTheme.typography.geologicaMedium16, color = colors.stoneGray)
     LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         items(values) { value -> FilterChip(
             selected = value in selected, onClick = { onClick(value) }, label = { Text(strings.label(value)) },
-            colors = FilterChipDefaults.filterChipColors(containerColor = colors.surfaceRaised, labelColor = colors.textPrimary,
-                selectedContainerColor = colors.lamp, selectedLabelColor = colors.night),
+            colors = FilterChipDefaults.filterChipColors(containerColor = colors.charcoal, labelColor = colors.boneWhite,
+                selectedContainerColor = colors.lampYellow, selectedLabelColor = colors.nightBlack),
             modifier = Modifier.heightIn(min = 48.dp)
         ) }
     }

@@ -36,8 +36,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
+import llc.bokadev.kompass.ui.theme.KompassTheme
 
 private val ArchShape = RoundedCornerShape(topStartPercent = 50, topEndPercent = 50)
 
@@ -55,7 +54,7 @@ fun ExploreWideArchCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     val shape = RoundedCornerShape(24.dp)
     var failed by remember(imageUrl) { mutableStateOf(false) }
     val showArch = !imageUrl.isNullOrBlank() && !failed
@@ -65,8 +64,8 @@ fun ExploreWideArchCard(
             .fillMaxWidth()
             .heightIn(min = 150.dp)
             .clip(shape)
-            .background(colors.surfaceRaised)
-            .border(1.dp, colors.divider, shape)
+            .background(colors.charcoal)
+            .border(1.dp, colors.slateDivider, shape)
             .clickable(onClick = onClick)
             .clearAndSetSemantics {
                 role = Role.Button
@@ -78,19 +77,19 @@ fun ExploreWideArchCard(
             modifier = Modifier.weight(1f).padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            Text(text = label.uppercase(), style = LamplightType.label(), color = colors.lamp)
-            Text(text = title, style = LamplightType.sectionTitleS(), color = colors.textPrimary)
-            Text(text = subtitle, style = LamplightType.bodyS().copy(fontSize = 14.sp), color = colors.textSecondary)
+            Text(text = label.uppercase(), style = KompassTheme.typography.geologicaSemiBold11, color = colors.lampYellow)
+            Text(text = title, style = KompassTheme.typography.gloockRegular26, color = colors.boneWhite)
+            Text(text = subtitle, style = KompassTheme.typography.geologicaRegular14.copy(fontSize = 14.sp), color = colors.stoneGray)
         }
         if (showArch) {
             Box(Modifier.width(132.dp).height(150.dp), contentAlignment = Alignment.BottomEnd) {
-                Box(Modifier.size(width = 112.dp, height = 128.dp).offset(x = (-8).dp).background(colors.night, ArchShape))
+                Box(Modifier.size(width = 112.dp, height = 128.dp).offset(x = (-8).dp).background(colors.nightBlack, ArchShape))
                 AsyncImage(
                     model = imageUrl,
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
                     onError = { failed = true },
-                    modifier = Modifier.size(width = 112.dp, height = 128.dp).clip(ArchShape).background(colors.surfaceMuted)
+                    modifier = Modifier.size(width = 112.dp, height = 128.dp).clip(ArchShape).background(colors.slateDark)
                 )
             }
         }

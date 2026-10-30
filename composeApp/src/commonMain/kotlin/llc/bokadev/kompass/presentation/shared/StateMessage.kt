@@ -16,8 +16,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
+import llc.bokadev.kompass.ui.theme.KompassTheme
 
 /**
  * A short, localized state line (empty / no filter match / couldn't load / couldn't refresh) with
@@ -30,19 +29,19 @@ fun StateMessage(
     actionLabel: String? = null,
     onAction: () -> Unit = {}
 ) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     Column(modifier = modifier.padding(horizontal = 2.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Text(
             text = text,
-            style = LamplightType.body(),
-            color = colors.textSecondary,
+            style = KompassTheme.typography.geologicaMedium16,
+            color = colors.stoneGray,
             modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }
         )
         actionLabel?.let {
             Text(
                 text = it,
-                style = LamplightType.body().copy(fontWeight = FontWeight.SemiBold),
-                color = colors.lamp,
+                style = KompassTheme.typography.geologicaMedium16.copy(fontWeight = FontWeight.SemiBold),
+                color = colors.lampYellow,
                 modifier = Modifier
                     .clip(RoundedCornerShape(100.dp))
                     .clickable(role = Role.Button, onClick = onAction)

@@ -68,10 +68,8 @@ import llc.bokadev.kompass.presentation.screens.search.components.SearchGlyph
 import llc.bokadev.kompass.presentation.screens.search.components.SearchGlyphIcon
 import llc.bokadev.kompass.presentation.shared.StatusBarIconsEffect
 import llc.bokadev.kompass.presentation.shared.rememberReduceMotion
-import llc.bokadev.kompass.presentation.theme.HomePalette
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
-import llc.bokadev.kompass.presentation.theme.pageGradientBackground
+import llc.bokadev.kompass.ui.theme.KompassTheme
+import llc.bokadev.kompass.ui.theme.pageGradientBackground
 
 private data class StoryDetailActions(
     val onBack: () -> Unit,
@@ -123,7 +121,7 @@ fun LocalFindDetailScreenContent(
 @Composable
 private fun StoryBody(find: LocalFind, next: NextStory?, audioMode: NavAudioMode?, strings: AppStrings, lang: String, actions: StoryDetailActions) {
     val s = strings.stories
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     val density = LocalDensity.current
     val reduceMotion = rememberReduceMotion()
     val scroll = rememberScrollState()
@@ -164,9 +162,9 @@ private fun StoryBody(find: LocalFind, next: NextStory?, audioMode: NavAudioMode
             ) {
                 if (paragraphs.isEmpty() && audioMode != null) {
                     // Only a title + audio: the listen block is the story.
-                    Text(s.listenToStory, style = LamplightType.sectionTitleS(), color = colors.textPrimary)
+                    Text(s.listenToStory, style = KompassTheme.typography.gloockRegular26, color = colors.boneWhite)
                 }
-                val bodyStyle = LamplightType.body().copy(fontSize = 18.sp, lineHeight = 30.6.sp, fontWeight = FontWeight.Normal)
+                val bodyStyle = KompassTheme.typography.geologicaMedium16.copy(fontSize = 18.sp, lineHeight = 30.6.sp, fontWeight = FontWeight.Normal)
                 paragraphs.forEachIndexed { index, paragraph ->
                     val quote = pullQuoteOf(paragraph)
                     when {
@@ -174,12 +172,12 @@ private fun StoryBody(find: LocalFind, next: NextStory?, audioMode: NavAudioMode
                         index == 0 -> DropCapParagraph(
                             text = paragraph,
                             style = bodyStyle,
-                            color = colors.textPrimary,
-                            capStyle = LamplightType.areaTitle().copy(fontSize = 64.sp, lineHeight = 64.sp),
-                            capColor = colors.lamp,
+                            color = colors.boneWhite,
+                            capStyle = KompassTheme.typography.gloockRegular40.copy(fontSize = 64.sp, lineHeight = 64.sp),
+                            capColor = colors.lampYellow,
                             enabled = density.fontScale < 1.3f
                         )
-                        else -> Text(paragraph, style = bodyStyle, color = colors.textPrimary)
+                        else -> Text(paragraph, style = bodyStyle, color = colors.boneWhite)
                     }
                 }
             }
@@ -203,8 +201,8 @@ private fun StoryBody(find: LocalFind, next: NextStory?, audioMode: NavAudioMode
                 DetailCompactBar(title = title, backLabel = strings.detail.back, onBack = actions.onBack)
                 // Reading progress: a thin `lamp` line under the bar.
                 val progress = if (scroll.maxValue > 0) scroll.value.toFloat() / scroll.maxValue else 0f
-                Box(Modifier.fillMaxWidth().height(2.dp).background(colors.night)) {
-                    Box(Modifier.fillMaxWidth(progress.coerceIn(0f, 1f)).fillMaxHeight().background(colors.lamp))
+                Box(Modifier.fillMaxWidth().height(2.dp).background(colors.nightBlack)) {
+                    Box(Modifier.fillMaxWidth(progress.coerceIn(0f, 1f)).fillMaxHeight().background(colors.lampYellow))
                 }
             }
         }
@@ -220,13 +218,13 @@ private fun Modifier.overlapUp(by: androidx.compose.ui.unit.Dp) = layout { measu
 
 @Composable
 private fun Hero(url: String, height: androidx.compose.ui.unit.Dp, backLabel: String, onBack: () -> Unit) {
-    val colors = LamplightTheme.colors
-    Box(Modifier.fillMaxWidth().height(height).background(colors.surfaceMuted)) {
+    val colors = KompassTheme.colors
+    Box(Modifier.fillMaxWidth().height(height).background(colors.slateDark)) {
         AsyncImage(model = url, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
         Box(Modifier.fillMaxWidth().height(120.dp).background(Brush.verticalGradient(listOf(Color.Black.copy(alpha = 0.45f), Color.Transparent))))
         Box(
             Modifier.fillMaxWidth().height(140.dp).align(Alignment.BottomCenter)
-                .background(Brush.verticalGradient(listOf(Color.Transparent, colors.night.copy(alpha = 0.85f))))
+                .background(Brush.verticalGradient(listOf(Color.Transparent, colors.nightBlack.copy(alpha = 0.85f))))
         )
         BackButton(backLabel, onBack, Modifier.windowInsetsPadding(WindowInsets.statusBars).padding(start = 16.dp, top = 8.dp))
     }
@@ -234,12 +232,12 @@ private fun Hero(url: String, height: androidx.compose.ui.unit.Dp, backLabel: St
 
 @Composable
 private fun CompactHeader(backLabel: String, onBack: () -> Unit) {
-    val colors = LamplightTheme.colors
-    Box(Modifier.fillMaxWidth().background(colors.lamp)) {
+    val colors = KompassTheme.colors
+    Box(Modifier.fillMaxWidth().background(colors.lampYellow)) {
         Text(
             "“",
-            style = LamplightType.areaTitle().copy(fontSize = 120.sp, lineHeight = 120.sp),
-            color = colors.night.copy(alpha = 0.14f),
+            style = KompassTheme.typography.gloockRegular40.copy(fontSize = 120.sp, lineHeight = 120.sp),
+            color = colors.nightBlack.copy(alpha = 0.14f),
             modifier = Modifier.align(Alignment.TopEnd).windowInsetsPadding(WindowInsets.statusBars).padding(end = 18.dp)
         )
         BackButton(backLabel, onBack, Modifier.windowInsetsPadding(WindowInsets.statusBars).padding(start = 20.dp, top = 8.dp, bottom = 22.dp))
@@ -248,16 +246,16 @@ private fun CompactHeader(backLabel: String, onBack: () -> Unit) {
 
 @Composable
 private fun BackButton(label: String, onBack: () -> Unit, modifier: Modifier) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     Box(
         modifier
             .size(44.dp)
             .clip(CircleShape)
-            .background(colors.night)
+            .background(colors.nightBlack)
             .clickable(onClick = onBack)
             .semantics { role = Role.Button; contentDescription = label },
         contentAlignment = Alignment.Center
-    ) { ChevronLeftIcon(color = colors.chalk, size = 18.dp) }
+    ) { ChevronLeftIcon(color = colors.chalkWhite, size = 18.dp) }
 }
 
 @Composable
@@ -273,29 +271,29 @@ private fun TitleBlock(
     onListen: () -> Unit,
     modifier: Modifier
 ) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     val type = if (find.storyKind == StoryKind.LOCALISM) s.localism else s.legend
     val label = listOfNotNull(type, storyArea(find.localizedLocation(lang))).joinToString(" · ").uppercaseFor(lang)
     Column(modifier.fillMaxWidth().padding(horizontal = 24.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Text(label, style = LamplightType.label(), color = colors.lamp)
+        Text(label, style = KompassTheme.typography.geologicaSemiBold11, color = colors.lampYellow)
         Text(
             title,
-            style = LamplightType.cardTitleXL().copy(fontSize = 40.sp, lineHeight = 41.sp),
-            color = colors.textPrimary,
+            style = KompassTheme.typography.gloockRegular34.copy(fontSize = 40.sp, lineHeight = 41.sp),
+            color = colors.boneWhite,
             modifier = Modifier.semantics { heading() }
         )
         if (readMinutes != null || placeName != null) {
             Row(horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically) {
                 readMinutes?.let {
                     Row(horizontalArrangement = Arrangement.spacedBy(5.dp), verticalAlignment = Alignment.CenterVertically) {
-                        SearchGlyphIcon(SearchGlyph.Book, colors.textSecondary, 14.dp)
-                        Text(s.minRead.replace("{n}", it.toString()), style = LamplightType.meta(), color = HomePalette.onGradientSecondary)
+                        SearchGlyphIcon(SearchGlyph.Book, colors.stoneGray, 14.dp)
+                        Text(s.minRead.replace("{n}", it.toString()), style = KompassTheme.typography.geologicaRegular13, color = KompassTheme.colors.white85)
                     }
                 }
                 placeName?.let {
                     Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
-                        EssentialsIcon(EssentialsGlyph.Pin, colors.textSecondary, 14.dp)
-                        Text(it, style = LamplightType.meta(), color = HomePalette.onGradientSecondary, maxLines = 1)
+                        EssentialsIcon(EssentialsGlyph.Pin, colors.stoneGray, 14.dp)
+                        Text(it, style = KompassTheme.typography.geologicaRegular13, color = KompassTheme.colors.white85, maxLines = 1)
                     }
                 }
             }
@@ -323,12 +321,12 @@ private fun TitleBlock(
 /** Hairlines top and bottom, a `lamp` “, Gloock 26/31. No left accent bar. */
 @Composable
 private fun PullQuote(text: String) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     Column(Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
-        Box(Modifier.fillMaxWidth().height(1.dp).background(colors.divider))
-        Text("“", style = LamplightType.areaTitle().copy(fontSize = 44.sp, lineHeight = 44.sp), color = colors.lamp, modifier = Modifier.padding(top = 14.dp).offset(y = 6.dp))
-        Text(text, style = LamplightType.cardTitle().copy(fontSize = 26.sp, lineHeight = 31.sp), color = colors.textPrimary, modifier = Modifier.padding(bottom = 18.dp))
-        Box(Modifier.fillMaxWidth().height(1.dp).background(colors.divider))
+        Box(Modifier.fillMaxWidth().height(1.dp).background(colors.slateDivider))
+        Text("“", style = KompassTheme.typography.gloockRegular40.copy(fontSize = 44.sp, lineHeight = 44.sp), color = colors.lampYellow, modifier = Modifier.padding(top = 14.dp).offset(y = 6.dp))
+        Text(text, style = KompassTheme.typography.gloockRegular23.copy(fontSize = 26.sp, lineHeight = 31.sp), color = colors.boneWhite, modifier = Modifier.padding(bottom = 18.dp))
+        Box(Modifier.fillMaxWidth().height(1.dp).background(colors.slateDivider))
     }
 }
 
@@ -340,11 +338,11 @@ private fun WhereItHappened(find: LocalFind, location: String, title: String, s:
     // (0, 0) is how a missing coordinate arrives from the CMS. Never geocode a name.
     val hasPoint = lat != null && lng != null && !(lat == 0.0 && lng == 0.0)
     if (cleaned == null && !hasPoint) return
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     Column(Modifier.fillMaxWidth().padding(start = 24.dp, end = 24.dp, top = 34.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text(s.whereItHappened, style = LamplightType.sectionTitleS(), color = colors.textPrimary, modifier = Modifier.semantics { heading() })
+        Text(s.whereItHappened, style = KompassTheme.typography.gloockRegular26, color = colors.boneWhite, modifier = Modifier.semantics { heading() })
         cleaned?.let {
-            Text(it, style = LamplightType.body().copy(fontSize = 15.sp, lineHeight = 23.sp, fontWeight = FontWeight.Normal), color = HomePalette.onGradientSecondary)
+            Text(it, style = KompassTheme.typography.geologicaMedium16.copy(fontSize = 15.sp, lineHeight = 23.sp, fontWeight = FontWeight.Normal), color = KompassTheme.colors.white85)
         }
         if (hasPoint) {
             val name = storyPlaceName(location) ?: storyArea(location) ?: title

@@ -80,11 +80,8 @@ import llc.bokadev.kompass.presentation.screens.placedetail.components.DetailWhe
 import llc.bokadev.kompass.presentation.shared.NativeDetailMapView
 import llc.bokadev.kompass.presentation.shared.StatusBarIconsEffect
 import llc.bokadev.kompass.presentation.shared.rememberReduceMotion
-import llc.bokadev.kompass.presentation.theme.HomePalette
-import llc.bokadev.kompass.presentation.theme.LamplightShapes
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
-import llc.bokadev.kompass.presentation.theme.pageGradientBackground
+import llc.bokadev.kompass.ui.theme.KompassTheme
+import llc.bokadev.kompass.ui.theme.pageGradientBackground
 
 /**
  * Lamplight place detail (place detail spec Part 1). One template for every category: each
@@ -151,7 +148,7 @@ private fun DetailBody(
 ) {
     val lang = currentAppLanguage()
     val strings = rememberAppStrings()
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     val density = LocalDensity.current
     val reduceMotion = rememberReduceMotion()
     val scroll = rememberScrollState()
@@ -218,16 +215,16 @@ private fun DetailBody(
 
 @Composable
 private fun TitleBlock(place: Place, lang: String, strings: AppStrings, listen: @Composable () -> Unit) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     Column(
         modifier = Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, top = 4.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        Text(text = place.detailTypeLabel(strings, lang), style = LamplightType.label(), color = colors.lamp)
+        Text(text = place.detailTypeLabel(strings, lang), style = KompassTheme.typography.geologicaSemiBold11, color = colors.lampYellow)
         Text(
             text = place.localizedName(lang),
-            style = LamplightType.cardTitleXL().copy(fontSize = 40.sp, lineHeight = 41.sp),
-            color = colors.textPrimary,
+            style = KompassTheme.typography.gloockRegular34.copy(fontSize = 40.sp, lineHeight = 41.sp),
+            color = colors.boneWhite,
             modifier = Modifier.semantics { heading() }
         )
         // Right under the title: the first view always shows how to listen.
@@ -235,8 +232,8 @@ private fun TitleBlock(place: Place, lang: String, strings: AppStrings, listen: 
         place.localizedDescription(lang).trim().takeIf { it.isNotBlank() }?.let { short ->
             Text(
                 text = short,
-                style = LamplightType.body().copy(fontWeight = FontWeight.Normal, lineHeight = 24.sp),
-                color = HomePalette.onGradientSecondary
+                style = KompassTheme.typography.geologicaMedium16.copy(fontWeight = FontWeight.Normal, lineHeight = 24.sp),
+                color = KompassTheme.colors.white85
             )
         }
     }
@@ -262,7 +259,7 @@ private fun EatAndDrinkActions(place: Place, strings: AppStrings, onOpenMenu: (S
     val menuUrl = place.menuUrl?.trim()?.takeIf { it.isNotBlank() }
     val phone = place.bookingPhone?.trim()?.takeIf { it.isNotBlank() }
     if (menuUrl == null && phone == null) return
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
 
     Column(
         modifier = Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, top = 20.dp),
@@ -293,8 +290,8 @@ private fun EatAndDrinkActions(place: Place, strings: AppStrings, onOpenMenu: (S
         phone?.let {
             Text(
                 text = it,
-                style = LamplightType.meta(),
-                color = HomePalette.onGradientSecondary,
+                style = KompassTheme.typography.geologicaRegular13,
+                color = KompassTheme.colors.white85,
                 textAlign = TextAlign.End,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -305,21 +302,21 @@ private fun EatAndDrinkActions(place: Place, strings: AppStrings, onOpenMenu: (S
 /** The page's only yellow panel (spec §1.6). */
 @Composable
 private fun LocalTipPanel(tip: String, lang: String, strings: AppStrings) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(start = 20.dp, end = 20.dp, top = 24.dp)
             .clip(RoundedCornerShape(20.dp))
-            .background(colors.lamp)
+            .background(colors.lampYellow)
             .padding(18.dp)
             .semantics(mergeDescendants = true) { },
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            DetailIcon(DetailGlyph.Lightbulb, color = colors.night, size = 16.dp)
-            Text(text = strings.detail.localTip.uppercaseFor(lang), style = LamplightType.label(), color = colors.night)
+            DetailIcon(DetailGlyph.Lightbulb, color = colors.nightBlack, size = 16.dp)
+            Text(text = strings.detail.localTip.uppercaseFor(lang), style = KompassTheme.typography.geologicaSemiBold11, color = colors.nightBlack)
         }
-        Text(text = tip, style = LamplightType.cardTitle().copy(fontSize = 21.sp, lineHeight = 26.sp), color = colors.night)
+        Text(text = tip, style = KompassTheme.typography.gloockRegular23.copy(fontSize = 21.sp, lineHeight = 26.sp), color = colors.nightBlack)
     }
 }

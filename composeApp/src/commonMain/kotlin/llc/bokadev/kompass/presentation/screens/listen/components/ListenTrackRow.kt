@@ -30,8 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import llc.bokadev.kompass.presentation.screens.listen.DownloadState
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
+import llc.bokadev.kompass.ui.theme.KompassTheme
 
 /**
  * One library row (Listen spec §2.3): the photo *is* the play button, the text opens the place,
@@ -55,8 +54,8 @@ fun ListenTrackRow(
     onDownload: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val colors = LamplightTheme.colors
-    val container by animateColorAsState(if (active) colors.surfaceActive else colors.surfaceRaised, label = "listenRow")
+    val colors = KompassTheme.colors
+    val container by animateColorAsState(if (active) colors.lampShadow else colors.charcoal, label = "listenRow")
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -70,7 +69,7 @@ fun ListenTrackRow(
             Modifier
                 .size(64.dp)
                 .clip(RoundedCornerShape(16.dp))
-                .background(colors.surfaceMuted)
+                .background(colors.slateDark)
                 .clickable(onClick = onPlay)
                 .clearAndSetSemantics { role = Role.Button; contentDescription = playDescription },
             contentAlignment = Alignment.Center
@@ -87,15 +86,15 @@ fun ListenTrackRow(
                 .semantics(mergeDescendants = true) { role = Role.Button },
             verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
-            Text(label, style = LamplightType.label().copy(fontSize = 10.sp), color = colors.lamp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(label, style = KompassTheme.typography.geologicaSemiBold11.copy(fontSize = 10.sp), color = colors.lampYellow, maxLines = 1, overflow = TextOverflow.Ellipsis)
             Text(
                 title,
-                style = LamplightType.cardTitle().copy(fontSize = 19.sp, lineHeight = 21.sp),
-                color = if (unavailable) colors.textTertiary else colors.textPrimary,
+                style = KompassTheme.typography.gloockRegular23.copy(fontSize = 19.sp, lineHeight = 21.sp),
+                color = if (unavailable) colors.pebbleGray else colors.boneWhite,
                 maxLines = 3,
                 overflow = TextOverflow.Ellipsis
             )
-            Text(meta, style = LamplightType.meta(), color = colors.textTertiary)
+            Text(meta, style = KompassTheme.typography.geologicaRegular13, color = colors.pebbleGray)
         }
         DownloadButton(download, downloadDescription, onDownload)
     }

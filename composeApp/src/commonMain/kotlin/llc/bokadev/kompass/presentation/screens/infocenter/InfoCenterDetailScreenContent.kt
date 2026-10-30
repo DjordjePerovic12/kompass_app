@@ -31,9 +31,8 @@ import llc.bokadev.kompass.presentation.screens.placedetail.components.DetailPra
 import llc.bokadev.kompass.presentation.screens.placedetail.components.DetailPracticalRows
 import llc.bokadev.kompass.presentation.screens.placedetail.components.DetailTextSection
 import llc.bokadev.kompass.presentation.shared.StatusBarIconsEffect
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
-import llc.bokadev.kompass.presentation.theme.pageGradientBackground
+import llc.bokadev.kompass.ui.theme.KompassTheme
+import llc.bokadev.kompass.ui.theme.pageGradientBackground
 
 /**
  * A local update: level and validity, what happened, where and when it applies, then the source.
@@ -47,7 +46,7 @@ fun InfoCenterDetailScreenContent(
     val onRetry = { onAction(InfoCenterDetailAction.Retry) }
     val onBack = { onAction(InfoCenterDetailAction.Back) }
     StatusBarIconsEffect(lightIcons = true)
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     val strings = rememberAppStrings()
     val lang = currentAppLanguage()
     val s = strings.states
@@ -75,11 +74,11 @@ fun InfoCenterDetailScreenContent(
                 modifier = Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, top = 4.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                Text(text = notice.toNoticeLabel(lang, strings).uppercaseFor(lang), style = LamplightType.label(), color = colors.lamp)
+                Text(text = notice.toNoticeLabel(lang, strings).uppercaseFor(lang), style = KompassTheme.typography.geologicaSemiBold11, color = colors.lampYellow)
                 Text(
                     text = notice.localizedTitle(lang),
-                    style = LamplightType.cardTitleXL().copy(fontSize = 32.sp, lineHeight = 35.sp),
-                    color = colors.textPrimary,
+                    style = KompassTheme.typography.gloockRegular34.copy(fontSize = 32.sp, lineHeight = 35.sp),
+                    color = colors.boneWhite,
                     modifier = Modifier.semantics { heading() }
                 )
             }

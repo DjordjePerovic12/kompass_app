@@ -13,9 +13,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import llc.bokadev.kompass.presentation.theme.HomePalette
-import llc.bokadev.kompass.presentation.theme.helveticaMedium16
-import llc.bokadev.kompass.presentation.theme.helveticaRegular14
+import llc.bokadev.kompass.ui.theme.KompassTheme
 
 /**
  * Intentional compact text-led treatment for a missing or failed photo — never a blank
@@ -26,7 +24,7 @@ import llc.bokadev.kompass.presentation.theme.helveticaRegular14
 @Composable
 fun HomeImageFallback(label: String, secondaryLabel: String? = null, modifier: Modifier = Modifier) {
     Box(
-        modifier = modifier.background(HomePalette.selection),
+        modifier = modifier.background(KompassTheme.colors.lavender),
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -36,8 +34,8 @@ fun HomeImageFallback(label: String, secondaryLabel: String? = null, modifier: M
         ) {
             Text(
                 text = label,
-                style = helveticaMedium16().copy(fontSize = 15.sp, lineHeight = 20.sp),
-                color = HomePalette.ink,
+                style = KompassTheme.typography.helveticaMedium16.copy(fontSize = 15.sp, lineHeight = 20.sp),
+                color = KompassTheme.colors.inkBlack,
                 textAlign = TextAlign.Center,
                 maxLines = 3,
                 overflow = TextOverflow.Ellipsis
@@ -45,8 +43,8 @@ fun HomeImageFallback(label: String, secondaryLabel: String? = null, modifier: M
             if (!secondaryLabel.isNullOrBlank()) {
                 Text(
                     text = secondaryLabel,
-                    style = helveticaRegular14().copy(fontSize = 13.sp, lineHeight = 18.sp),
-                    color = HomePalette.ink.copy(alpha = 0.7f),
+                    style = KompassTheme.typography.helveticaRegular14.copy(fontSize = 13.sp, lineHeight = 18.sp),
+                    color = KompassTheme.colors.inkBlack.copy(alpha = 0.7f),
                     textAlign = TextAlign.Center,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis

@@ -16,9 +16,8 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import llc.bokadev.kompass.presentation.theme.LamplightShapes
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
+import llc.bokadev.kompass.ui.theme.KompassTheme
+import llc.bokadev.kompass.ui.theme.KompassShapes
 
 /** A single-choice filter pill on Lamplight surfaces (48dp touch height, selected = lamp fill). */
 @Composable
@@ -28,7 +27,7 @@ fun LamplightChip(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     Box(
         modifier = modifier
             .heightIn(min = 48.dp)
@@ -37,12 +36,12 @@ fun LamplightChip(
     ) {
         Text(
             text = label,
-            style = LamplightType.bodyS().copy(fontWeight = FontWeight.SemiBold),
-            color = if (selected) colors.night else colors.textPrimary,
+            style = KompassTheme.typography.geologicaRegular14.copy(fontWeight = FontWeight.SemiBold),
+            color = if (selected) colors.nightBlack else colors.boneWhite,
             modifier = Modifier
-                .clip(LamplightShapes.pill)
-                .background(if (selected) colors.lamp else Color.Transparent)
-                .border(1.5.dp, if (selected) colors.lamp else colors.borderStrong, LamplightShapes.pill)
+                .clip(KompassShapes.pill)
+                .background(if (selected) colors.lampYellow else Color.Transparent)
+                .border(1.5.dp, if (selected) colors.lampYellow else colors.slateGray, KompassShapes.pill)
                 .padding(horizontal = 14.dp, vertical = 8.dp)
         )
     }

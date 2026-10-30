@@ -24,13 +24,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import llc.bokadev.kompass.presentation.screens.home.components.ArrowRightIcon
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
+import llc.bokadev.kompass.ui.theme.KompassTheme
 
 /** `limestone` card: NEXT STORY · title · a `night` circle with a `lamp` arrow. */
 @Composable
 fun NextStoryCard(label: String, title: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     Row(
         modifier
             .fillMaxWidth()
@@ -43,11 +42,11 @@ fun NextStoryCard(label: String, title: String, onClick: () -> Unit, modifier: M
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(label, style = LamplightType.label(), color = colors.textOnLimestone)
-            Text(title, style = LamplightType.cardTitle().copy(fontSize = 22.sp, lineHeight = 25.sp), color = colors.night)
+            Text(label, style = KompassTheme.typography.geologicaSemiBold11, color = colors.inkGray)
+            Text(title, style = KompassTheme.typography.gloockRegular23.copy(fontSize = 22.sp, lineHeight = 25.sp), color = colors.nightBlack)
         }
-        Box(Modifier.size(44.dp).clip(CircleShape).background(colors.night), contentAlignment = Alignment.Center) {
-            ArrowRightIcon(colors.lamp, 16.dp)
+        Box(Modifier.size(44.dp).clip(CircleShape).background(colors.nightBlack), contentAlignment = Alignment.Center) {
+            ArrowRightIcon(colors.lampYellow, 16.dp)
         }
     }
 }

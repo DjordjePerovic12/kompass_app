@@ -23,9 +23,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import llc.bokadev.kompass.presentation.theme.LamplightShapes
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
+import llc.bokadev.kompass.ui.theme.KompassTheme
+import llc.bokadev.kompass.ui.theme.KompassShapes
 
 /**
  * "Do this early" (Essentials spec §2.2): a calm limestone card for the one formality visitors
@@ -43,7 +42,7 @@ fun DoThisEarlyCard(
     dismissLabel: String? = null,
     onDismiss: () -> Unit = {}
 ) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -53,20 +52,20 @@ fun DoThisEarlyCard(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            EssentialsIcon(EssentialsGlyph.Clock, color = colors.textOnLimestone, size = 14.dp)
-            Text(text = label.uppercase(), style = LamplightType.label(), color = colors.textOnLimestone)
+            EssentialsIcon(EssentialsGlyph.Clock, color = colors.inkGray, size = 14.dp)
+            Text(text = label.uppercase(), style = KompassTheme.typography.geologicaSemiBold11, color = colors.inkGray)
         }
         Text(
             text = title,
-            style = LamplightType.cardTitle().copy(fontSize = 25.sp, lineHeight = 27.sp),
-            color = colors.night,
+            style = KompassTheme.typography.gloockRegular23.copy(fontSize = 25.sp, lineHeight = 27.sp),
+            color = colors.nightBlack,
             modifier = Modifier.semantics { heading() }
         )
         if (summary.isNotBlank()) {
             Text(
                 text = summary,
-                style = LamplightType.body().copy(fontSize = 15.sp, lineHeight = 22.sp, fontWeight = FontWeight.Normal),
-                color = colors.textOnLimestone,
+                style = KompassTheme.typography.geologicaMedium16.copy(fontSize = 15.sp, lineHeight = 22.sp, fontWeight = FontWeight.Normal),
+                color = colors.inkGray,
                 maxLines = 3,
                 overflow = TextOverflow.Ellipsis
             )
@@ -76,26 +75,26 @@ fun DoThisEarlyCard(
             modifier = Modifier
                 .padding(top = 4.dp)
                 .heightIn(min = 48.dp)
-                .clip(LamplightShapes.pill)
-                .background(colors.night)
+                .clip(KompassShapes.pill)
+                .background(colors.nightBlack)
                 .clickable(onClick = onAction)
                 .semantics(mergeDescendants = true) { role = Role.Button }
                 .padding(horizontal = 18.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text(text = actionLabel, style = LamplightType.body().copy(fontSize = 15.sp, fontWeight = FontWeight.SemiBold), color = colors.lamp)
-            EssentialsIcon(EssentialsGlyph.ArrowUpRight, color = colors.lamp, size = 14.dp)
+            Text(text = actionLabel, style = KompassTheme.typography.geologicaMedium16.copy(fontSize = 15.sp, fontWeight = FontWeight.SemiBold), color = colors.lampYellow)
+            EssentialsIcon(EssentialsGlyph.ArrowUpRight, color = colors.lampYellow, size = 14.dp)
         }
         dismissLabel?.let {
             Text(
                 text = it,
-                style = LamplightType.body().copy(fontSize = 14.sp, fontWeight = FontWeight.SemiBold),
-                color = colors.textOnLimestone,
+                style = KompassTheme.typography.geologicaMedium16.copy(fontSize = 14.sp, fontWeight = FontWeight.SemiBold),
+                color = colors.inkGray,
                 modifier = Modifier
                     .padding(top = 4.dp)
                     .heightIn(min = 48.dp)
-                    .clip(LamplightShapes.pill)
+                    .clip(KompassShapes.pill)
                     .clickable(role = Role.Button, onClick = onDismiss)
                     .padding(horizontal = 8.dp, vertical = 14.dp)
             )

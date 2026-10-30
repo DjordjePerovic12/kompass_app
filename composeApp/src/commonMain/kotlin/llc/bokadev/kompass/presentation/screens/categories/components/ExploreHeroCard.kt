@@ -35,8 +35,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
+import llc.bokadev.kompass.ui.theme.KompassTheme
 
 /**
  * Explore's Places hero (spec §2.2): a 230dp editorial photo card with a bottom scrim, Gloock
@@ -51,7 +50,7 @@ fun ExploreHeroCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     val shape = RoundedCornerShape(24.dp)
     var failed by remember(imageUrl) { mutableStateOf(false) }
     val hasPhoto = !imageUrl.isNullOrBlank() && !failed
@@ -61,8 +60,8 @@ fun ExploreHeroCard(
             .fillMaxWidth()
             .heightIn(min = 230.dp)
             .clip(shape)
-            .background(if (hasPhoto) colors.surfaceMuted else colors.surfaceRaised)
-            .then(if (hasPhoto) Modifier else Modifier.border(1.dp, colors.divider, shape))
+            .background(if (hasPhoto) colors.slateDark else colors.charcoal)
+            .then(if (hasPhoto) Modifier else Modifier.border(1.dp, colors.slateDivider, shape))
             .clickable(onClick = onClick)
             .clearAndSetSemantics {
                 role = Role.Button
@@ -85,7 +84,7 @@ fun ExploreHeroCard(
                         Brush.verticalGradient(
                             0f to Color.Transparent,
                             0.4f to Color.Transparent,
-                            1f to colors.night.copy(alpha = 0.94f)
+                            1f to colors.nightBlack.copy(alpha = 0.94f)
                         )
                     )
             )
@@ -98,14 +97,14 @@ fun ExploreHeroCard(
             verticalAlignment = Alignment.Bottom
         ) {
             Column(Modifier.weight(1f)) {
-                Text(text = title, style = LamplightType.sectionTitle().copy(fontSize = 36.sp, lineHeight = 38.sp), color = colors.textPrimary)
-                Text(text = subtitle, style = LamplightType.body().copy(fontSize = 15.sp), color = Color(0xFFC3C7BF))
+                Text(text = title, style = KompassTheme.typography.gloockRegular32.copy(fontSize = 36.sp, lineHeight = 38.sp), color = colors.boneWhite)
+                Text(text = subtitle, style = KompassTheme.typography.geologicaMedium16.copy(fontSize = 15.sp), color = KompassTheme.colors.sageGray)
             }
             Box(
-                Modifier.size(44.dp).clip(CircleShape).background(colors.lamp),
+                Modifier.size(44.dp).clip(CircleShape).background(colors.lampYellow),
                 contentAlignment = Alignment.Center
             ) {
-                ExploreIcon(ExploreGlyph.ArrowRight, color = colors.night, size = 18.dp)
+                ExploreIcon(ExploreGlyph.ArrowRight, color = colors.nightBlack, size = 18.dp)
             }
         }
     }

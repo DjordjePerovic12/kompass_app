@@ -41,9 +41,8 @@ import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import llc.bokadev.kompass.core.utils.RedesignStrings
 import llc.bokadev.kompass.core.utils.redesignStringsFor
-import llc.bokadev.kompass.presentation.theme.LamplightShapes
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
+import llc.bokadev.kompass.ui.theme.KompassTheme
+import llc.bokadev.kompass.ui.theme.KompassShapes
 
 /**
  * "Lamplight" Must See card (Must See spec Part A). [areaLabel] arrives already uppercased and
@@ -67,11 +66,11 @@ fun MustSeeCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     val haptics = LocalHapticFeedback.current
     val hasUrl = !imageUrl.isNullOrBlank()
     var loadFailed by remember(imageUrl) { mutableStateOf(false) }
-    val shape = LamplightShapes.cardMustSee
+    val shape = KompassShapes.cardMustSee
     val toggleSave = {
         haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
         onToggleSave()
@@ -103,15 +102,15 @@ fun MustSeeCard(
                     .fillMaxWidth()
                     .height(140.dp)
                     .clip(shape)
-                    .background(colors.limestoneShade)
+                    .background(colors.limestoneDark)
             )
         } else {
             // A missing image must not become a large block of empty colour: 72dp, not the full 140dp.
             Box(
-                modifier = Modifier.fillMaxWidth().height(72.dp).clip(shape).background(colors.limestoneShade),
+                modifier = Modifier.fillMaxWidth().height(72.dp).clip(shape).background(colors.limestoneDark),
                 contentAlignment = Alignment.Center
             ) {
-                LandmarkIcon(color = colors.landmarkGlyph, size = 24.dp)
+                LandmarkIcon(color = colors.mossGray, size = 24.dp)
             }
         }
 
@@ -127,15 +126,15 @@ fun MustSeeCard(
             if (!areaLabel.isNullOrBlank()) {
                 Text(
                     text = areaLabel,
-                    style = LamplightType.label(),
-                    color = colors.indicatorInactive,
+                    style = KompassTheme.typography.geologicaSemiBold11,
+                    color = colors.ashGray,
                     textAlign = TextAlign.Center
                 )
             }
             Text(
                 text = name,
-                style = LamplightType.cardTitle().copy(fontSize = 20.sp, lineHeight = 22.sp),
-                color = colors.night,
+                style = KompassTheme.typography.gloockRegular23.copy(fontSize = 20.sp, lineHeight = 22.sp),
+                color = colors.nightBlack,
                 maxLines = 3,
                 overflow = TextOverflow.Ellipsis,
                 textAlign = TextAlign.Center
@@ -143,8 +142,8 @@ fun MustSeeCard(
             if (!description.isNullOrBlank()) {
                 Text(
                     text = description,
-                    style = LamplightType.bodyS(),
-                    color = colors.textOnLimestone,
+                    style = KompassTheme.typography.geologicaRegular14,
+                    color = colors.inkGray,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                     textAlign = TextAlign.Center
@@ -159,10 +158,10 @@ fun MustSeeCard(
                 .padding(start = 12.dp, end = 12.dp, top = 12.dp, bottom = 12.dp)
                 .fillMaxWidth()
                 .height(48.dp)
-                .clip(LamplightShapes.pill)
+                .clip(KompassShapes.pill)
                 .then(
-                    if (isSaved) Modifier.background(colors.night)
-                    else Modifier.border(1.5.dp, colors.night, LamplightShapes.pill)
+                    if (isSaved) Modifier.background(colors.nightBlack)
+                    else Modifier.border(1.5.dp, colors.nightBlack, KompassShapes.pill)
                 )
                 .clickable(onClick = toggleSave)
                 .semantics {
@@ -174,10 +173,10 @@ fun MustSeeCard(
             horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            val contentColor = if (isSaved) colors.chalk else colors.night
+            val contentColor = if (isSaved) colors.chalkWhite else colors.nightBlack
             Text(
                 text = if (isSaved) strings.mustSeeSaved else strings.mustSeeSave,
-                style = LamplightType.body().copy(fontSize = 15.sp, fontWeight = FontWeight.SemiBold),
+                style = KompassTheme.typography.geologicaMedium16.copy(fontSize = 15.sp, fontWeight = FontWeight.SemiBold),
                 color = contentColor
             )
             if (isSaved) BookmarkIcon(filled = true, color = contentColor, size = 16.dp)

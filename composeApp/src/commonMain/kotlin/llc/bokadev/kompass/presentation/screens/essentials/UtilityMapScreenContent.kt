@@ -51,9 +51,8 @@ import llc.bokadev.kompass.presentation.screens.placedetail.components.DetailPil
 import llc.bokadev.kompass.presentation.shared.NativeUtilityDetailMapView
 import llc.bokadev.kompass.presentation.shared.StateMessage
 import llc.bokadev.kompass.presentation.shared.UtilityMapPin
-import llc.bokadev.kompass.presentation.theme.LamplightShapes
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
+import llc.bokadev.kompass.ui.theme.KompassTheme
+import llc.bokadev.kompass.ui.theme.KompassShapes
 
 /**
  * The expanded utility map: the map fills the screen; a compact sheet holds the selected point
@@ -65,7 +64,7 @@ fun UtilityMapScreenContent(
     state: UtilityMapState,
     onAction: (UtilityMapAction) -> Unit
 ) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     val strings = rememberAppStrings()
     val s = strings.essentials
     val title = state.category?.title(s) ?: s.tileAllOnMap
@@ -76,7 +75,7 @@ fun UtilityMapScreenContent(
     var topBarHeight by remember { mutableStateOf(0.dp) }
     var sheetHeight by remember { mutableStateOf(0.dp) }
 
-    Box(Modifier.fillMaxSize().background(colors.night)) {
+    Box(Modifier.fillMaxSize().background(colors.nightBlack)) {
         if (state.items.isNotEmpty()) {
             NativeUtilityDetailMapView(
                 pins = state.items.map { UtilityMapPin(id = it.utility.id, title = it.utility.name, point = it.point) },
@@ -103,13 +102,13 @@ fun UtilityMapScreenContent(
             if (state.items.isNotEmpty()) {
                 Text(
                     text = s.recenter,
-                    style = LamplightType.bodyS().copy(fontWeight = FontWeight.SemiBold),
-                    color = colors.night,
+                    style = KompassTheme.typography.geologicaRegular14.copy(fontWeight = FontWeight.SemiBold),
+                    color = colors.nightBlack,
                     modifier = Modifier
                         .padding(end = 16.dp, bottom = 10.dp)
                         .heightIn(min = 48.dp)
-                        .clip(LamplightShapes.pill)
-                        .background(colors.chalk)
+                        .clip(KompassShapes.pill)
+                        .background(colors.chalkWhite)
                         .clickable(role = Role.Button) { recenter++ }
                         .padding(horizontal = 18.dp, vertical = 14.dp)
                 )
@@ -121,7 +120,7 @@ fun UtilityMapScreenContent(
 
 @Composable
 private fun TopBar(title: String, backLabel: String, onBack: () -> Unit, modifier: Modifier = Modifier) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     Row(
         modifier = modifier.fillMaxWidth().windowInsetsPadding(WindowInsets.statusBars).padding(16.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -131,18 +130,18 @@ private fun TopBar(title: String, backLabel: String, onBack: () -> Unit, modifie
             modifier = Modifier
                 .size(48.dp)
                 .clip(CircleShape)
-                .background(colors.night.copy(alpha = 0.85f))
+                .background(colors.nightBlack.copy(alpha = 0.85f))
                 .clickable(role = Role.Button, onClick = onBack)
                 .semantics { contentDescription = backLabel },
             contentAlignment = Alignment.Center
-        ) { ChevronLeftIcon(color = colors.chalk, size = 18.dp) }
+        ) { ChevronLeftIcon(color = colors.chalkWhite, size = 18.dp) }
         Text(
             text = title,
-            style = LamplightType.body().copy(fontWeight = FontWeight.SemiBold),
-            color = colors.textPrimary,
+            style = KompassTheme.typography.geologicaMedium16.copy(fontWeight = FontWeight.SemiBold),
+            color = colors.boneWhite,
             modifier = Modifier
-                .clip(LamplightShapes.pill)
-                .background(colors.night.copy(alpha = 0.85f))
+                .clip(KompassShapes.pill)
+                .background(colors.nightBlack.copy(alpha = 0.85f))
                 .padding(horizontal = 16.dp, vertical = 12.dp)
                 .semantics { heading() }
         )
@@ -159,28 +158,28 @@ private fun Sheet(
     onToggleList: () -> Unit,
     onAction: (UtilityMapAction) -> Unit
 ) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
-            .background(colors.surfaceRaised)
+            .background(colors.charcoal)
             .windowInsetsPadding(WindowInsets.navigationBars)
             .padding(start = 20.dp, end = 20.dp, top = 16.dp, bottom = 16.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         val retry = { onAction(UtilityMapAction.Retry) }
         when {
-            state.isLoading -> LinearProgressIndicator(Modifier.fillMaxWidth(), color = colors.lamp, trackColor = colors.surfaceMuted)
+            state.isLoading -> LinearProgressIndicator(Modifier.fillMaxWidth(), color = colors.lampYellow, trackColor = colors.slateDark)
             state.error != null -> StateMessage(state.error.asString(), actionLabel = retryLabel, onAction = retry)
             state.items.isEmpty() -> StateMessage(s.noUtilitiesFound)
             else -> {
                 if (state.refreshFailed) StateMessage(s.couldntLoadUtilities, actionLabel = retryLabel, onAction = retry)
                 if (state.selectionGone) StateMessage(s.selectionGone)
                 selectedItem?.let { item ->
-                    Text(text = item.utility.name, style = LamplightType.cardTitle(), color = colors.textPrimary, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                    Text(text = item.utility.name, style = KompassTheme.typography.gloockRegular23, color = colors.boneWhite, maxLines = 2, overflow = TextOverflow.Ellipsis)
                     val meta = listOfNotNull(item.distanceMeters?.formatDistance(), item.utility.address?.takeIf { it.isNotBlank() }).joinToString(" · ")
-                    if (meta.isNotBlank()) Text(text = meta, style = LamplightType.bodyS(), color = colors.textSecondary)
+                    if (meta.isNotBlank()) Text(text = meta, style = KompassTheme.typography.geologicaRegular14, color = colors.stoneGray)
                     DetailPillButton(
                         label = s.navigate,
                         glyph = DetailGlyph.ArrowUpRight,
@@ -192,11 +191,11 @@ private fun Sheet(
                 }
                 Text(
                     text = if (listOpen) s.hideList else "${s.showList} (${state.items.size})",
-                    style = LamplightType.bodyS().copy(fontWeight = FontWeight.SemiBold),
-                    color = colors.lamp,
+                    style = KompassTheme.typography.geologicaRegular14.copy(fontWeight = FontWeight.SemiBold),
+                    color = colors.lampYellow,
                     modifier = Modifier
                         .heightIn(min = 48.dp)
-                        .clip(LamplightShapes.pill)
+                        .clip(KompassShapes.pill)
                         .clickable(role = Role.Button, onClick = onToggleList)
                         .padding(vertical = 14.dp)
                 )
@@ -209,13 +208,13 @@ private fun Sheet(
                                     .fillMaxWidth()
                                     .heightIn(min = 52.dp)
                                     .clip(RoundedCornerShape(14.dp))
-                                    .background(if (selected) colors.surfaceActive else colors.surfaceMuted)
+                                    .background(if (selected) colors.lampShadow else colors.slateDark)
                                     .selectable(selected = selected, role = Role.RadioButton) { onAction(UtilityMapAction.SelectUtility(item.utility.id)) }
                                     .padding(horizontal = 14.dp, vertical = 10.dp)
                             ) {
-                                Text(text = item.utility.name, style = LamplightType.body(), color = colors.textPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                Text(text = item.utility.name, style = KompassTheme.typography.geologicaMedium16, color = colors.boneWhite, maxLines = 1, overflow = TextOverflow.Ellipsis)
                                 val meta = listOfNotNull(item.distanceMeters?.formatDistance(), item.utility.address?.takeIf { it.isNotBlank() }).joinToString(" · ")
-                                if (meta.isNotBlank()) Text(text = meta, style = LamplightType.meta(), color = colors.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                if (meta.isNotBlank()) Text(text = meta, style = KompassTheme.typography.geologicaRegular13, color = colors.stoneGray, maxLines = 1, overflow = TextOverflow.Ellipsis)
                             }
                         }
                     }

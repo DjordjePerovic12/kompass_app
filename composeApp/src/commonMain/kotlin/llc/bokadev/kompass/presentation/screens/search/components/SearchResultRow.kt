@@ -37,8 +37,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
+import llc.bokadev.kompass.ui.theme.KompassTheme
 
 /**
  * One search result (Search spec §2.3): a 56dp tile (photo, else the type icon — never an empty
@@ -59,7 +58,7 @@ fun SearchResultRow(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     val description = listOfNotNull(typeLabel, name, context).joinToString(", ")
     Column(modifier.fillMaxWidth()) {
         Row(
@@ -74,10 +73,10 @@ fun SearchResultRow(
         ) {
             var photoFailed by remember(photoUrl) { mutableStateOf(false) }
             Box(
-                Modifier.size(56.dp).clip(RoundedCornerShape(14.dp)).background(colors.surfaceMuted),
+                Modifier.size(56.dp).clip(RoundedCornerShape(14.dp)).background(colors.slateDark),
                 contentAlignment = Alignment.Center
             ) {
-                icon(colors.lamp)
+                icon(colors.lampYellow)
                 if (photoUrl != null && !photoFailed) {
                     AsyncImage(
                         model = photoUrl,
@@ -91,23 +90,23 @@ fun SearchResultRow(
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(
                     text = typeLabel,
-                    style = LamplightType.label().copy(fontSize = 10.sp),
-                    color = if (essential) colors.textSecondary else colors.lamp
+                    style = KompassTheme.typography.geologicaSemiBold11.copy(fontSize = 10.sp),
+                    color = if (essential) colors.stoneGray else colors.lampYellow
                 )
                 Text(
-                    text = highlighted(name, matchStart, matchLength, colors.lamp),
-                    style = LamplightType.body().copy(fontSize = 17.sp, lineHeight = 22.sp, fontWeight = FontWeight.Medium),
-                    color = colors.textPrimary,
+                    text = highlighted(name, matchStart, matchLength, colors.lampYellow),
+                    style = KompassTheme.typography.geologicaMedium16.copy(fontSize = 17.sp, lineHeight = 22.sp, fontWeight = FontWeight.Medium),
+                    color = colors.boneWhite,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
                 context?.let {
-                    Text(text = it, style = LamplightType.meta(), color = colors.textTertiary, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                    Text(text = it, style = KompassTheme.typography.geologicaRegular13, color = colors.pebbleGray, maxLines = 2, overflow = TextOverflow.Ellipsis)
                 }
             }
-            chevron(colors.textTertiary)
+            chevron(colors.pebbleGray)
         }
-        Box(Modifier.fillMaxWidth().padding(start = 20.dp).height(1.dp).background(colors.divider))
+        Box(Modifier.fillMaxWidth().padding(start = 20.dp).height(1.dp).background(colors.slateDivider))
     }
 }
 

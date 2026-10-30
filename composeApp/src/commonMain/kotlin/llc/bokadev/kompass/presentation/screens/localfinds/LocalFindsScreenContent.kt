@@ -46,10 +46,8 @@ import llc.bokadev.kompass.presentation.screens.localfinds.components.StoryFeatu
 import llc.bokadev.kompass.presentation.screens.localfinds.components.StoryQuoteCard
 import llc.bokadev.kompass.presentation.shared.LamplightSegmentedControl
 import llc.bokadev.kompass.presentation.shared.SegmentOption
-import llc.bokadev.kompass.presentation.theme.HomePalette
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
-import llc.bokadev.kompass.presentation.theme.pageGradientBackground
+import llc.bokadev.kompass.ui.theme.KompassTheme
+import llc.bokadev.kompass.ui.theme.pageGradientBackground
 
 /**
  * Lamplight Legends & Localisms (stories spec Part 1): cultural reading, not a venue list. Card
@@ -110,12 +108,12 @@ private fun Card(card: StoryCard, s: StoriesStrings, lang: String, modifier: Mod
 
 @Composable
 private fun TopBar(state: LocalFindsState, s: StoriesStrings, backLabel: String, onBack: () -> Unit, onAction: (LocalFindsAction) -> Unit) {
-    val colors = LamplightTheme.colors
-    Box(Modifier.fillMaxWidth().background(colors.lamp)) {
+    val colors = KompassTheme.colors
+    Box(Modifier.fillMaxWidth().background(colors.lampYellow)) {
         Text(
             "“",
-            style = LamplightType.areaTitle().copy(fontSize = 150.sp, lineHeight = 150.sp),
-            color = colors.night.copy(alpha = 0.14f),
+            style = KompassTheme.typography.gloockRegular40.copy(fontSize = 150.sp, lineHeight = 150.sp),
+            color = colors.nightBlack.copy(alpha = 0.14f),
             modifier = Modifier.align(Alignment.TopEnd).windowInsetsPadding(WindowInsets.statusBars).padding(end = 18.dp).offset(y = (-6).dp)
         )
         Column(
@@ -126,19 +124,19 @@ private fun TopBar(state: LocalFindsState, s: StoriesStrings, backLabel: String,
                 Modifier
                     .size(44.dp)
                     .clip(CircleShape)
-                    .background(colors.night)
+                    .background(colors.nightBlack)
                     .clickable(onClick = onBack)
                     .semantics { role = Role.Button; contentDescription = backLabel },
                 contentAlignment = Alignment.Center
-            ) { ChevronLeftIcon(color = colors.lamp, size = 18.dp) }
+            ) { ChevronLeftIcon(color = colors.lampYellow, size = 18.dp) }
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(
                     s.title,
-                    style = LamplightType.areaTitle().copy(fontSize = 42.sp, lineHeight = 42.sp),
-                    color = colors.night,
+                    style = KompassTheme.typography.gloockRegular40.copy(fontSize = 42.sp, lineHeight = 42.sp),
+                    color = colors.nightBlack,
                     modifier = Modifier.semantics { heading() }
                 )
-                Text(s.subtitle, style = LamplightType.body().copy(fontSize = 15.sp, fontWeight = FontWeight.Medium), color = colors.night)
+                Text(s.subtitle, style = KompassTheme.typography.geologicaMedium16.copy(fontSize = 15.sp, fontWeight = FontWeight.Medium), color = colors.nightBlack)
             }
             // Only worth a control when there are two kinds to choose between.
             if (state.kinds.size > 1) {
@@ -157,27 +155,27 @@ private fun TopBar(state: LocalFindsState, s: StoriesStrings, backLabel: String,
 
 @Composable
 private fun Skeleton() {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     Column(Modifier.padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        Box(Modifier.fillMaxWidth().height(380.dp).clip(RoundedCornerShape(24.dp)).background(colors.surfaceRaised))
-        repeat(2) { Box(Modifier.fillMaxWidth().height(160.dp).clip(RoundedCornerShape(22.dp)).background(colors.surfaceRaised)) }
+        Box(Modifier.fillMaxWidth().height(380.dp).clip(RoundedCornerShape(24.dp)).background(colors.charcoal))
+        repeat(2) { Box(Modifier.fillMaxWidth().height(160.dp).clip(RoundedCornerShape(22.dp)).background(colors.charcoal)) }
     }
 }
 
 @Composable
 private fun Message(text: String, action: String?, onAction: () -> Unit) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     Column(
         Modifier.fillMaxWidth().padding(horizontal = 28.dp, vertical = 32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
-        Text(text, style = LamplightType.body().copy(fontSize = 15.sp, lineHeight = 23.sp), color = HomePalette.onGradientSecondary, textAlign = TextAlign.Center)
+        Text(text, style = KompassTheme.typography.geologicaMedium16.copy(fontSize = 15.sp, lineHeight = 23.sp), color = KompassTheme.colors.white85, textAlign = TextAlign.Center)
         if (action != null) {
             Text(
                 action,
-                style = LamplightType.body().copy(fontWeight = FontWeight.SemiBold),
-                color = colors.lamp,
+                style = KompassTheme.typography.geologicaMedium16.copy(fontWeight = FontWeight.SemiBold),
+                color = colors.lampYellow,
                 modifier = Modifier.clip(RoundedCornerShape(22.dp)).clickable(onClick = onAction).padding(horizontal = 16.dp, vertical = 10.dp)
             )
         }

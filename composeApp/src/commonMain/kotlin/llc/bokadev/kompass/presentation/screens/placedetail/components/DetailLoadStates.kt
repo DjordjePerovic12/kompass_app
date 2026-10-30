@@ -16,8 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
+import llc.bokadev.kompass.ui.theme.KompassTheme
 
 /**
  * A detail page that isn't loaded yet ([message] null: skeleton) or failed to load ([message]
@@ -31,16 +30,16 @@ fun DetailLoadState(
     onRetry: () -> Unit,
     onBack: () -> Unit
 ) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     if (message == null) {
         Column(Modifier.fillMaxSize()) {
-            Box(Modifier.fillMaxWidth().height(400.dp).background(colors.surfaceMuted))
+            Box(Modifier.fillMaxWidth().height(400.dp).background(colors.slateDark))
             Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 listOf(0.35f, 0.8f, 0.6f).forEach { fraction ->
-                    Box(Modifier.fillMaxWidth(fraction).height(14.dp).clip(RoundedCornerShape(7.dp)).background(colors.surfaceMuted))
+                    Box(Modifier.fillMaxWidth(fraction).height(14.dp).clip(RoundedCornerShape(7.dp)).background(colors.slateDark))
                 }
                 Spacer(Modifier.height(12.dp))
-                repeat(2) { Box(Modifier.fillMaxWidth().height(48.dp).clip(RoundedCornerShape(10.dp)).background(colors.surfaceRaised)) }
+                repeat(2) { Box(Modifier.fillMaxWidth().height(48.dp).clip(RoundedCornerShape(10.dp)).background(colors.charcoal)) }
             }
         }
         return
@@ -49,7 +48,7 @@ fun DetailLoadState(
         DetailCompactBar(title = "", backLabel = backLabel, onBack = onBack)
         Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             Spacer(Modifier.height(24.dp))
-            Text(text = message, style = LamplightType.bodyL(), color = colors.textPrimary)
+            Text(text = message, style = KompassTheme.typography.geologicaSemiBold17, color = colors.boneWhite)
             DetailPillButton(label = retryLabel, glyph = null, filled = true, height = 48.dp, onClick = onRetry)
         }
     }

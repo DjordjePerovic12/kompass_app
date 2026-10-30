@@ -23,8 +23,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
+import llc.bokadev.kompass.ui.theme.KompassTheme
 
 /** One option of a [LamplightSegmentedControl]; [icon] is drawn in the option's content colour. */
 data class SegmentOption(val label: String, val icon: (@Composable (Color) -> Unit)? = null)
@@ -41,25 +40,25 @@ fun LamplightSegmentedControl(
     onSelect: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     Row(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(26.dp))
-            .background(colors.night)
+            .background(colors.nightBlack)
             .padding(4.dp)
             .selectableGroup(),
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         options.forEachIndexed { index, option ->
             val selected = index == selectedIndex
-            val content = if (selected) colors.night else colors.textPrimary
+            val content = if (selected) colors.nightBlack else colors.boneWhite
             Row(
                 modifier = Modifier
                     .weight(1f)
                     .heightIn(min = 44.dp)
                     .clip(RoundedCornerShape(22.dp))
-                    .background(if (selected) colors.chalk else Color.Transparent)
+                    .background(if (selected) colors.chalkWhite else Color.Transparent)
                     .selectable(selected = selected, role = Role.Tab, onClick = { onSelect(index) })
                     .padding(horizontal = 10.dp),
                 horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
@@ -68,7 +67,7 @@ fun LamplightSegmentedControl(
                 option.icon?.let { Box { it(content) } }
                 Text(
                     text = option.label,
-                    style = LamplightType.body().copy(
+                    style = KompassTheme.typography.geologicaMedium16.copy(
                         fontSize = 15.sp,
                         fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium
                     ),

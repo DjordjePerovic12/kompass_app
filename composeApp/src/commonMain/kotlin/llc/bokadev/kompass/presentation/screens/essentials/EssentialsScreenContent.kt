@@ -73,11 +73,9 @@ import llc.bokadev.kompass.presentation.shared.LamplightSegmentedControl
 import llc.bokadev.kompass.presentation.shared.SegmentOption
 import llc.bokadev.kompass.presentation.shared.UtilityMapPin
 import llc.bokadev.kompass.presentation.shared.rememberReduceMotion
-import llc.bokadev.kompass.presentation.theme.HomePalette
-import llc.bokadev.kompass.presentation.theme.LamplightShapes
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
-import llc.bokadev.kompass.presentation.theme.pageGradientBackground
+import llc.bokadev.kompass.ui.theme.KompassTheme
+import llc.bokadev.kompass.ui.theme.KompassShapes
+import llc.bokadev.kompass.ui.theme.pageGradientBackground
 
 /** Everything Essentials hands off: dialer, exact-coordinate maps, links, the utility map, settings. */
 /**
@@ -91,7 +89,7 @@ fun EssentialsScreenContent(
     onAction: (EssentialsAction) -> Unit
 ) {
     val strings = rememberAppStrings()
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     val infoScroll = rememberScrollState()
     val utilityScroll = rememberScrollState()
     val info = state.selectedTab == EssentialsTab.INFO
@@ -131,32 +129,32 @@ fun EssentialsScreenContent(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
-                        ChevronLeftIcon(color = colors.night, size = 16.dp)
+                        ChevronLeftIcon(color = colors.nightBlack, size = 16.dp)
                         Text(
                             text = strings.detail.back,
-                            style = LamplightType.body().copy(fontSize = 15.sp, fontWeight = FontWeight.SemiBold),
-                            color = colors.night
+                            style = KompassTheme.typography.geologicaMedium16.copy(fontSize = 15.sp, fontWeight = FontWeight.SemiBold),
+                            color = colors.nightBlack
                         )
                     }
                 }
                 Text(
                     text = strings.bottomEssentials,
-                    style = LamplightType.areaTitle(),
-                    color = colors.night,
+                    style = KompassTheme.typography.gloockRegular40,
+                    color = colors.nightBlack,
                     modifier = Modifier.semantics { heading() }
                 )
                 Text(
                     text = strings.essentials.subtitle,
-                    style = LamplightType.body().copy(fontSize = 15.sp, fontWeight = FontWeight.Medium),
-                    color = colors.night
+                    style = KompassTheme.typography.geologicaMedium16.copy(fontSize = 15.sp, fontWeight = FontWeight.Medium),
+                    color = colors.nightBlack
                 )
             }
         }
         if (offline && info && !state.essentialsFailed) {
             Text(
                 text = strings.essentials.offlineNote,
-                style = LamplightType.meta(),
-                color = HomePalette.onGradientSecondary,
+                style = KompassTheme.typography.geologicaRegular13,
+                color = KompassTheme.colors.white85,
                 modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 12.dp)
             )
         }
@@ -256,7 +254,7 @@ private fun InfoView(
                 verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
                 SectionTitle(group.kind.title(s))
-                Text(text = group.kind.purpose(s), style = LamplightType.bodyS(), color = LamplightTheme.colors.textTertiary)
+                Text(text = group.kind.purpose(s), style = KompassTheme.typography.geologicaRegular14, color = KompassTheme.colors.pebbleGray)
             }
             EssentialModuleGroup(
                 items = group.modules.map { it.toModuleItem(lang, strings, onAction) },
@@ -299,7 +297,7 @@ private fun UtilitiesView(
     onAction: (EssentialsAction) -> Unit
 ) {
     val s = strings.essentials
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     val location = state.currentLocation
     val fontScale = LocalDensity.current.fontScale
     val columns = when {
@@ -316,7 +314,7 @@ private fun UtilitiesView(
         LocationStatusLine(locationKnown = location != null, strings = strings, onTurnOn = { onAction(EssentialsAction.TurnOnLocation) })
 
         if (state.utilitiesFailed && state.sections.isEmpty()) {
-            Text(text = s.couldntLoad.replace("{category}", s.utilities), style = LamplightType.bodyS(), color = HomePalette.onGradientSecondary)
+            Text(text = s.couldntLoad.replace("{category}", s.utilities), style = KompassTheme.typography.geologicaRegular14, color = KompassTheme.colors.white85)
             RetryPill(strings.retry) { onAction(EssentialsAction.Retry) }
             return@Column
         }
@@ -381,20 +379,20 @@ private fun UtilityCategorySection.nearbyText(strings: AppStrings): String =
 
 @Composable
 private fun LocationStatusLine(locationKnown: Boolean, strings: AppStrings, onTurnOn: () -> Unit) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        Box(Modifier.size(14.dp).clip(CircleShape).background(colors.lamp.copy(alpha = 0.35f)), contentAlignment = Alignment.Center) {
-            Box(Modifier.size(8.dp).clip(CircleShape).background(colors.chalk))
+        Box(Modifier.size(14.dp).clip(CircleShape).background(colors.lampYellow.copy(alpha = 0.35f)), contentAlignment = Alignment.Center) {
+            Box(Modifier.size(8.dp).clip(CircleShape).background(colors.chalkWhite))
         }
         if (locationKnown) {
-            Text(text = strings.essentials.distancesCurrent, style = LamplightType.bodyS(), color = HomePalette.onGradientSecondary)
+            Text(text = strings.essentials.distancesCurrent, style = KompassTheme.typography.geologicaRegular14, color = KompassTheme.colors.white85)
         } else {
             Column {
-                Text(text = strings.essentials.locationOff, style = LamplightType.bodyS(), color = HomePalette.onGradientSecondary)
+                Text(text = strings.essentials.locationOff, style = KompassTheme.typography.geologicaRegular14, color = KompassTheme.colors.white85)
                 Text(
                     text = strings.essentials.turnOn,
-                    style = LamplightType.bodyS().copy(fontWeight = FontWeight.SemiBold, textDecoration = TextDecoration.Underline),
-                    color = colors.lamp,
+                    style = KompassTheme.typography.geologicaRegular14.copy(fontWeight = FontWeight.SemiBold, textDecoration = TextDecoration.Underline),
+                    color = colors.lampYellow,
                     modifier = Modifier.heightIn(min = 44.dp).clickable(onClick = onTurnOn).padding(vertical = 12.dp)
                 )
             }
@@ -406,8 +404,8 @@ private fun LocationStatusLine(locationKnown: Boolean, strings: AppStrings, onTu
 private fun SectionTitle(text: String, modifier: Modifier = Modifier) {
     Text(
         text = text,
-        style = LamplightType.sectionTitleS(),
-        color = LamplightTheme.colors.textPrimary,
+        style = KompassTheme.typography.gloockRegular26,
+        color = KompassTheme.colors.boneWhite,
         modifier = modifier.semantics { heading() }
     )
 }
@@ -415,22 +413,22 @@ private fun SectionTitle(text: String, modifier: Modifier = Modifier) {
 @Composable
 private fun ConnectOnceMessage(strings: AppStrings, onRetry: () -> Unit) {
     Column(Modifier.padding(top = 18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text(text = strings.essentials.connectOnce, style = LamplightType.body(), color = LamplightTheme.colors.textSecondary)
+        Text(text = strings.essentials.connectOnce, style = KompassTheme.typography.geologicaMedium16, color = KompassTheme.colors.stoneGray)
         RetryPill(strings.retry, onRetry)
     }
 }
 
 @Composable
 private fun RetryPill(label: String, onClick: () -> Unit) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     Text(
         text = label,
-        style = LamplightType.body().copy(fontWeight = FontWeight.SemiBold),
-        color = colors.night,
+        style = KompassTheme.typography.geologicaMedium16.copy(fontWeight = FontWeight.SemiBold),
+        color = colors.nightBlack,
         modifier = Modifier
             .heightIn(min = 48.dp)
-            .clip(LamplightShapes.pill)
-            .background(colors.lamp)
+            .clip(KompassShapes.pill)
+            .background(colors.lampYellow)
             .clickable(onClick = onClick)
             .padding(horizontal = 22.dp, vertical = 13.dp)
     )

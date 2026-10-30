@@ -36,8 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import llc.bokadev.kompass.presentation.screens.home.components.ChevronLeftIcon
 import llc.bokadev.kompass.presentation.screens.home.components.SearchIcon
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
+import llc.bokadev.kompass.ui.theme.KompassTheme
 
 /**
  * The search field *is* the header (Search spec §2.1): a `lamp` bar with Back and a 52dp `night`
@@ -55,11 +54,11 @@ fun SearchHeader(
     modifier: Modifier = Modifier,
     focusRequester: FocusRequester = remember { FocusRequester() }
 ) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .background(colors.lamp)
+            .background(colors.lampYellow)
             .windowInsetsPadding(WindowInsets.statusBars)
             .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -69,33 +68,33 @@ fun SearchHeader(
             Modifier
                 .size(44.dp)
                 .clip(CircleShape)
-                .background(colors.night)
+                .background(colors.nightBlack)
                 .clickable(onClick = onBack)
                 .semantics { role = Role.Button; contentDescription = backLabel },
             contentAlignment = Alignment.Center
-        ) { ChevronLeftIcon(color = colors.lamp, size = 18.dp) }
+        ) { ChevronLeftIcon(color = colors.lampYellow, size = 18.dp) }
 
         Row(
             modifier = Modifier
                 .weight(1f)
                 .heightIn(min = 52.dp)
                 .clip(CircleShape)
-                .background(colors.night)
+                .background(colors.nightBlack)
                 .padding(start = 16.dp, end = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            SearchIcon(color = colors.lamp, size = 20.dp)
+            SearchIcon(color = colors.lampYellow, size = 20.dp)
             Box(Modifier.weight(1f).padding(vertical = 14.dp), contentAlignment = Alignment.CenterStart) {
                 if (query.isEmpty()) {
-                    Text(placeholder, style = LamplightType.body().copy(fontSize = 16.sp), color = colors.textTertiary, maxLines = 1)
+                    Text(placeholder, style = KompassTheme.typography.geologicaMedium16.copy(fontSize = 16.sp), color = colors.pebbleGray, maxLines = 1)
                 }
                 BasicTextField(
                     value = query,
                     onValueChange = onQueryChange,
                     singleLine = true,
-                    textStyle = LamplightType.body().copy(fontSize = 16.sp, color = colors.textPrimary),
-                    cursorBrush = SolidColor(colors.lamp),
+                    textStyle = KompassTheme.typography.geologicaMedium16.copy(fontSize = 16.sp, color = colors.boneWhite),
+                    cursorBrush = SolidColor(colors.lampYellow),
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                     keyboardActions = KeyboardActions(onSearch = { onSearchAction() }),
                     modifier = Modifier
@@ -109,14 +108,14 @@ fun SearchHeader(
                     Modifier
                         .size(36.dp)
                         .clip(CircleShape)
-                        .background(colors.surfaceMuted)
+                        .background(colors.slateDark)
                         .clickable {
                             onQueryChange("")
                             runCatching { focusRequester.requestFocus() }
                         }
                         .semantics { role = Role.Button; contentDescription = clearLabel },
                     contentAlignment = Alignment.Center
-                ) { SearchGlyphIcon(SearchGlyph.Close, colors.textPrimary, 16.dp) }
+                ) { SearchGlyphIcon(SearchGlyph.Close, colors.boneWhite, 16.dp) }
             } else {
                 Box(Modifier.height(36.dp))
             }

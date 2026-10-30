@@ -24,9 +24,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import llc.bokadev.kompass.presentation.theme.LamplightShapes
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
+import llc.bokadev.kompass.ui.theme.KompassTheme
+import llc.bokadev.kompass.ui.theme.KompassShapes
 
 /**
  * A scannable event row: time (or "Ongoing") | title, venue, price. Only data the CMS has is
@@ -41,13 +40,13 @@ fun EventRow(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     Row(
         modifier = modifier
             .fillMaxWidth()
             .heightIn(min = 72.dp)
-            .clip(LamplightShapes.cardEvent)
-            .background(colors.surfaceRaised)
+            .clip(KompassShapes.cardEvent)
+            .background(colors.charcoal)
             .clickable(onClick = onClick)
             .clearAndSetSemantics {
                 role = Role.Button
@@ -60,21 +59,21 @@ fun EventRow(
     ) {
         Text(
             text = time,
-            style = LamplightType.bodyS().copy(fontWeight = FontWeight.SemiBold),
-            color = colors.lamp,
+            style = KompassTheme.typography.geologicaRegular14.copy(fontWeight = FontWeight.SemiBold),
+            color = colors.lampYellow,
             modifier = Modifier.width(64.dp)
         )
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(
                 text = title,
-                style = LamplightType.cardTitle().copy(fontSize = 20.sp, lineHeight = 23.sp),
-                color = colors.textPrimary,
+                style = KompassTheme.typography.gloockRegular23.copy(fontSize = 20.sp, lineHeight = 23.sp),
+                color = colors.boneWhite,
                 maxLines = 3,
                 overflow = TextOverflow.Ellipsis
             )
             val meta = listOfNotNull(venue, price).joinToString(" · ")
             if (meta.isNotBlank()) {
-                Text(text = meta, style = LamplightType.bodyS(), color = colors.textSecondary)
+                Text(text = meta, style = KompassTheme.typography.geologicaRegular14, color = colors.stoneGray)
             }
         }
     }

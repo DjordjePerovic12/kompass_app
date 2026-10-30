@@ -10,7 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import llc.bokadev.kompass.core.utils.rememberAppStrings
 import llc.bokadev.kompass.presentation.shared.StateMessage
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
+import llc.bokadev.kompass.ui.theme.KompassTheme
 
 /**
  * For read screens whose whole content loads or fails as one: shows [loading] while
@@ -40,7 +40,7 @@ fun BaseContentView(
 @Composable
 private fun DefaultLoading() {
     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        CircularProgressIndicator(color = LamplightTheme.colors.lamp)
+        CircularProgressIndicator(color = KompassTheme.colors.lampYellow)
     }
 }
 

@@ -48,8 +48,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
+import llc.bokadev.kompass.ui.theme.KompassTheme
 
 data class NowPlayingLabels(
     val status: String,
@@ -83,23 +82,23 @@ fun NowPlayingCard(
     onOpen: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val colors = LamplightTheme.colors
-    val ink = colors.night
+    val colors = KompassTheme.colors
+    val ink = colors.nightBlack
     Column(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(22.dp))
-            .background(colors.lamp)
+            .background(colors.lampYellow)
             .semantics { paneTitle = labels.region }
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(labels.status, style = LamplightType.label(), color = ink, modifier = Modifier.weight(1f))
+            Text(labels.status, style = KompassTheme.typography.geologicaSemiBold11, color = ink, modifier = Modifier.weight(1f))
             if (disc == DiscState.Failed) {
                 Text(
                     labels.retry,
-                    style = LamplightType.bodyS().copy(fontWeight = FontWeight.Bold),
+                    style = KompassTheme.typography.geologicaRegular14.copy(fontWeight = FontWeight.Bold),
                     color = ink,
                     modifier = Modifier.clip(RoundedCornerShape(18.dp)).clickable(onClick = onToggle).padding(horizontal = 10.dp, vertical = 8.dp)
                 )
@@ -118,7 +117,7 @@ fun NowPlayingCard(
         }
         Text(
             title,
-            style = LamplightType.cardTitle().copy(fontSize = 24.sp, lineHeight = 27.sp),
+            style = KompassTheme.typography.gloockRegular23.copy(fontSize = 24.sp, lineHeight = 27.sp),
             color = ink,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
@@ -137,7 +136,7 @@ fun NowPlayingCard(
                     .clickable(onClick = onToggle)
                     .clearAndSetSemantics { role = Role.Button; contentDescription = labels.mainButton }
             ) {
-                PlayDisc(disc, 64.dp, reduceMotion, background = ink, ink = colors.lamp, showPause = true)
+                PlayDisc(disc, 64.dp, reduceMotion, background = ink, ink = colors.lampYellow, showPause = true)
             }
             SkipButton("+15", labels.forward15, ink) { onSkip(15_000) }
         }
@@ -153,7 +152,7 @@ private fun SkipButton(text: String, description: String, ink: Color, onClick: (
             .clickable(onClick = onClick)
             .clearAndSetSemantics { role = Role.Button; contentDescription = description },
         contentAlignment = Alignment.Center
-    ) { Text(text, style = LamplightType.bodyS().copy(fontWeight = FontWeight.Bold), color = ink) }
+    ) { Text(text, style = KompassTheme.typography.geologicaRegular14.copy(fontWeight = FontWeight.Bold), color = ink) }
 }
 
 @Composable
@@ -216,8 +215,8 @@ private fun ProgressSlider(
             if (duration != null) drawCircle(ink, radius = 7.dp.toPx(), center = Offset(size.width * fraction, size.height / 2))
         }
         Row(Modifier.fillMaxWidth()) {
-            Text(formatTime(shownPosition), style = LamplightType.meta().copy(fontSize = 12.sp, fontWeight = FontWeight.SemiBold), color = ink, modifier = Modifier.weight(1f))
-            Text(duration?.let(formatTime) ?: "", style = LamplightType.meta().copy(fontSize = 12.sp, fontWeight = FontWeight.SemiBold), color = ink)
+            Text(formatTime(shownPosition), style = KompassTheme.typography.geologicaRegular13.copy(fontSize = 12.sp, fontWeight = FontWeight.SemiBold), color = ink, modifier = Modifier.weight(1f))
+            Text(duration?.let(formatTime) ?: "", style = KompassTheme.typography.geologicaRegular13.copy(fontSize = 12.sp, fontWeight = FontWeight.SemiBold), color = ink)
         }
     }
 }

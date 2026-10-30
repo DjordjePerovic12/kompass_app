@@ -24,8 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
+import llc.bokadev.kompass.ui.theme.KompassTheme
 
 data class TopicTile(val title: String, val glyph: EssentialsGlyph, val onClick: () -> Unit)
 
@@ -47,21 +46,21 @@ fun TopicIndexGrid(tiles: List<TopicTile>, singleColumn: Boolean, modifier: Modi
 
 @Composable
 private fun Tile(tile: TopicTile, modifier: Modifier) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     val shape = RoundedCornerShape(20.dp)
     Column(
         modifier = modifier
             .heightIn(min = 96.dp)
             .clip(shape)
-            .background(colors.surfaceRaised)
-            .border(1.dp, colors.divider, shape)
+            .background(colors.charcoal)
+            .border(1.dp, colors.slateDivider, shape)
             .clickable(onClick = tile.onClick)
             .semantics(mergeDescendants = true) { role = Role.Button }
             .padding(14.dp),
         verticalArrangement = Arrangement.SpaceBetween
     ) {
-        EssentialsIcon(tile.glyph, color = colors.lamp, size = 24.dp)
-        Text(text = tile.title, style = LamplightType.body().copy(fontSize = 15.sp, fontWeight = FontWeight.SemiBold), color = colors.textPrimary)
+        EssentialsIcon(tile.glyph, color = colors.lampYellow, size = 24.dp)
+        Text(text = tile.title, style = KompassTheme.typography.geologicaMedium16.copy(fontSize = 15.sp, fontWeight = FontWeight.SemiBold), color = colors.boneWhite)
     }
 }
 

@@ -49,8 +49,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import llc.bokadev.kompass.core.audio.AudioState
 import llc.bokadev.kompass.presentation.shared.rememberReduceMotion
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
+import llc.bokadev.kompass.ui.theme.KompassTheme
 
 // Step 7.9: 50/64 → 46/58, so the Listen button no longer sets a much taller bar; still ≥ 48dp to touch.
 private val ButtonSize = 46.dp
@@ -89,7 +88,7 @@ fun NavAudioButton(
     current: Boolean,
     onClick: () -> Unit
 ) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     val reduceMotion = rememberReduceMotion()
     Column(
         modifier = Modifier
@@ -106,7 +105,7 @@ fun NavAudioButton(
         // Everything stays inside the bar (the shell clips above it); the bar bottom-aligns its
         // items, so this label shares the tab labels' baseline.
         Box(Modifier.size(RingSize), contentAlignment = Alignment.Center) {
-            if (current) Box(Modifier.size(ButtonSize + 10.dp).border(2.dp, colors.lamp, CircleShape))
+            if (current) Box(Modifier.size(ButtonSize + 10.dp).border(2.dp, colors.lampYellow, CircleShape))
             when (state) {
                 is ListenButtonState.Playing -> state.progress?.let { ProgressRing(it) }
                 is ListenButtonState.Paused -> state.progress?.let { ProgressRing(it) }
@@ -118,17 +117,17 @@ fun NavAudioButton(
                     .size(ButtonSize)
                     .shadow(elevation = 4.dp, shape = CircleShape, ambientColor = Color.Black.copy(alpha = 0.2f), spotColor = Color.Black.copy(alpha = 0.3f))
                     .clip(CircleShape)
-                    .background(colors.lamp),
+                    .background(colors.lampYellow),
                 contentAlignment = Alignment.Center
             ) {
-                if (state is ListenButtonState.Playing) EqualizerBars(color = colors.night, reduceMotion = reduceMotion)
-                else Canvas(Modifier.size(24.dp)) { drawHeadphones(colors.night) }
+                if (state is ListenButtonState.Playing) EqualizerBars(color = colors.nightBlack, reduceMotion = reduceMotion)
+                else Canvas(Modifier.size(24.dp)) { drawHeadphones(colors.nightBlack) }
             }
         }
         Text(
             text = label,
-            style = LamplightType.navLabel(selected = current),
-            color = if (current) colors.chalk else colors.textTertiary,
+            style = (if (current) KompassTheme.typography.geologicaBold12 else KompassTheme.typography.geologicaRegular12),
+            color = if (current) colors.chalkWhite else colors.pebbleGray,
             maxLines = 1
         )
     }
@@ -137,7 +136,7 @@ fun NavAudioButton(
 /** Determinate 3dp ring 4dp outside the button, from 12 o'clock, clockwise (spec §2.4 C). */
 @Composable
 private fun ProgressRing(progress: Float) {
-    val lamp = LamplightTheme.colors.lamp
+    val lamp = KompassTheme.colors.lampYellow
     val sweep by animateFloatAsState(progress * 360f, tween(200, easing = LinearEasing), label = "audioProgress")
     Canvas(Modifier.size(RingSize)) {
         val stroke = 3.dp.toPx()
@@ -157,7 +156,7 @@ private fun ProgressRing(progress: Float) {
 /** Indeterminate ring for Loading. Static quarter arc with reduced motion. */
 @Composable
 private fun LoadingRing(reduceMotion: Boolean) {
-    val lamp = LamplightTheme.colors.lamp
+    val lamp = KompassTheme.colors.lampYellow
     val rotation = if (reduceMotion) 0f else {
         val transition = rememberInfiniteTransition(label = "audioLoading")
         val value by transition.animateFloat(0f, 360f, infiniteRepeatable(tween(1_000, easing = LinearEasing)), label = "audioLoadingRotation")

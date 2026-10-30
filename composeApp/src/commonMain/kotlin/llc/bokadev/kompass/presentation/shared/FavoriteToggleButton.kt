@@ -21,7 +21,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import llc.bokadev.kompass.core.utils.rememberAppStrings
-import llc.bokadev.kompass.presentation.theme.KompassTheme
+import llc.bokadev.kompass.ui.theme.KompassTheme
 
 @Composable
 fun FavoriteToggleButton(
@@ -33,19 +33,19 @@ fun FavoriteToggleButton(
     val colors = KompassTheme.colors
     val strings = rememberAppStrings()
     val description = if (isFavorited) strings.removeFromSavedAction else strings.saveAction
-    val iconColor = if (isFavorited) Color(0xFFE53935) else colors.colorNavy.copy(alpha = 0.48f)
+    val iconColor = if (isFavorited) KompassTheme.colors.tomatoRed else colors.black.copy(alpha = 0.48f)
     Box(
         modifier = modifier
             .size(size)
             .shadow(
                 elevation = 3.dp,
                 shape = CircleShape,
-                ambientColor = colors.colorNavy.copy(alpha = 0.05f),
-                spotColor = colors.colorNavy.copy(alpha = 0.08f)
+                ambientColor = colors.black.copy(alpha = 0.05f),
+                spotColor = colors.black.copy(alpha = 0.08f)
             )
             .clip(CircleShape)
-            .background(colors.colorWhite)
-            .border(1.dp, colors.colorNavy.copy(alpha = 0.08f), CircleShape)
+            .background(colors.warmOffWhite)
+            .border(1.dp, colors.black.copy(alpha = 0.08f), CircleShape)
             .semantics { contentDescription = description }
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center

@@ -28,8 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import llc.bokadev.kompass.core.utils.DetailStrings
 import llc.bokadev.kompass.core.utils.detailStringsFor
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
+import llc.bokadev.kompass.ui.theme.KompassTheme
 
 /**
  * Body text on a detail page, collapsed after [collapsedLines] with Read more / Show less
@@ -44,19 +43,19 @@ fun DetailTextSection(
     collapsedLines: Int = 6
 ) {
     if (text.isBlank()) return
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     var expanded by rememberSaveable(text) { mutableStateOf(false) }
     var overflows by remember(text) { mutableStateOf(false) }
 
     Column(modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, top = 24.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         title?.let {
-            Text(text = it, style = LamplightType.sectionTitleS(), color = colors.textPrimary, modifier = Modifier.semantics { heading() })
+            Text(text = it, style = KompassTheme.typography.gloockRegular26, color = colors.boneWhite, modifier = Modifier.semantics { heading() })
         }
         Column {
             Text(
                 text = text,
-                style = LamplightType.body().copy(fontWeight = FontWeight.Normal, lineHeight = 26.sp),
-                color = colors.textPrimary,
+                style = KompassTheme.typography.geologicaMedium16.copy(fontWeight = FontWeight.Normal, lineHeight = 26.sp),
+                color = colors.boneWhite,
                 maxLines = if (expanded) Int.MAX_VALUE else collapsedLines,
                 overflow = TextOverflow.Ellipsis,
                 onTextLayout = { if (!expanded) overflows = it.hasVisualOverflow }
@@ -75,10 +74,10 @@ fun DetailTextSection(
                 ) {
                     Text(
                         text = if (expanded) strings.showLess else strings.readMore,
-                        style = LamplightType.bodyS().copy(fontWeight = FontWeight.SemiBold),
-                        color = colors.lamp
+                        style = KompassTheme.typography.geologicaRegular14.copy(fontWeight = FontWeight.SemiBold),
+                        color = colors.lampYellow
                     )
-                    DetailIcon(if (expanded) DetailGlyph.ChevronUp else DetailGlyph.ChevronDown, color = colors.lamp, size = 16.dp)
+                    DetailIcon(if (expanded) DetailGlyph.ChevronUp else DetailGlyph.ChevronDown, color = colors.lampYellow, size = 16.dp)
                 }
             }
         }

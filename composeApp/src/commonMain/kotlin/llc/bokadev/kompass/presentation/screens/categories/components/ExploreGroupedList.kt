@@ -29,8 +29,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
+import llc.bokadev.kompass.ui.theme.KompassTheme
 
 /** One row of "What's on & updates". [extraDescription] is appended for screen readers. */
 data class ExploreListRow(
@@ -51,16 +50,16 @@ sealed interface ExploreRowLeading {
 /** Grouped rows for Events / Info Center / Services (spec §2.6): one raised container, inset dividers. */
 @Composable
 fun ExploreGroupedList(rows: List<ExploreListRow>, modifier: Modifier = Modifier) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     Column(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(20.dp))
-            .background(colors.surfaceRaised)
+            .background(colors.charcoal)
     ) {
         rows.forEachIndexed { index, row ->
             if (index > 0) {
-                Box(Modifier.padding(horizontal = 16.dp).fillMaxWidth().height(1.dp).background(colors.divider))
+                Box(Modifier.padding(horizontal = 16.dp).fillMaxWidth().height(1.dp).background(colors.slateDivider))
             }
             Row(
                 modifier = Modifier
@@ -78,16 +77,16 @@ fun ExploreGroupedList(rows: List<ExploreListRow>, modifier: Modifier = Modifier
             ) {
                 Leading(row.leading)
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                    Text(text = row.title, style = LamplightType.bodyL(), color = colors.textPrimary)
+                    Text(text = row.title, style = KompassTheme.typography.geologicaSemiBold17, color = colors.boneWhite)
                     Text(
                         text = row.subtitle,
-                        style = LamplightType.meta(),
-                        color = colors.textTertiary,
+                        style = KompassTheme.typography.geologicaRegular13,
+                        color = colors.pebbleGray,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis
                     )
                 }
-                ExploreIcon(ExploreGlyph.ChevronRight, color = colors.textTertiary, size = 18.dp)
+                ExploreIcon(ExploreGlyph.ChevronRight, color = colors.pebbleGray, size = 18.dp)
             }
         }
     }
@@ -95,23 +94,23 @@ fun ExploreGroupedList(rows: List<ExploreListRow>, modifier: Modifier = Modifier
 
 @Composable
 private fun Leading(leading: ExploreRowLeading) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     val tileShape = RoundedCornerShape(12.dp)
     when (leading) {
         is ExploreRowLeading.DateTile -> Column(
-            modifier = Modifier.size(44.dp).clip(tileShape).background(colors.lamp),
+            modifier = Modifier.size(44.dp).clip(tileShape).background(colors.lampYellow),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Text(text = leading.month.uppercase(), style = LamplightType.label().copy(fontSize = 9.sp, fontWeight = FontWeight.Bold, lineHeight = 10.sp), color = colors.night)
-            Text(text = leading.day, style = LamplightType.body().copy(fontSize = 16.sp, fontWeight = FontWeight.Bold, lineHeight = 18.sp), color = colors.night)
+            Text(text = leading.month.uppercase(), style = KompassTheme.typography.geologicaSemiBold11.copy(fontSize = 9.sp, fontWeight = FontWeight.Bold, lineHeight = 10.sp), color = colors.nightBlack)
+            Text(text = leading.day, style = KompassTheme.typography.geologicaMedium16.copy(fontSize = 16.sp, fontWeight = FontWeight.Bold, lineHeight = 18.sp), color = colors.nightBlack)
         }
         is ExploreRowLeading.Icon -> Box(Modifier.size(44.dp)) {
             Box(
-                Modifier.size(44.dp).clip(tileShape).background(colors.surfaceMuted),
+                Modifier.size(44.dp).clip(tileShape).background(colors.slateDark),
                 contentAlignment = Alignment.Center
             ) {
-                ExploreIcon(leading.glyph, color = colors.lamp, size = 22.dp)
+                ExploreIcon(leading.glyph, color = colors.lampYellow, size = 22.dp)
             }
             if (leading.alertDot) {
                 Box(
@@ -120,7 +119,7 @@ private fun Leading(leading: ExploreRowLeading) {
                         .offset(x = 3.dp, y = (-3).dp)
                         .size(10.dp)
                         .clip(CircleShape)
-                        .background(colors.alert)
+                        .background(colors.coralRed)
                 )
             }
         }

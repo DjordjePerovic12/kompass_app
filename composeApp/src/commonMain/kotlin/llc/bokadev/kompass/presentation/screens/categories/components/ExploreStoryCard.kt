@@ -25,8 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
+import llc.bokadev.kompass.ui.theme.KompassTheme
 
 /**
  * Legends & Localisms (spec §2.5): a `lamp` card with an oversized decorative quote mark, so the
@@ -40,12 +39,12 @@ fun ExploreStoryCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
     Box(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(24.dp))
-            .background(colors.lamp)
+            .background(colors.lampYellow)
             .clickable(onClick = onClick)
             .clearAndSetSemantics {
                 role = Role.Button
@@ -55,20 +54,20 @@ fun ExploreStoryCard(
     ) {
         Text(
             text = "“",
-            style = LamplightType.areaTitle().copy(fontSize = 140.sp, lineHeight = 140.sp),
-            color = colors.night,
+            style = KompassTheme.typography.gloockRegular40.copy(fontSize = 140.sp, lineHeight = 140.sp),
+            color = colors.nightBlack,
             modifier = Modifier.align(Alignment.TopEnd).offset(x = (-14).dp, y = (-18).dp).alpha(0.16f)
         )
         Column(
             modifier = Modifier.padding(horizontal = 20.dp, vertical = 22.dp),
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            Text(text = label.uppercase(), style = LamplightType.label(), color = colors.night)
-            Text(text = title, style = LamplightType.sectionTitle().copy(fontSize = 30.sp, lineHeight = 33.sp), color = colors.night)
+            Text(text = label.uppercase(), style = KompassTheme.typography.geologicaSemiBold11, color = colors.nightBlack)
+            Text(text = title, style = KompassTheme.typography.gloockRegular32.copy(fontSize = 30.sp, lineHeight = 33.sp), color = colors.nightBlack)
             Text(
                 text = subtitle,
-                style = LamplightType.body().copy(fontSize = 15.sp, fontWeight = FontWeight.Medium),
-                color = colors.night,
+                style = KompassTheme.typography.geologicaMedium16.copy(fontSize = 15.sp, fontWeight = FontWeight.Medium),
+                color = colors.nightBlack,
                 modifier = Modifier.widthIn(max = 260.dp)
             )
         }

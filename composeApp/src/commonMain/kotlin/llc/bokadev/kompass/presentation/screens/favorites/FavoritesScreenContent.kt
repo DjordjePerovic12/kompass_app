@@ -7,8 +7,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.Role
-import llc.bokadev.kompass.presentation.theme.HomePalette
-import llc.bokadev.kompass.presentation.theme.LamplightShapes
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -42,9 +40,9 @@ import llc.bokadev.kompass.presentation.screens.favorites.components.Unavailable
 import llc.bokadev.kompass.presentation.screens.home.HomeArea
 import llc.bokadev.kompass.presentation.screens.placedetail.toVisitLength
 import llc.bokadev.kompass.presentation.shared.LamplightHeader
-import llc.bokadev.kompass.presentation.theme.LamplightTheme
-import llc.bokadev.kompass.presentation.theme.LamplightType
-import llc.bokadev.kompass.presentation.theme.pageGradientBackground
+import llc.bokadev.kompass.ui.theme.KompassTheme
+import llc.bokadev.kompass.ui.theme.KompassShapes
+import llc.bokadev.kompass.ui.theme.pageGradientBackground
 
 /**
  * Lamplight Saved (Saved spec): favorites grouped by area, most recently saved first, with
@@ -54,16 +52,16 @@ import llc.bokadev.kompass.presentation.theme.pageGradientBackground
 fun FavoritesScreenContent(state: FavoritesState, onAction: (FavoritesAction) -> Unit) {
     val strings = rememberAppStrings()
     val lang = currentAppLanguage()
-    val colors = LamplightTheme.colors
+    val colors = KompassTheme.colors
 
     Column(Modifier.fillMaxSize().pageGradientBackground().verticalScroll(rememberScrollState())) {
         LamplightHeader(searchPlaceholder = null, onLanguageClick = { onAction(FavoritesAction.OpenLanguage) }, onSearchClick = null) {
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(text = strings.redesign.saved, style = LamplightType.areaTitle(), color = colors.night, modifier = Modifier.semantics { heading() })
+                Text(text = strings.redesign.saved, style = KompassTheme.typography.gloockRegular40, color = colors.nightBlack, modifier = Modifier.semantics { heading() })
                 Text(
                     text = strings.redesign.savedSubtitle,
-                    style = LamplightType.body().copy(fontSize = 15.sp, fontWeight = FontWeight.Medium),
-                    color = colors.night
+                    style = KompassTheme.typography.geologicaMedium16.copy(fontSize = 15.sp, fontWeight = FontWeight.Medium),
+                    color = colors.nightBlack
                 )
             }
         }
@@ -81,27 +79,27 @@ fun FavoritesScreenContent(state: FavoritesState, onAction: (FavoritesAction) ->
             if (state.groups.isNotEmpty()) {
                 Text(
                     text = strings.saved.savedCount.replace("{n}", state.savedCount.toString()),
-                    style = LamplightType.bodyS().copy(fontWeight = FontWeight.SemiBold),
-                    color = colors.textPrimary
+                    style = KompassTheme.typography.geologicaRegular14.copy(fontWeight = FontWeight.SemiBold),
+                    color = colors.boneWhite
                 )
                 if (!state.inRegion) {
-                    Text(text = strings.saved.distancesInBay, style = LamplightType.bodyS(), color = HomePalette.onGradientSecondary)
+                    Text(text = strings.saved.distancesInBay, style = KompassTheme.typography.geologicaRegular14, color = KompassTheme.colors.white85)
                 }
                 if (state.refreshFailed) {
                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 8.dp)) {
                         Text(
                             text = strings.saved.couldntRefresh,
-                            style = LamplightType.bodyS(),
-                            color = HomePalette.onGradientSecondary,
+                            style = KompassTheme.typography.geologicaRegular14,
+                            color = KompassTheme.colors.white85,
                             modifier = Modifier.weight(1f)
                         )
                         Text(
                             text = strings.retry,
-                            style = LamplightType.bodyS().copy(fontWeight = FontWeight.SemiBold),
-                            color = colors.textPrimary,
+                            style = KompassTheme.typography.geologicaRegular14.copy(fontWeight = FontWeight.SemiBold),
+                            color = colors.boneWhite,
                             modifier = Modifier
                                 .heightIn(min = 44.dp)
-                                .clip(LamplightShapes.pill)
+                                .clip(KompassShapes.pill)
                                 .clickable(role = Role.Button) { onAction(FavoritesAction.Load) }
                                 .padding(horizontal = 12.dp, vertical = 12.dp)
                         )
@@ -120,8 +118,8 @@ fun FavoritesScreenContent(state: FavoritesState, onAction: (FavoritesAction) ->
                     verticalAlignment = Alignment.Bottom,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text(text = area, style = LamplightType.sectionTitleS(), color = colors.textPrimary)
-                    Text(text = group.items.size.toString(), style = LamplightType.meta(), color = HomePalette.onGradientSecondary, modifier = Modifier.padding(bottom = 4.dp))
+                    Text(text = area, style = KompassTheme.typography.gloockRegular26, color = colors.boneWhite)
+                    Text(text = group.items.size.toString(), style = KompassTheme.typography.geologicaRegular13, color = KompassTheme.colors.white85, modifier = Modifier.padding(bottom = 4.dp))
                 }
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     group.items.forEach { item -> SavedItemRow(item, area, lang, strings, onAction) }
