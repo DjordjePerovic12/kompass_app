@@ -43,11 +43,8 @@ import kompass.composeapp.generated.resources.saved_remove
 import kompass.composeapp.generated.resources.saved_saved_count
 import kompass.composeapp.generated.resources.saved_unavailable
 import kompass.composeapp.generated.resources.saved_unavailable_name
-import llc.bokadev.kompass.core.utils.AppStrings
 import llc.bokadev.kompass.core.utils.LocalAppLocale
-import llc.bokadev.kompass.core.utils.appStringsFor
 import llc.bokadev.kompass.core.utils.buildPhotoUrl
-import llc.bokadev.kompass.core.utils.localizedTypeLabel
 import llc.bokadev.kompass.core.utils.toTitleCaseLabel
 import llc.bokadev.kompass.core.utils.uppercaseFor
 import llc.bokadev.kompass.domain.model.FavoriteEntry
@@ -65,11 +62,12 @@ import llc.bokadev.kompass.ui.theme.KompassShapes
 import llc.bokadev.kompass.ui.theme.KompassTheme
 import llc.bokadev.kompass.ui.theme.pageGradientBackground
 import org.jetbrains.compose.resources.stringResource
+import llc.bokadev.kompass.presentation.shared.localizedTypeLabel
+import llc.bokadev.kompass.presentation.shared.shortLabel
 
 /**
  * Lamplight Saved (Saved spec): favorites grouped by area, most recently saved first, with
  * distances only once the user is in the bay. Presentation only; favorites storage is unchanged.
- * The shared type/visit-length/area labels still take the AppStrings tables until they are migrated.
  */
 @Composable
 fun FavoritesScreenContent(
@@ -83,7 +81,6 @@ fun FavoritesScreenContent(
 ) {
     // Language from the composition (AppEnvironment), not Koin, so the content stays previewable.
     val lang = LocalAppLocale.current.substringBefore('-')
-    val strings = appStringsFor(lang)
     val colors = KompassTheme.colors
     val otherLabel = stringResource(Res.string.saved_group_other)
 
@@ -140,7 +137,7 @@ fun FavoritesScreenContent(
                 }
             }
             state.groups.forEach { group ->
-                val area = group.key.groupLabel(strings, otherLabel)
+                val area = group.key.groupLabel(otherLabel)
                 val groupHeading = stringResource(Res.string.saved_group_heading, area, group.items.size.toString())
                 Row(
                     modifier = Modifier
@@ -156,7 +153,7 @@ fun FavoritesScreenContent(
                     Text(text = group.items.size.toString(), style = KompassTheme.typography.geologicaRegular13, color = KompassTheme.colors.white85, modifier = Modifier.padding(bottom = 4.dp))
                 }
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    group.items.forEach { item -> SavedItemRow(item, area, lang, strings, onItemClick, onRemoveClick) }
+                    group.items.forEach { item -> SavedItemRow(item, area, lang, onItemClick, onRemoveClick) }
                 }
             }
         }
@@ -170,7 +167,6 @@ private fun SavedItemRow(
     item: SavedItem,
     area: String,
     lang: String,
-    strings: AppStrings,
     onItemClick: (FavoriteItemType, String) -> Unit,
     onRemoveClick: (FavoriteEntry, String) -> Unit
 ) {
@@ -193,14 +189,14 @@ private fun SavedItemRow(
     val activityLabel = stringResource(Res.string.saved_activity)
     val audioLabel = stringResource(Res.string.saved_audio)
     val typeLabel = when {
-        item.place != null -> item.place.localizedTypeLabel(strings).uppercaseFor(lang)
+        item.place != null -> item.place.localizedTypeLabel().uppercaseFor(lang)
         item.activity != null -> listOfNotNull(activityLabel, item.activity.category?.toTitleCaseLabel()).joinToString(" · ").uppercaseFor(lang)
         else -> null
     }
     val hasAudio = item.place?.localizedAudioFile(lang) != null || item.activity?.localizedAudioFile(lang) != null
     val distance = item.distanceKm?.let { (it * 1000).toInt().formatDistance() }
     // One practical hint, only when the CMS has it: the visit / activity length. Never invented.
-    val hint = (item.activity?.durationMin ?: item.place?.estimatedDuration)?.toVisitLength(strings.detail)
+    val hint = (item.activity?.durationMin ?: item.place?.estimatedDuration)?.toVisitLength()
     val photo = item.place?.photos?.firstOrNull() ?: item.activity?.photos?.firstOrNull() ?: item.snapshot?.photo
 
     SavedCard(
@@ -218,9 +214,10 @@ private fun SavedItemRow(
     )
 }
 
-private fun String.groupLabel(strings: AppStrings, otherLabel: String): String = when (this) {
+@Composable
+private fun String.groupLabel(otherLabel: String): String = when (this) {
     GROUP_OTHER -> otherLabel
-    else -> HomeArea.entries.firstOrNull { it.preferenceValue == this }?.shortLabel(strings) ?: toTitleCaseLabel()
+    else -> HomeArea.entries.firstOrNull { it.preferenceValue == this }?.shortLabel() ?: toTitleCaseLabel()
 }
 
 @Preview

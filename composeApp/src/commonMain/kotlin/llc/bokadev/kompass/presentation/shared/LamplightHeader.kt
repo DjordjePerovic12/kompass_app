@@ -30,7 +30,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
-import llc.bokadev.kompass.core.utils.currentAppLanguage
+import llc.bokadev.kompass.core.utils.LocalAppLocale
 import llc.bokadev.kompass.presentation.shared.icons.GlobeIcon
 import llc.bokadev.kompass.presentation.shared.icons.SearchIcon
 import llc.bokadev.kompass.ui.theme.KompassTheme
@@ -53,7 +53,7 @@ fun LamplightHeader(
     headline: @Composable ColumnScope.() -> Unit
 ) {
     val colors = KompassTheme.colors
-    val languageCode = currentAppLanguage().uppercase()
+    val languageCode = LocalAppLocale.current.substringBefore('-').uppercase()
 
     Box(modifier = modifier.fillMaxWidth().background(colors.lampYellow)) {
         Canvas(

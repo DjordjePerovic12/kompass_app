@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Generated from the former Kotlin AppStrings tables (core/utils/*Strings.kt). Keys: <group>_<field>. -->
+<!-- UI strings. Keys: <group>_<field>; %1$s-style args are named in the args comment above each templated string. -->
 <resources>
     <string name="excursions_intro">Places and activities for a trip beyond Kotor. Approximate outing times include travel from Kotor.</string>
     <string name="excursions_interests">Interests</string>

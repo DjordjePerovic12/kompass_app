@@ -21,8 +21,6 @@ import llc.bokadev.kompass.core.audio.onNavAudioTap
 import llc.bokadev.kompass.core.audio.resolveNavAudioMode
 import llc.bokadev.kompass.core.presentation.SnackbarBus
 import llc.bokadev.kompass.core.utils.ConnectivityMonitor
-import llc.bokadev.kompass.core.utils.LocalAppLocale
-import llc.bokadev.kompass.core.utils.appStringsFor
 import llc.bokadev.kompass.core.utils.observeWithLifecycle
 import llc.bokadev.kompass.domain.location.UserLocationProvider
 import llc.bokadev.kompass.presentation.base.BaseContentView
@@ -53,8 +51,6 @@ fun PlaceDetailScreen(
     val audio = koinInject<AudioController>()
     val snackbarBus = koinInject<SnackbarBus>()
     val launcher = rememberExternalLauncher()
-    // perform() still takes the AppStrings tables until it is migrated.
-    val strings = appStringsFor(LocalAppLocale.current.substringBefore('-'))
     val currentLocation = rememberLiveCurrentLocation(koinInject<UserLocationProvider>(), 5_000L, state.place?.id)
 
     // The page is `night` from top to bottom, so the status bar icons stay light throughout.
@@ -66,7 +62,7 @@ fun PlaceDetailScreen(
 
     viewModel.eventFlow.observeWithLifecycle { event ->
         if (event is PlaceDetailEvent.OpenExternal) {
-            launcher.perform(event.launch, snackbarBus, strings)
+            launcher.perform(event.launch, snackbarBus)
         }
     }
 

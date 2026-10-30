@@ -46,6 +46,9 @@ import llc.bokadev.kompass.presentation.shared.PagerDots
 import llc.bokadev.kompass.ui.theme.KompassTheme
 import llc.bokadev.kompass.presentation.shared.icons.DetailGlyph
 import llc.bokadev.kompass.presentation.shared.icons.DetailIcon
+import kompass.composeapp.generated.resources.Res
+import kompass.composeapp.generated.resources.detail_photo_of
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * Full-bleed photo carousel at the top of the place detail screen (spec §1.2): swipeable ordered
@@ -62,7 +65,6 @@ fun DetailHero(
     backLabel: String,
     saveLabel: String,
     savedStateLabel: String,
-    photoOfLabel: String,
     onBack: () -> Unit,
     /** Null hides the save button (e.g. events, which aren't saveable). */
     onToggleSave: (() -> Unit)?,
@@ -72,6 +74,7 @@ fun DetailHero(
     val colors = KompassTheme.colors
     val heroHeight = if (photoUrls.isEmpty()) 200.dp else height
     val pagerState = rememberPagerState(pageCount = { photoUrls.size })
+    val photoOfLabel = stringResource(Res.string.detail_photo_of, (pagerState.currentPage + 1).toString(), photoUrls.size.toString())
 
     Box(modifier = modifier.fillMaxWidth().height(heroHeight).clip(RectangleShape)) {
         if (photoUrls.isEmpty()) {
@@ -87,8 +90,6 @@ fun DetailHero(
                         if (photoUrls.size > 1) {
                             liveRegion = LiveRegionMode.Polite
                             stateDescription = photoOfLabel
-                                .replace("{n}", (pagerState.currentPage + 1).toString())
-                                .replace("{total}", photoUrls.size.toString())
                         }
                     }
             ) { page -> HeroPhoto(photoUrls[page]) }
@@ -189,7 +190,6 @@ private fun DetailHeroPreview() {
         backLabel = "Back",
         saveLabel = "Save Cathedral of Saint Tryphon",
         savedStateLabel = "Not saved",
-        photoOfLabel = "Photo {n} of {total}",
         onBack = {},
         onToggleSave = {}
     )

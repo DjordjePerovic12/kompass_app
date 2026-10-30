@@ -1,6 +1,5 @@
 package llc.bokadev.kompass.presentation.shared
 
-import llc.bokadev.kompass.core.utils.EssentialsStrings
 import llc.bokadev.kompass.domain.model.CityEssential
 import llc.bokadev.kompass.domain.model.EssentialCategory
 import llc.bokadev.kompass.domain.model.UtilityCategory

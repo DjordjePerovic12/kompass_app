@@ -17,8 +17,6 @@ import llc.bokadev.kompass.core.audio.onNavAudioTap
 import llc.bokadev.kompass.core.audio.resolveNavAudioMode
 import llc.bokadev.kompass.core.presentation.SnackbarBus
 import llc.bokadev.kompass.core.utils.ConnectivityMonitor
-import llc.bokadev.kompass.core.utils.LocalAppLocale
-import llc.bokadev.kompass.core.utils.appStringsFor
 import llc.bokadev.kompass.core.utils.observeWithLifecycle
 import llc.bokadev.kompass.domain.location.UserLocationProvider
 import llc.bokadev.kompass.presentation.base.BaseContentView
@@ -44,8 +42,6 @@ fun ExperienceDetailScreen(
     val audio = koinInject<AudioController>()
     val snackbarBus = koinInject<SnackbarBus>()
     val launcher = rememberExternalLauncher()
-    // perform() still takes the AppStrings tables until it is migrated.
-    val strings = appStringsFor(LocalAppLocale.current.substringBefore('-'))
     val currentLocation = rememberLiveCurrentLocation(koinInject<UserLocationProvider>(), 5_000L, state.activity?.id)
 
     StatusBarIconsEffect(lightIcons = true)
@@ -56,7 +52,7 @@ fun ExperienceDetailScreen(
 
     viewModel.eventFlow.observeWithLifecycle { event ->
         if (event is ExperienceDetailEvent.OpenExternal) {
-            launcher.perform(event.launch, snackbarBus, strings)
+            launcher.perform(event.launch, snackbarBus)
         }
     }
 

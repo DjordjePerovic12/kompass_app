@@ -20,6 +20,9 @@ import llc.bokadev.kompass.domain.usecase.*
 import llc.bokadev.kompass.core.navigation.Screen
 import llc.bokadev.kompass.presentation.shared.LanguageSheetHost
 import llc.bokadev.kompass.presentation.shared.dotWindow
+import llc.bokadev.kompass.presentation.shared.sectionTitleRes
+import kompass.composeapp.generated.resources.Res
+import kompass.composeapp.generated.resources.nearby_you
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class HomeViewModelTest {
@@ -37,7 +40,7 @@ class HomeViewModelTest {
         assertEquals(HomeArea.DEVICE, HomeArea.restore(null))
         assertEquals(HomeArea.DEVICE, HomeArea.restore("retired_value"))
         HomeArea.entries.forEach { assertEquals(it, HomeArea.restore(it.preferenceValue)) }
-        assertNotEquals(HomeArea.PERAST.sectionTitle(appStringsFor("en")), appStringsFor("en").nearbyYou)
+        assertNotEquals(HomeArea.PERAST.sectionTitleRes(), Res.string.nearby_you)
     }
 
     @Test fun failedEventsDoNotSuppressNearbyAndRetryIsIndependent() = screen { vm, _, data, events ->

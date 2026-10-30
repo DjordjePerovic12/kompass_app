@@ -1,9 +1,27 @@
 package llc.bokadev.kompass.presentation.shared
 
-import llc.bokadev.kompass.core.utils.EssentialsStrings
-import llc.bokadev.kompass.domain.model.CityEssential
+import kompass.composeapp.generated.resources.Res
+import kompass.composeapp.generated.resources.essentials_group_getting_around
+import kompass.composeapp.generated.resources.essentials_group_local_tips
+import kompass.composeapp.generated.resources.essentials_group_practical
+import kompass.composeapp.generated.resources.essentials_group_registration
+import kompass.composeapp.generated.resources.essentials_tile_atm
+import kompass.composeapp.generated.resources.essentials_tile_emergency
+import kompass.composeapp.generated.resources.essentials_tile_fuel
+import kompass.composeapp.generated.resources.essentials_tile_parking
+import kompass.composeapp.generated.resources.essentials_tile_pharmacy
+import kompass.composeapp.generated.resources.essentials_tile_shop
+import kompass.composeapp.generated.resources.essentials_tile_supermarket
+import kompass.composeapp.generated.resources.essentials_title_atm
+import kompass.composeapp.generated.resources.essentials_title_emergency
+import kompass.composeapp.generated.resources.essentials_title_fuel
+import kompass.composeapp.generated.resources.essentials_title_parking
+import kompass.composeapp.generated.resources.essentials_title_pharmacy
+import kompass.composeapp.generated.resources.essentials_title_shop
+import kompass.composeapp.generated.resources.essentials_title_supermarket
 import llc.bokadev.kompass.domain.model.EssentialCategory
 import llc.bokadev.kompass.domain.model.UtilityCategory
+import org.jetbrains.compose.resources.StringResource
 
 /** The topic groups shown in Essential info, in display order. A UI mapping only; CMS categories are unchanged. */
 enum class EssentialGroupKind(val category: EssentialCategory) {
@@ -13,29 +31,29 @@ enum class EssentialGroupKind(val category: EssentialCategory) {
     LOCAL_TIPS(EssentialCategory.TIPS)
 }
 
-fun EssentialGroupKind.title(strings: EssentialsStrings): String = when (this) {
-    EssentialGroupKind.REGISTRATION -> strings.groupRegistration
-    EssentialGroupKind.GETTING_AROUND -> strings.groupGettingAround
-    EssentialGroupKind.PRACTICAL -> strings.groupPractical
-    EssentialGroupKind.LOCAL_TIPS -> strings.groupLocalTips
+fun EssentialGroupKind.titleRes(): StringResource = when (this) {
+    EssentialGroupKind.REGISTRATION -> Res.string.essentials_group_registration
+    EssentialGroupKind.GETTING_AROUND -> Res.string.essentials_group_getting_around
+    EssentialGroupKind.PRACTICAL -> Res.string.essentials_group_practical
+    EssentialGroupKind.LOCAL_TIPS -> Res.string.essentials_group_local_tips
 }
 
-fun UtilityCategory.tileLabel(strings: EssentialsStrings): String = when (this) {
-    UtilityCategory.ATM -> strings.tileAtm
-    UtilityCategory.PHARMACY -> strings.tilePharmacy
-    UtilityCategory.SUPERMARKET -> strings.tileSupermarket
-    UtilityCategory.SHOP -> strings.tileShop
-    UtilityCategory.PARKING -> strings.tileParking
-    UtilityCategory.GAS_STATION -> strings.tileFuel
-    UtilityCategory.EMERGENCY -> strings.tileEmergency
+fun UtilityCategory.tileLabelRes(): StringResource = when (this) {
+    UtilityCategory.ATM -> Res.string.essentials_tile_atm
+    UtilityCategory.PHARMACY -> Res.string.essentials_tile_pharmacy
+    UtilityCategory.SUPERMARKET -> Res.string.essentials_tile_supermarket
+    UtilityCategory.SHOP -> Res.string.essentials_tile_shop
+    UtilityCategory.PARKING -> Res.string.essentials_tile_parking
+    UtilityCategory.GAS_STATION -> Res.string.essentials_tile_fuel
+    UtilityCategory.EMERGENCY -> Res.string.essentials_tile_emergency
 }
 
-fun UtilityCategory.cardTitle(strings: EssentialsStrings): String = when (this) {
-    UtilityCategory.ATM -> strings.titleAtm
-    UtilityCategory.PHARMACY -> strings.titlePharmacy
-    UtilityCategory.SUPERMARKET -> strings.titleSupermarket
-    UtilityCategory.SHOP -> strings.titleShop
-    UtilityCategory.PARKING -> strings.titleParking
-    UtilityCategory.GAS_STATION -> strings.titleFuel
-    UtilityCategory.EMERGENCY -> strings.titleEmergency
+fun UtilityCategory.cardTitleRes(): StringResource = when (this) {
+    UtilityCategory.ATM -> Res.string.essentials_title_atm
+    UtilityCategory.PHARMACY -> Res.string.essentials_title_pharmacy
+    UtilityCategory.SUPERMARKET -> Res.string.essentials_title_supermarket
+    UtilityCategory.SHOP -> Res.string.essentials_title_shop
+    UtilityCategory.PARKING -> Res.string.essentials_title_parking
+    UtilityCategory.GAS_STATION -> Res.string.essentials_title_fuel
+    UtilityCategory.EMERGENCY -> Res.string.essentials_title_emergency
 }

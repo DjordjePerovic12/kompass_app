@@ -26,8 +26,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import llc.bokadev.kompass.core.utils.DetailStrings
-import llc.bokadev.kompass.core.utils.detailStringsFor
+import kompass.composeapp.generated.resources.Res
+import kompass.composeapp.generated.resources.detail_collapsed
+import kompass.composeapp.generated.resources.detail_expanded
+import kompass.composeapp.generated.resources.detail_read_more
+import kompass.composeapp.generated.resources.detail_show_less
+import org.jetbrains.compose.resources.stringResource
 import llc.bokadev.kompass.ui.theme.KompassTheme
 import llc.bokadev.kompass.presentation.shared.icons.DetailGlyph
 import llc.bokadev.kompass.presentation.shared.icons.DetailIcon
@@ -39,7 +43,6 @@ import llc.bokadev.kompass.presentation.shared.icons.DetailIcon
 @Composable
 fun DetailTextSection(
     text: String,
-    strings: DetailStrings,
     modifier: Modifier = Modifier,
     title: String? = null,
     collapsedLines: Int = 6
@@ -48,6 +51,8 @@ fun DetailTextSection(
     val colors = KompassTheme.colors
     var expanded by rememberSaveable(text) { mutableStateOf(false) }
     var overflows by remember(text) { mutableStateOf(false) }
+    val expandedState = stringResource(Res.string.detail_expanded)
+    val collapsedState = stringResource(Res.string.detail_collapsed)
 
     Column(modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, top = 24.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         title?.let {
@@ -69,13 +74,13 @@ fun DetailTextSection(
                         .clickable { expanded = !expanded }
                         .semantics(mergeDescendants = true) {
                             role = Role.Button
-                            stateDescription = if (expanded) strings.expanded else strings.collapsed
+                            stateDescription = if (expanded) expandedState else collapsedState
                         },
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     Text(
-                        text = if (expanded) strings.showLess else strings.readMore,
+                        text = if (expanded) stringResource(Res.string.detail_show_less) else stringResource(Res.string.detail_read_more),
                         style = KompassTheme.typography.geologicaRegular14.copy(fontWeight = FontWeight.SemiBold),
                         color = colors.lampYellow
                     )
@@ -89,5 +94,5 @@ fun DetailTextSection(
 @Preview
 @Composable
 private fun DetailTextSectionPreview() {
-    DetailTextSection("Take the old road up from the sea gate and follow the switchbacks.", detailStringsFor("en"), title = "How to get there")
+    DetailTextSection("Take the old road up from the sea gate and follow the switchbacks.", title = "How to get there")
 }

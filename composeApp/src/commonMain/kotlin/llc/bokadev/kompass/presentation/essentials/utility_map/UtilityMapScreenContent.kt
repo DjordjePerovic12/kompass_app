@@ -55,8 +55,6 @@ import kompass.composeapp.generated.resources.essentials_show_list
 import kompass.composeapp.generated.resources.essentials_tile_all_on_map
 import kompass.composeapp.generated.resources.essentials_you_are_here
 import kompass.composeapp.generated.resources.retry
-import llc.bokadev.kompass.core.utils.LocalAppLocale
-import llc.bokadev.kompass.core.utils.appStringsFor
 import llc.bokadev.kompass.domain.model.GeoPoint
 import llc.bokadev.kompass.domain.model.Utility
 import llc.bokadev.kompass.domain.model.UtilityCategory
@@ -69,7 +67,7 @@ import llc.bokadev.kompass.presentation.shared.StateMessage
 import llc.bokadev.kompass.presentation.shared.UtilityMapPin
 import llc.bokadev.kompass.ui.theme.KompassTheme
 import llc.bokadev.kompass.ui.theme.KompassShapes
-import llc.bokadev.kompass.presentation.shared.cardTitle
+import llc.bokadev.kompass.presentation.shared.cardTitleRes
 import llc.bokadev.kompass.presentation.shared.formatDistance
 import org.jetbrains.compose.resources.stringResource
 
@@ -77,7 +75,6 @@ import org.jetbrains.compose.resources.stringResource
  * The expanded utility map: the map fills the screen; a compact sheet holds the selected point
  * and Navigate, with the nearby list one tap away; Recenter reframes all points. Selection is by
  * utility id everywhere (map, list, sheet and the Maps hand-off).
- * The shared category title helper still takes the AppStrings tables until it is migrated.
  */
 @Composable
 fun UtilityMapScreenContent(
@@ -89,9 +86,7 @@ fun UtilityMapScreenContent(
     onNavigateClick: (String) -> Unit
 ) {
     val colors = KompassTheme.colors
-    // Language from the composition (AppEnvironment), not Koin, so the content stays previewable.
-    val s = appStringsFor(LocalAppLocale.current.substringBefore('-')).essentials
-    val title = state.category?.cardTitle(s) ?: stringResource(Res.string.essentials_tile_all_on_map)
+    val title = stringResource(state.category?.cardTitleRes() ?: Res.string.essentials_tile_all_on_map)
     val selectedItem = state.items.firstOrNull { it.utility.id == state.selectedUtilityId }
     var recenter by rememberSaveable { mutableIntStateOf(0) }
     var listOpen by rememberSaveable { mutableStateOf(false) }

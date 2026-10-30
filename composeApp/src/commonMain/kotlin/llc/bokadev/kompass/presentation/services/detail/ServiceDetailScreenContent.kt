@@ -27,7 +27,6 @@ import kompass.composeapp.generated.resources.services_title
 import kompass.composeapp.generated.resources.states_notice_where
 import kompass.composeapp.generated.resources.states_website
 import llc.bokadev.kompass.core.utils.LocalAppLocale
-import llc.bokadev.kompass.core.utils.appStringsFor
 import llc.bokadev.kompass.domain.model.GeoPoint
 import llc.bokadev.kompass.domain.model.Service
 import llc.bokadev.kompass.presentation.shared.linkTitle
@@ -43,7 +42,6 @@ import org.jetbrains.compose.resources.stringResource
 
 /**
  * A service: area and contact first, then what it offers; the website/map only when valid data exists.
- * The shared detail text section still takes the AppStrings tables until it is migrated.
  */
 @Composable
 fun ServiceDetailScreenContent(
@@ -57,7 +55,6 @@ fun ServiceDetailScreenContent(
     val service = state.service ?: return
     // Language from the composition (AppEnvironment), not Koin, so the content stays previewable.
     val lang = LocalAppLocale.current.substringBefore('-')
-    val strings = appStringsFor(lang)
     val colors = KompassTheme.colors
     val name = service.localizedName(lang)
     val area = service.localizedLocation(lang)?.trim()?.takeIf { it.isNotBlank() }
@@ -93,7 +90,7 @@ fun ServiceDetailScreenContent(
                 modifier = Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, top = 20.dp)
             )
         }
-        DetailTextSection(service.localizedDescription(lang).trim(), strings.detail)
+        DetailTextSection(service.localizedDescription(lang).trim())
         val lat = service.latitude
         val lng = service.longitude
         if (lat != null && lng != null) {

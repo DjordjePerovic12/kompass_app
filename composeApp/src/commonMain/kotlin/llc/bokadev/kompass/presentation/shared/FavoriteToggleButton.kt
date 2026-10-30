@@ -20,7 +20,10 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import llc.bokadev.kompass.core.utils.rememberAppStrings
+import kompass.composeapp.generated.resources.Res
+import kompass.composeapp.generated.resources.remove_from_saved_action
+import kompass.composeapp.generated.resources.save_action
+import org.jetbrains.compose.resources.stringResource
 import llc.bokadev.kompass.ui.theme.KompassTheme
 
 @Composable
@@ -31,8 +34,7 @@ fun FavoriteToggleButton(
     size: Dp = 38.dp
 ) {
     val colors = KompassTheme.colors
-    val strings = rememberAppStrings()
-    val description = if (isFavorited) strings.removeFromSavedAction else strings.saveAction
+    val description = if (isFavorited) stringResource(Res.string.remove_from_saved_action) else stringResource(Res.string.save_action)
     val iconColor = if (isFavorited) KompassTheme.colors.tomatoRed else colors.black.copy(alpha = 0.48f)
     Box(
         modifier = modifier

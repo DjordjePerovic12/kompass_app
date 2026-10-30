@@ -17,8 +17,6 @@ import llc.bokadev.kompass.core.audio.onNavAudioTap
 import llc.bokadev.kompass.core.audio.resolveNavAudioMode
 import llc.bokadev.kompass.core.presentation.SnackbarBus
 import llc.bokadev.kompass.core.utils.ConnectivityMonitor
-import llc.bokadev.kompass.core.utils.LocalAppLocale
-import llc.bokadev.kompass.core.utils.appStringsFor
 import llc.bokadev.kompass.core.utils.observeWithLifecycle
 import llc.bokadev.kompass.presentation.base.BaseContentView
 import llc.bokadev.kompass.presentation.shared.detail.DetailLoadState
@@ -46,8 +44,6 @@ fun LocalFindDetailScreen(
     val audio = koinInject<AudioController>()
     val snackbarBus = koinInject<SnackbarBus>()
     val launcher = rememberExternalLauncher()
-    // perform() still takes the AppStrings tables until it is migrated.
-    val strings = appStringsFor(LocalAppLocale.current.substringBefore('-'))
 
     viewModel.snackBarChannel.observeWithLifecycle { message ->
         showSnackBar(message)
@@ -55,7 +51,7 @@ fun LocalFindDetailScreen(
 
     viewModel.eventFlow.observeWithLifecycle { event ->
         if (event is LocalFindDetailEvent.OpenExternal) {
-            launcher.perform(event.launch, snackbarBus, strings)
+            launcher.perform(event.launch, snackbarBus)
         }
     }
 

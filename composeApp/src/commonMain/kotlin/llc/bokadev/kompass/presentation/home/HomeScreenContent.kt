@@ -59,9 +59,7 @@ import kompass.composeapp.generated.resources.redesign_section_error
 import kompass.composeapp.generated.resources.redesign_whole_bay
 import kompass.composeapp.generated.resources.retry
 import kompass.composeapp.generated.resources.upcoming_events
-import llc.bokadev.kompass.core.utils.AppStrings
 import llc.bokadev.kompass.core.utils.LocalAppLocale
-import llc.bokadev.kompass.core.utils.appStringsFor
 import llc.bokadev.kompass.core.utils.buildPhotoUrl
 import llc.bokadev.kompass.core.utils.toDateTag
 import llc.bokadev.kompass.core.utils.uppercaseFor
@@ -92,6 +90,8 @@ import llc.bokadev.kompass.ui.theme.pageGradientBackground
 import llc.bokadev.kompass.ui.theme.pageGradientStops
 import org.jetbrains.compose.resources.stringResource
 import kotlin.time.ExperimentalTime
+import llc.bokadev.kompass.presentation.shared.label
+import llc.bokadev.kompass.presentation.shared.sectionTitle
 
 /**
  * The whole screen is one continuous light-purple-to-ink gradient (see
@@ -99,10 +99,6 @@ import kotlin.time.ExperimentalTime
  * sections (masthead, area control, Nearby) land on the light part of the gradient and use
  * dark ink text; later sections (Must See, Notices, Events) land on the dark part and use
  * light surface-based text. Nearby's own white cards read fine against either.
- *
- * Area names, place type labels and notice labels still come from the AppStrings tables
- * (through [HomeArea], the card formatting helpers and [toNoticeLabel]) until those shared
- * helpers are migrated.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -127,7 +123,6 @@ fun HomeScreenContent(
 ) {
     // Language from the composition (AppEnvironment), not Koin, so the content stays previewable.
     val lang = LocalAppLocale.current.substringBefore('-')
-    val strings = appStringsFor(lang)
     val onPlaceOpen: (String) -> Unit = { id ->
         val origin = if (state.mustSeePlaces.any { it.id == id }) "must_see" else "nearby"
         onPlaceClick(id, origin)
@@ -158,15 +153,15 @@ fun HomeScreenContent(
         )
         Spacer(Modifier.height(28.dp))
 
-        HomeSectionFrame(state, HomeSection.NEARBY, state.effectiveArea.sectionTitle(strings), onRetrySectionClick) {
+        HomeSectionFrame(state, HomeSection.NEARBY, state.effectiveArea.sectionTitle(), onRetrySectionClick) {
             NearbyYouSection(
-                state = state, lang = lang, strings = strings,
+                state = state, lang = lang,
                 onPlaceClick = onPlaceOpen,
                 onListenClick = onListenClick,
                 favoriteKeySet = favoriteKeySet, onPlaceFavoriteToggle = onPlaceFavoriteToggle,
                 // Manual areas get "See all" too; the list opens filtered to the same area.
                 onSeeAll = onSeeAllNearbyClick,
-                title = state.effectiveArea.sectionTitle(strings),
+                title = state.effectiveArea.sectionTitle(),
                 emptyMessage = stringResource(Res.string.redesign_empty_area)
             )
         }
@@ -177,7 +172,7 @@ fun HomeScreenContent(
         if (!hideMustSee) {
             HomeSectionFrame(state, HomeSection.HIGHLIGHTS, landmarksTitle, onRetrySectionClick, darkZone = true) {
                 MustSeeSection(
-                    places = state.mustSeePlaces, lang = lang, strings = strings,
+                    places = state.mustSeePlaces, lang = lang,
                     onPlaceClick = onPlaceOpen, favoriteKeySet = favoriteKeySet,
                     onPlaceFavoriteToggle = onPlaceFavoriteToggle,
                     title = landmarksTitle
@@ -191,7 +186,7 @@ fun HomeScreenContent(
         if (!hideNotices) {
             HomeSectionFrame(state, HomeSection.NOTICES, recentNewsTitle, onRetrySectionClick, darkZone = true) {
                 InfoCenterPreviewSection(
-                    notices = state.infoCenterNotices, lang = lang, strings = strings,
+                    notices = state.infoCenterNotices, lang = lang,
                     onNoticeClick = onNoticeClick,
                     onSeeAll = onSeeAllInfoCenterClick, title = recentNewsTitle
                 )
@@ -263,7 +258,7 @@ fun HomeScreenContent(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Text(
-                            text = area.label(strings),
+                            text = area.label(),
                             style = KompassTheme.typography.helveticaMedium16.copy(fontSize = 16.sp, lineHeight = 24.sp),
                             color = KompassTheme.colors.inkBlack,
                             modifier = Modifier.weight(1f)
@@ -359,7 +354,6 @@ private fun HomeSectionFrame(
 private fun MustSeeSection(
     places: List<Place>,
     lang: String,
-    strings: AppStrings,
     onPlaceClick: (String) -> Unit,
     favoriteKeySet: Set<FavoriteKey>,
     onPlaceFavoriteToggle: (String) -> Unit,
@@ -396,7 +390,7 @@ private fun MustSeeSection(
             places.forEach { place ->
                 MustSeeCard(
                     name = place.localizedName(lang),
-                    areaLabel = place.toMustSeeAreaLabel(strings)?.uppercaseFor(lang),
+                    areaLabel = place.toMustSeeAreaLabel()?.uppercaseFor(lang),
                     description = place.localizedDescription(lang).takeIf { it.isNotBlank() },
                     imageUrl = place.photos.firstOrNull()?.let { buildPhotoUrl(it) },
                     isSaved = favoriteKeySet.contains(FavoriteKey(FavoriteItemType.PLACE, place.id)),
@@ -413,7 +407,6 @@ private fun MustSeeSection(
 private fun NearbyYouSection(
     state: HomeState,
     lang: String,
-    strings: AppStrings,
     onPlaceClick: (String) -> Unit,
     onListenClick: (String) -> Unit,
     favoriteKeySet: Set<FavoriteKey>,
@@ -461,7 +454,7 @@ private fun NearbyYouSection(
                 NearbyCardUi(
                     id = place.id,
                     title = place.localizedName(lang),
-                    meta = nearby.toNearbyMeta(showDistance = state.isUsingCurrentLocation, strings = strings),
+                    meta = nearby.toNearbyMeta(showDistance = state.isUsingCurrentLocation),
                     imageUrl = place.photos.firstOrNull()?.let { buildPhotoUrl(it) },
                     hasAudio = place.localizedAudioFile(lang) != null,
                     isSaved = favoriteKeySet.contains(FavoriteKey(FavoriteItemType.PLACE, place.id))
@@ -522,7 +515,6 @@ private fun UpcomingEventsSection(
 private fun InfoCenterPreviewSection(
     notices: List<InfoNotice>,
     lang: String,
-    strings: AppStrings,
     onNoticeClick: (String) -> Unit,
     onSeeAll: () -> Unit,
     title: String
@@ -544,7 +536,7 @@ private fun InfoCenterPreviewSection(
             notices.forEach { notice ->
                 NoticeItem(
                     level = notice.toNoticeLevel(),
-                    label = notice.toNoticeLabel(lang, strings),
+                    label = notice.toNoticeLabel(lang),
                     title = notice.localizedTitle(lang),
                     summary = notice.localizedShortDescription(lang),
                     onClick = { onNoticeClick(notice.id) }

@@ -21,7 +21,6 @@ import kompass.composeapp.generated.resources.retry
 import kompass.composeapp.generated.resources.states_couldnt_refresh
 import kompass.composeapp.generated.resources.states_no_updates
 import llc.bokadev.kompass.core.utils.LocalAppLocale
-import llc.bokadev.kompass.core.utils.appStringsFor
 import llc.bokadev.kompass.domain.model.InfoNotice
 import llc.bokadev.kompass.presentation.shared.NoticeItem
 import llc.bokadev.kompass.presentation.shared.toNoticeLabel
@@ -34,7 +33,6 @@ import org.jetbrains.compose.resources.stringResource
 /**
  * Local updates: what happened and its level/validity first ("Important · until 12 Oct"), where it
  * applies, then the short summary. Rows are text-first; imagery belongs on the detail.
- * The shared notice label still takes the AppStrings tables until it is migrated.
  */
 @Composable
 fun InfoCenterScreenContent(
@@ -47,7 +45,6 @@ fun InfoCenterScreenContent(
     val colors = KompassTheme.colors
     // Language from the composition (AppEnvironment), not Koin, so the content stays previewable.
     val lang = LocalAppLocale.current.substringBefore('-')
-    val strings = appStringsFor(lang)
     val retryLabel = stringResource(Res.string.retry)
     val pad = Modifier.padding(horizontal = 20.dp)
     val error = state.error
@@ -81,7 +78,7 @@ fun InfoCenterScreenContent(
             val where = notice.localizedLocation(lang).trim().takeIf { it.isNotBlank() }
             NoticeItem(
                 level = notice.toNoticeLevel(),
-                label = listOfNotNull(notice.toNoticeLabel(lang, strings), where).joinToString(" · "),
+                label = listOfNotNull(notice.toNoticeLabel(lang), where).joinToString(" · "),
                 title = notice.localizedTitle(lang),
                 // A summary that only repeats the title adds nothing.
                 summary = notice.localizedShortDescription(lang).takeUnless { it.trim().equals(notice.localizedTitle(lang).trim(), ignoreCase = true) }.orEmpty(),

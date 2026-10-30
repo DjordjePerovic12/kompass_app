@@ -1,15 +1,14 @@
 package llc.bokadev.kompass.presentation.shared
 
-import llc.bokadev.kompass.core.utils.AppStrings
-import llc.bokadev.kompass.core.utils.localizedTypeLabel
-import llc.bokadev.kompass.core.utils.toTitleCaseLabel
-import llc.bokadev.kompass.core.utils.toClockTime
+import androidx.compose.runtime.Composable
+import kompass.composeapp.generated.resources.Res
+import kompass.composeapp.generated.resources.redesign_notice_general
+import kompass.composeapp.generated.resources.redesign_notice_important
+import kompass.composeapp.generated.resources.redesign_notice_until
+import kompass.composeapp.generated.resources.redesign_notice_urgent
 import llc.bokadev.kompass.core.utils.toNoticeDate
-import llc.bokadev.kompass.domain.model.Event
 import llc.bokadev.kompass.domain.model.InfoNotice
-import llc.bokadev.kompass.domain.model.NearbyPlace
-import llc.bokadev.kompass.domain.model.Place
-import kotlin.math.roundToInt
+import org.jetbrains.compose.resources.stringResource
 
 fun InfoNotice.toNoticeLevel(): NoticeLevel = when (priorityRank()) {
     0 -> NoticeLevel.URGENT
@@ -18,12 +17,14 @@ fun InfoNotice.toNoticeLevel(): NoticeLevel = when (priorityRank()) {
 }
 
 /** "Important · until 12. Oct" (or just "Important" with no end date) — never fabricated, hides the "until" segment when `endsAt` is absent. */
-fun InfoNotice.toNoticeLabel(lang: String, strings: AppStrings): String {
+@Composable
+fun InfoNotice.toNoticeLabel(lang: String): String {
     val levelText = when (toNoticeLevel()) {
-        NoticeLevel.URGENT -> strings.redesign.noticeUrgent
-        NoticeLevel.IMPORTANT -> strings.redesign.noticeImportant
-        NoticeLevel.GENERAL -> strings.redesign.noticeGeneral
+        NoticeLevel.URGENT -> stringResource(Res.string.redesign_notice_urgent)
+        NoticeLevel.IMPORTANT -> stringResource(Res.string.redesign_notice_important)
+        NoticeLevel.GENERAL -> stringResource(Res.string.redesign_notice_general)
     }
     val untilDate = endsAt?.toNoticeDate(lang)
-    return if (untilDate != null) "$levelText · ${strings.redesign.noticeUntil} $untilDate" else levelText
+    val until = stringResource(Res.string.redesign_notice_until)
+    return if (untilDate != null) "$levelText · $until $untilDate" else levelText
 }

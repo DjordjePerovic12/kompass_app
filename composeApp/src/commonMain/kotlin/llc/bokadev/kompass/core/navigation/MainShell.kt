@@ -24,13 +24,11 @@ import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.navigation
 import llc.bokadev.kompass.core.audio.AudioController
 import llc.bokadev.kompass.core.audio.AudioState
-import llc.bokadev.kompass.core.utils.AppStrings
 import llc.bokadev.kompass.core.audio.NavAudioHost
 import llc.bokadev.kompass.core.presentation.SnackbarBus
 import llc.bokadev.kompass.core.navigation.utils.Navigator
 import llc.bokadev.kompass.core.utils.ConnectivityMonitor
-import llc.bokadev.kompass.core.utils.currentAppLanguage
-import llc.bokadev.kompass.core.utils.rememberAppStrings
+import llc.bokadev.kompass.core.utils.LocalAppLocale
 import llc.bokadev.kompass.core.utils.supportedDeviceLanguage
 import llc.bokadev.kompass.presentation.shared.LanguageSheet
 import llc.bokadev.kompass.presentation.shared.LanguageSheetHost
@@ -50,6 +48,12 @@ import llc.bokadev.kompass.core.navigation.utils.HomeRootResetSequencer
 import llc.bokadev.kompass.core.navigation.utils.NavigatorBridge
 import llc.bokadev.kompass.core.navigation.utils.RootTabBackHandler
 import llc.bokadev.kompass.ui.theme.KompassTheme
+import kompass.composeapp.generated.resources.Res
+import kompass.composeapp.generated.resources.detail_couldnt_play_audio
+import kompass.composeapp.generated.resources.detail_open_audio_library
+import kompass.composeapp.generated.resources.listen_now_playing
+import kompass.composeapp.generated.resources.listen_title
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun MainShell() {
@@ -84,7 +88,6 @@ fun MainShell() {
     val languageSheet = koinInject<LanguageSheetHost>()
     val languageSheetOpen by languageSheet.isOpen.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
-    val strings = rememberAppStrings()
     LaunchedEffect(snackbarBus) {
         snackbarBus.messages.collect { message ->
             // Actions (Undo) stay up for 5s, plain messages for the short default.
@@ -149,7 +152,6 @@ fun MainShell() {
                             audio = audio,
                             navAudio = navAudio,
                             snackbarBus = snackbarBus,
-                            strings = strings,
                             onOpenLibrary = { controller.navigate(Screen.ListenScreen) { launchSingleTop = true } }
                         )
                     }
@@ -177,8 +179,7 @@ fun MainShell() {
     }
     if (languageSheetOpen) {
         LanguageSheet(
-            currentLanguage = currentAppLanguage(),
-            strings = strings.language,
+            currentLanguage = LocalAppLocale.current.substringBefore('-'),
             onSelect = { code ->
                 preferences.setSelectedLanguage(code)
                 languageSheet.close()
@@ -229,22 +230,24 @@ private fun ShellAudioButton(
     audio: AudioController,
     navAudio: NavAudioHost,
     snackbarBus: SnackbarBus,
-    strings: AppStrings,
     onOpenLibrary: () -> Unit
 ) {
     val context by navAudio.current.collectAsState()
     val audioState by audio.state.collectAsState()
     val inLibrary = context?.isLibrary == true
     val playing = audioState.trackOrNull?.takeIf { audioState is AudioState.Playing || audioState is AudioState.Paused }
+    val couldntPlayAudio = stringResource(Res.string.detail_couldnt_play_audio)
+    val openAudioLibrary = stringResource(Res.string.detail_open_audio_library)
+    val nowPlaying = stringResource(Res.string.listen_now_playing)
     // Detail screens play from their own controls: a failure is announced here, once, app-wide.
     // The library shows its own message, so not while it is on top.
     LaunchedEffect(audioState is AudioState.Failed) {
-        if (audioState is AudioState.Failed && !inLibrary) snackbarBus.show(strings.detail.couldntPlayAudio)
+        if (audioState is AudioState.Failed && !inLibrary) snackbarBus.show(couldntPlayAudio)
     }
     NavAudioButton(
         state = audioState.toListenButtonState(),
-        label = strings.listen.title,
-        description = listOfNotNull(strings.detail.openAudioLibrary, playing?.let { "${strings.listen.nowPlaying.lowercase()}: ${it.title}" }).joinToString(". "),
+        label = stringResource(Res.string.listen_title),
+        description = listOfNotNull(openAudioLibrary, playing?.let { "${nowPlaying.lowercase()}: ${it.title}" }).joinToString(". "),
         current = inLibrary,
         onClick = { if (!inLibrary) onOpenLibrary() }
     )

@@ -44,7 +44,6 @@ import kompass.composeapp.generated.resources.redesign_remove_title_from_saved
 import kompass.composeapp.generated.resources.redesign_save_title
 import llc.bokadev.kompass.core.audio.NavAudioMode
 import llc.bokadev.kompass.core.utils.LocalAppLocale
-import llc.bokadev.kompass.core.utils.appStringsFor
 import llc.bokadev.kompass.core.utils.buildPhotoUrl
 import llc.bokadev.kompass.core.utils.uppercaseFor
 import llc.bokadev.kompass.domain.model.Experience
@@ -59,7 +58,7 @@ import llc.bokadev.kompass.presentation.shared.detail.DetailTextSection
 import llc.bokadev.kompass.presentation.shared.detail.DetailWhereItIs
 import llc.bokadev.kompass.presentation.shared.detail.normalizedForCompare
 import llc.bokadev.kompass.presentation.shared.detail.prettyLabel
-import llc.bokadev.kompass.presentation.shared.detail.toDetailLabel
+import llc.bokadev.kompass.presentation.shared.detail.detailLabelRes
 import llc.bokadev.kompass.presentation.shared.detail.toVisitLength
 import llc.bokadev.kompass.presentation.shared.DetailListenControl
 import llc.bokadev.kompass.presentation.shared.rememberReduceMotion
@@ -72,7 +71,6 @@ import org.jetbrains.compose.resources.stringResource
  * practical rows, About, Where it is) plus activity-only sections (how to get there, website).
  * Every section shows only when its data exists. [audioMode] is the activity's free audio state
  * (null = no audio), played via [onListenClick].
- * The shared detail components still take the AppStrings tables until they are migrated.
  */
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -92,7 +90,6 @@ fun ExperienceDetailScreenContent(
     val isFavorited = state.isSaved
     // Language from the composition (AppEnvironment), not Koin, so the content stays previewable.
     val lang = LocalAppLocale.current.substringBefore('-')
-    val s = appStringsFor(lang).detail
     val density = LocalDensity.current
     val reduceMotion = rememberReduceMotion()
     val scroll = rememberScrollState()
@@ -120,19 +117,18 @@ fun ExperienceDetailScreenContent(
                 backLabel = backLabel,
                 saveLabel = saveLabel,
                 savedStateLabel = savedState,
-                photoOfLabel = s.photoOf,
                 onBack = onBackClick,
                 onToggleSave = onFavoriteClick,
                 parallax = { if (reduceMotion) 0f else scroll.value.toFloat() }
             )
             TitleBlock(activity, name, area, lang) {
-                audioMode?.let { DetailListenControl(it, s, reduceMotion, onListenClick) }
+                audioMode?.let { DetailListenControl(it, reduceMotion, onListenClick) }
             }
             DetailPracticalRows(
                 fullWidth = emptyList(),
                 paired = listOfNotNull(
-                    activity.durationMin?.toVisitLength(s)?.let { DetailPracticalRow(DetailGlyph.Visit, stringResource(Res.string.detail_duration), it) },
-                    activity.bestTime.toDetailLabel(s)?.let { DetailPracticalRow(DetailGlyph.Sun, stringResource(Res.string.detail_best_time), it) }
+                    activity.durationMin?.toVisitLength()?.let { DetailPracticalRow(DetailGlyph.Visit, stringResource(Res.string.detail_duration), it) },
+                    activity.bestTime.detailLabelRes()?.let { stringResource(it) }?.let { DetailPracticalRow(DetailGlyph.Sun, stringResource(Res.string.detail_best_time), it) }
                 ),
                 lang = lang
             )
@@ -146,9 +142,9 @@ fun ExperienceDetailScreenContent(
                     modifier = Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, top = 20.dp)
                 )
             }
-            activity.aboutText(lang)?.let { DetailTextSection(it, s) }
+            activity.aboutText(lang)?.let { DetailTextSection(it) }
             activity.localizedHowToGetThere(lang).trim().takeIf { it.isNotBlank() }?.let {
-                DetailTextSection(it, s, title = stringResource(Res.string.detail_how_to_get_there), collapsedLines = 8)
+                DetailTextSection(it, title = stringResource(Res.string.detail_how_to_get_there), collapsedLines = 8)
             }
             val lat = activity.latitude
             val lng = activity.longitude

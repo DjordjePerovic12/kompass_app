@@ -1,7 +1,5 @@
 package llc.bokadev.kompass.domain.model
 
-import llc.bokadev.kompass.core.utils.AppStrings
-
 enum class HomeArea(val preferenceValue: String) {
     DEVICE("device"), OLD_TOWN("old_town"), DOBROTA("dobrota"), PERAST("perast");
 
@@ -13,29 +11,6 @@ enum class HomeArea(val preferenceValue: String) {
             DOBROTA -> normalized == "dobrota"
             PERAST -> normalized == "perast"
         }
-    }
-
-    fun label(strings: AppStrings): String = when (this) {
-        DEVICE -> strings.redesign.deviceLocation
-        OLD_TOWN -> strings.redesign.oldTown
-        DOBROTA -> "Dobrota"
-        PERAST -> "Perast"
-    }
-
-    /** Just the area's own name (e.g. "Old Town", not "Kotor / Old Town") — for the Lamplight
-     * top bar's large title, which already has its own "Around" label above it. */
-    fun shortLabel(strings: AppStrings): String = when (this) {
-        DEVICE -> strings.redesign.deviceLocation
-        OLD_TOWN -> strings.redesign.oldTownShort
-        DOBROTA -> "Dobrota"
-        PERAST -> "Perast"
-    }
-
-    fun sectionTitle(strings: AppStrings): String = when (this) {
-        DEVICE -> strings.nearbyYou
-        OLD_TOWN -> strings.redesign.aroundOldTown
-        DOBROTA -> strings.redesign.aroundDobrota
-        PERAST -> strings.redesign.aroundPerast
     }
 
     companion object {

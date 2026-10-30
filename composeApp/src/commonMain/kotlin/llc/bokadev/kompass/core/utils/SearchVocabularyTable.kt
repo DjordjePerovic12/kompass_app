@@ -5,8 +5,6 @@ import llc.bokadev.kompass.domain.model.PlaceCategory
 import llc.bokadev.kompass.domain.model.SearchTag
 import llc.bokadev.kompass.domain.model.SearchVocabulary
 import llc.bokadev.kompass.domain.model.UtilityCategory
-import llc.bokadev.kompass.presentation.shared.cardTitle
-import llc.bokadev.kompass.presentation.shared.tileLabel
 
 /**
  * The reviewed search vocabulary: what a visitor might type for a category or CMS subtype, and a
@@ -14,19 +12,19 @@ import llc.bokadev.kompass.presentation.shared.tileLabel
  *
  * Rules for editing: plain words only, keyed by *category/subtype*, never by a record's name;
  * every language gets the English words too (visitors often type English). Labels shown in the
- * app (category names, Essentials groups, utility tiles) are reused from [AppStrings] so the
- * vocabulary can't drift from what the screen says. Subtypes not listed here still match their
- * own CMS value (e.g. "palace").
+ * app (category names, Essentials groups, utility tiles) are repeated here in every language, as
+ * search data: Compose resources only resolve the current locale, and search matches all of them.
+ * Keep them identical to the strings.xml values so the vocabulary can't drift from what the
+ * screen says. Subtypes not listed here still match their own CMS value (e.g. "palace").
  */
 class SearchVocabularyTable : SearchVocabulary {
 
     override fun terms(tag: SearchTag, lang: String): List<String> {
-        val strings = appStringsFor(lang)
         val local = when (tag) {
-            is SearchTag.Place -> listOf(tag.category.localizedLabel(strings)) + placeTerms(tag.category, lang)
+            is SearchTag.Place -> listOf(placeCategoryLabel(tag.category, lang)) + placeTerms(tag.category, lang)
             is SearchTag.Subtype -> subtypeTerms(tag.value, lang)
-            is SearchTag.Essential -> essentialLabel(tag.category, strings.essentials) + essentialTerms(tag.category, lang)
-            is SearchTag.Utility -> listOf(tag.category.tileLabel(strings.essentials), tag.category.cardTitle(strings.essentials)) + utilityTerms(tag.category, lang)
+            is SearchTag.Essential -> essentialLabel(tag.category, lang) + essentialTerms(tag.category, lang)
+            is SearchTag.Utility -> utilityLabels(tag.category, lang) + utilityTerms(tag.category, lang)
         }
         val english = if (lang == "en") emptyList() else terms(tag, "en")
         return (local + english).filter { it.isNotBlank() }.distinct()
@@ -41,12 +39,81 @@ class SearchVocabularyTable : SearchVocabulary {
         }
     }
 
-    private fun essentialLabel(category: EssentialCategory, s: EssentialsStrings): List<String> = when (category) {
-        EssentialCategory.CUSTOMS -> listOf(s.groupRegistration)
-        EssentialCategory.TRANSPORT -> listOf(s.groupGettingAround)
-        EssentialCategory.PRACTICAL -> listOf(s.groupPractical)
-        EssentialCategory.TIPS -> listOf(s.groupLocalTips)
-        EssentialCategory.EMERGENCY -> listOf(s.tileEmergency)
+    /** The category name the app shows (redesign_category_*). */
+    private fun placeCategoryLabel(category: PlaceCategory, lang: String): String = when (category) {
+        PlaceCategory.EAT_AND_DRINK -> when (lang) {
+            "fr" -> "Manger et boire"; "de" -> "Essen & Trinken"; "es" -> "Comer y beber"; "tr" -> "Yeme & İçme"; else -> "Eat & Drink"
+        }
+        PlaceCategory.SEE_AND_VISIT -> when (lang) {
+            "fr" -> "À voir"; "de" -> "Sehenswürdigkeiten"; "es" -> "Para ver"; "tr" -> "Gezilecek yer"; else -> "See & Visit"
+        }
+        PlaceCategory.ACTIVITIES -> when (lang) {
+            "fr" -> "Activités"; "de" -> "Aktivitäten"; "es" -> "Actividades"; "tr" -> "Aktiviteler"; else -> "Activities"
+        }
+        PlaceCategory.HIDDEN_GEMS -> when (lang) {
+            "fr" -> "Trésors cachés"; "de" -> "Versteckte Orte"; "es" -> "Joyas escondidas"; "tr" -> "Gizli hazineler"; else -> "Hidden Gems"
+        }
+        PlaceCategory.PRACTICAL -> when (lang) {
+            "fr" -> "Pratique"; "de" -> "Praktisches"; "es" -> "Práctico"; "tr" -> "Pratik"; else -> "Practical"
+        }
+    }
+
+    /** The Essentials group name the app shows (essentials_group_*), or the Emergency tile (essentials_tile_emergency). */
+    private fun essentialLabel(category: EssentialCategory, lang: String): List<String> = listOf(
+        when (category) {
+            EssentialCategory.CUSTOMS -> when (lang) {
+                "fr" -> "Enregistrement & taxe"; "de" -> "Anmeldung & Kurtaxe"; "es" -> "Registro y tasa"; "tr" -> "Kayıt ve vergi"; else -> "Registration & tax"
+            }
+            EssentialCategory.TRANSPORT -> when (lang) {
+                "fr" -> "Se déplacer"; "de" -> "Unterwegs"; "es" -> "Moverse"; "tr" -> "Ulaşım"; else -> "Getting around"
+            }
+            EssentialCategory.PRACTICAL -> when (lang) {
+                "fr" -> "Infos pratiques"; "de" -> "Praktisches"; "es" -> "Info práctica"; "tr" -> "Pratik bilgiler"; else -> "Practical info"
+            }
+            EssentialCategory.TIPS -> when (lang) {
+                "fr" -> "Conseils locaux"; "de" -> "Lokale Tipps"; "es" -> "Consejos locales"; "tr" -> "Yerel ipuçları"; else -> "Local tips"
+            }
+            EssentialCategory.EMERGENCY -> utilityLabels(UtilityCategory.EMERGENCY, lang).first()
+        }
+    )
+
+    /** The utility's tile label then its card title, as the app shows them (essentials_tile_* / essentials_title_*). */
+    private fun utilityLabels(category: UtilityCategory, lang: String): List<String> = when (category) {
+        UtilityCategory.ATM -> when (lang) {
+            "fr" -> listOf("Argent & DAB", "Argent & DAB"); "de" -> listOf("Bargeld & Automaten", "Bargeld & Automaten")
+            "es" -> listOf("Efectivo y cajeros", "Efectivo y cajeros"); "tr" -> listOf("Nakit ve ATM", "Nakit ve ATM")
+            else -> listOf("Cash & ATMs", "Cash & ATMs")
+        }
+        UtilityCategory.PHARMACY -> when (lang) {
+            "fr" -> listOf("Pharmacie", "Pharmacies"); "de" -> listOf("Apotheke", "Apotheken")
+            "es" -> listOf("Farmacia", "Farmacias"); "tr" -> listOf("Eczane", "Eczaneler")
+            else -> listOf("Pharmacy", "Pharmacies")
+        }
+        UtilityCategory.SUPERMARKET -> when (lang) {
+            "fr" -> listOf("Supermarché", "Supermarchés"); "de" -> listOf("Supermarkt", "Supermärkte")
+            "es" -> listOf("Supermercado", "Supermercados"); "tr" -> listOf("Market", "Marketler")
+            else -> listOf("Supermarket", "Supermarkets")
+        }
+        UtilityCategory.SHOP -> when (lang) {
+            "fr" -> listOf("Magasin", "Magasins"); "de" -> listOf("Geschäft", "Geschäfte")
+            "es" -> listOf("Tienda", "Tiendas"); "tr" -> listOf("Mağaza", "Mağazalar")
+            else -> listOf("Shop", "Shops")
+        }
+        UtilityCategory.PARKING -> when (lang) {
+            "fr" -> listOf("Parking", "Parking"); "de" -> listOf("Parken", "Parken")
+            "es" -> listOf("Aparcamiento", "Aparcamiento"); "tr" -> listOf("Otopark", "Otopark")
+            else -> listOf("Parking", "Parking")
+        }
+        UtilityCategory.GAS_STATION -> when (lang) {
+            "fr" -> listOf("Carburant", "Carburant"); "de" -> listOf("Tanken", "Tankstellen")
+            "es" -> listOf("Gasolina", "Gasolineras"); "tr" -> listOf("Yakıt", "Akaryakıt")
+            else -> listOf("Fuel", "Fuel")
+        }
+        UtilityCategory.EMERGENCY -> when (lang) {
+            "fr" -> listOf("Urgence", "Urgence"); "de" -> listOf("Notfall", "Notfall")
+            "es" -> listOf("Emergencias", "Emergencias"); "tr" -> listOf("Acil", "Acil")
+            else -> listOf("Emergency", "Emergency")
+        }
     }
 
     private fun placeTerms(category: PlaceCategory, lang: String): List<String> = when (category) {

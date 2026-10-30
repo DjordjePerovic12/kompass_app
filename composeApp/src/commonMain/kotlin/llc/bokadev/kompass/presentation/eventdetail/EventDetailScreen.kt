@@ -9,7 +9,6 @@ import kompass.composeapp.generated.resources.detail_back
 import kompass.composeapp.generated.resources.retry
 import llc.bokadev.kompass.core.presentation.SnackbarBus
 import llc.bokadev.kompass.core.utils.observeWithLifecycle
-import llc.bokadev.kompass.core.utils.rememberAppStrings
 import llc.bokadev.kompass.domain.location.UserLocationProvider
 import llc.bokadev.kompass.presentation.base.BaseContentView
 import llc.bokadev.kompass.presentation.shared.detail.DetailLoadState
@@ -30,7 +29,6 @@ fun EventDetailScreen(
     val state by viewModel.eventDetailState.collectAsStateWithLifecycle()
     val snackbarBus = koinInject<SnackbarBus>()
     val launcher = rememberExternalLauncher()
-    val strings = rememberAppStrings()
     val currentLocation = rememberLiveCurrentLocation(koinInject<UserLocationProvider>(), 5_000L, state.event?.id)
 
     StatusBarIconsEffect(lightIcons = true)
@@ -41,7 +39,7 @@ fun EventDetailScreen(
 
     viewModel.eventFlow.observeWithLifecycle { event ->
         if (event is EventDetailEvent.OpenExternal) {
-            launcher.perform(event.launch, snackbarBus, strings)
+            launcher.perform(event.launch, snackbarBus)
         }
     }
 

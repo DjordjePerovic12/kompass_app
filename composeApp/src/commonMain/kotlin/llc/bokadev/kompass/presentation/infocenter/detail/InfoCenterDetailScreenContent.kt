@@ -23,7 +23,6 @@ import kompass.composeapp.generated.resources.states_notice_source
 import kompass.composeapp.generated.resources.states_notice_when
 import kompass.composeapp.generated.resources.states_notice_where
 import llc.bokadev.kompass.core.utils.LocalAppLocale
-import llc.bokadev.kompass.core.utils.appStringsFor
 import llc.bokadev.kompass.core.utils.toNoticeDate
 import llc.bokadev.kompass.core.utils.uppercaseFor
 import llc.bokadev.kompass.domain.model.InfoNotice
@@ -41,7 +40,6 @@ import org.jetbrains.compose.resources.stringResource
 /**
  * A local update: level and validity, what happened, where and when it applies, then the source.
  * The image only appears when the CMS has one; otherwise the header stays compact.
- * The shared detail components and notice label still take the AppStrings tables until they are migrated.
  */
 @Composable
 fun InfoCenterDetailScreenContent(
@@ -53,7 +51,6 @@ fun InfoCenterDetailScreenContent(
     val notice = state.notice ?: return
     // Language from the composition (AppEnvironment), not Koin, so the content stays previewable.
     val lang = LocalAppLocale.current.substringBefore('-')
-    val strings = appStringsFor(lang)
     val colors = KompassTheme.colors
     val backLabel = stringResource(Res.string.detail_back)
     val whereLabel = stringResource(Res.string.states_notice_where)
@@ -67,7 +64,6 @@ fun InfoCenterDetailScreenContent(
             backLabel = backLabel,
             saveLabel = "",
             savedStateLabel = "",
-            photoOfLabel = strings.detail.photoOf,
             onBack = onBackClick,
             onToggleSave = null
         )
@@ -75,7 +71,7 @@ fun InfoCenterDetailScreenContent(
             modifier = Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, top = 4.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            Text(text = notice.toNoticeLabel(lang, strings).uppercaseFor(lang), style = KompassTheme.typography.geologicaSemiBold11, color = colors.lampYellow)
+            Text(text = notice.toNoticeLabel(lang).uppercaseFor(lang), style = KompassTheme.typography.geologicaSemiBold11, color = colors.lampYellow)
             Text(
                 text = notice.localizedTitle(lang),
                 style = KompassTheme.typography.gloockRegular34.copy(fontSize = 32.sp, lineHeight = 35.sp),
@@ -98,7 +94,7 @@ fun InfoCenterDetailScreenContent(
             lang = lang
         )
         val body = notice.localizedLongDescription(lang).trim().ifBlank { notice.localizedShortDescription(lang).trim() }
-        DetailTextSection(body, strings.detail, collapsedLines = 12)
+        DetailTextSection(body, collapsedLines = 12)
         notice.externalUrl?.trim()?.takeIf { it.isNotBlank() }?.let {
             DetailPillButton(
                 label = stringResource(Res.string.states_notice_source),

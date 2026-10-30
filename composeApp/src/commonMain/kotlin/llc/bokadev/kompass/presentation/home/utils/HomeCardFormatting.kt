@@ -1,13 +1,17 @@
 package llc.bokadev.kompass.presentation.home.utils
 
-import llc.bokadev.kompass.core.utils.AppStrings
-import llc.bokadev.kompass.core.utils.localizedTypeLabel
+import androidx.compose.runtime.Composable
+import kompass.composeapp.generated.resources.Res
+import kompass.composeapp.generated.resources.redesign_worth_drive
 import llc.bokadev.kompass.core.utils.toTitleCaseLabel
 import llc.bokadev.kompass.core.utils.toClockTime
 import llc.bokadev.kompass.domain.model.Event
 import llc.bokadev.kompass.domain.model.NearbyPlace
 import llc.bokadev.kompass.domain.model.Place
 import llc.bokadev.kompass.presentation.shared.formatDistance
+import llc.bokadev.kompass.presentation.shared.localizedTypeLabel
+import llc.bokadev.kompass.presentation.shared.shortLabel
+import org.jetbrains.compose.resources.stringResource
 import kotlin.math.roundToInt
 import llc.bokadev.kompass.domain.model.HomeArea
 
@@ -33,20 +37,22 @@ fun Event.toRecurrenceSuffix(weeklyLabel: String): String =
  * items have no GPS context, unlike Nearby's `NearbyPlace.distanceKm`). Null when the place has
  * no zone at all: the label is hidden rather than guessed.
  */
-fun Place.toMustSeeAreaLabel(strings: AppStrings): String? {
+@Composable
+fun Place.toMustSeeAreaLabel(): String? {
     if (zone.isNullOrBlank()) return null
     val matchedArea = HomeArea.entries
         .filter { it != HomeArea.DEVICE }
         .firstOrNull { it.matchesZone(zone) }
-    return matchedArea?.shortLabel(strings) ?: strings.redesign.worthDrive
+    return matchedArea?.shortLabel() ?: stringResource(Res.string.redesign_worth_drive)
 }
 
 /**
  * The Nearby card's meta line: "Cathedral · 240 m" (straight-line, never a walking time) with live location, else "Cathedral · Old Town"
  * from the place's own zone. Either half is dropped when absent, never invented.
  */
-fun NearbyPlace.toNearbyMeta(showDistance: Boolean, strings: AppStrings): String {
-    val typeLabel = place.localizedTypeLabel(strings)
+@Composable
+fun NearbyPlace.toNearbyMeta(showDistance: Boolean): String {
+    val typeLabel = place.localizedTypeLabel()
     val locationPart = if (showDistance) {
         (distanceKm * 1000).roundToInt().formatDistance()
     } else {

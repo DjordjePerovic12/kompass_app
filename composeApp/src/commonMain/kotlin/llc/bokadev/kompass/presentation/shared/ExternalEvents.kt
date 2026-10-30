@@ -1,7 +1,11 @@
 package llc.bokadev.kompass.presentation.shared
 
 import llc.bokadev.kompass.core.presentation.SnackbarBus
-import llc.bokadev.kompass.core.utils.AppStrings
+import kompass.composeapp.generated.resources.Res
+import kompass.composeapp.generated.resources.detail_couldnt_open_browser
+import kompass.composeapp.generated.resources.detail_couldnt_open_dialer
+import kompass.composeapp.generated.resources.detail_couldnt_open_maps
+import org.jetbrains.compose.resources.getString
 
 /** A hand-off to another app, requested by a ViewModel and performed by the screen's orchestrator. */
 sealed interface ExternalLaunch {
@@ -13,7 +17,7 @@ sealed interface ExternalLaunch {
 }
 
 /** Performs [launch]; if nothing on the device can handle it, says so instead of failing silently. */
-fun ExternalLauncher.perform(launch: ExternalLaunch, snackbar: SnackbarBus, strings: AppStrings) {
+suspend fun ExternalLauncher.perform(launch: ExternalLaunch, snackbar: SnackbarBus) {
     val opened = when (launch) {
         is ExternalLaunch.Maps -> openMaps(launch.latitude, launch.longitude, launch.label)
         is ExternalLaunch.Url -> openUrl(launch.url)
@@ -22,9 +26,9 @@ fun ExternalLauncher.perform(launch: ExternalLaunch, snackbar: SnackbarBus, stri
     }
     if (!opened) snackbar.show(
         when (launch) {
-            is ExternalLaunch.Maps -> strings.detail.couldntOpenMaps
-            is ExternalLaunch.Url -> strings.detail.couldntOpenBrowser
-            is ExternalLaunch.Dial -> strings.detail.couldntOpenDialer
+            is ExternalLaunch.Maps -> getString(Res.string.detail_couldnt_open_maps)
+            is ExternalLaunch.Url -> getString(Res.string.detail_couldnt_open_browser)
+            is ExternalLaunch.Dial -> getString(Res.string.detail_couldnt_open_dialer)
             ExternalLaunch.AppSettings -> return
         }
     )

@@ -75,9 +75,7 @@ import kompass.composeapp.generated.resources.essentials_utilities
 import kompass.composeapp.generated.resources.essentials_what_do_you_need
 import kompass.composeapp.generated.resources.retry
 import kotlinx.coroutines.launch
-import llc.bokadev.kompass.core.utils.EssentialsStrings
 import llc.bokadev.kompass.core.utils.LocalAppLocale
-import llc.bokadev.kompass.core.utils.appStringsFor
 import llc.bokadev.kompass.domain.model.CityEssential
 import llc.bokadev.kompass.domain.model.EssentialCategory
 import llc.bokadev.kompass.domain.model.GeoPoint
@@ -109,7 +107,7 @@ import llc.bokadev.kompass.presentation.shared.LamplightHeader
 import llc.bokadev.kompass.presentation.shared.LamplightSegmentedControl
 import llc.bokadev.kompass.presentation.shared.SegmentOption
 import llc.bokadev.kompass.presentation.shared.UtilityMapPin
-import llc.bokadev.kompass.presentation.shared.cardTitle
+import llc.bokadev.kompass.presentation.shared.cardTitleRes
 import llc.bokadev.kompass.presentation.shared.formatDistance
 import llc.bokadev.kompass.presentation.shared.icons.ChevronLeftIcon
 import llc.bokadev.kompass.presentation.shared.icons.EssentialsGlyph
@@ -117,8 +115,8 @@ import llc.bokadev.kompass.presentation.shared.icons.EssentialsIcon
 import llc.bokadev.kompass.presentation.shared.icons.glyph
 import llc.bokadev.kompass.presentation.shared.linkTitle
 import llc.bokadev.kompass.presentation.shared.rememberReduceMotion
-import llc.bokadev.kompass.presentation.shared.tileLabel
-import llc.bokadev.kompass.presentation.shared.title
+import llc.bokadev.kompass.presentation.shared.tileLabelRes
+import llc.bokadev.kompass.presentation.shared.titleRes
 import llc.bokadev.kompass.ui.theme.KompassShapes
 import llc.bokadev.kompass.ui.theme.KompassTheme
 import llc.bokadev.kompass.ui.theme.pageGradientBackground
@@ -127,7 +125,6 @@ import org.jetbrains.compose.resources.stringResource
 /**
  * Lamplight Essentials (Essentials spec): answer a practical question in under ten seconds. Two
  * views behind a segmented control in the header, each keeping its own scroll position.
- * The shared category/group label helpers still take the AppStrings tables until they are migrated.
  */
 @Composable
 fun EssentialsScreenContent(
@@ -150,7 +147,6 @@ fun EssentialsScreenContent(
 ) {
     // Language from the composition (AppEnvironment), not Koin, so the content stays previewable.
     val lang = LocalAppLocale.current.substringBefore('-')
-    val s = appStringsFor(lang).essentials
     val colors = KompassTheme.colors
     val infoScroll = rememberScrollState()
     val utilityScroll = rememberScrollState()
@@ -223,7 +219,6 @@ fun EssentialsScreenContent(
             InfoView(
                 state = state,
                 lang = lang,
-                s = s,
                 scroll = infoScroll,
                 focusModuleId = state.focusModuleId,
                 containerTop = { containerTop },
@@ -238,7 +233,6 @@ fun EssentialsScreenContent(
         } else {
             UtilitiesView(
                 state = state,
-                s = s,
                 onRetryClick = onRetryClick,
                 onUtilityMapClick = onUtilityMapClick,
                 onTurnOnLocationClick = onTurnOnLocationClick
@@ -253,7 +247,6 @@ fun EssentialsScreenContent(
 private fun InfoView(
     state: EssentialsState,
     lang: String,
-    s: EssentialsStrings,
     scroll: ScrollState,
     focusModuleId: String?,
     containerTop: () -> Float,
@@ -321,7 +314,7 @@ private fun InfoView(
             SectionTitle(stringResource(Res.string.essentials_what_do_you_need), Modifier.padding(top = 6.dp))
             TopicIndexGrid(
                 tiles = state.groups.map { group ->
-                    TopicTile(group.kind.title(s), group.kind.glyph()) { jumpTo(group.kind) }
+                    TopicTile(stringResource(group.kind.titleRes()), group.kind.glyph()) { jumpTo(group.kind) }
                 },
                 singleColumn = singleColumn
             )
@@ -348,7 +341,7 @@ private fun InfoView(
                     .onGloballyPositioned { headingTops[group.kind] = it.positionInRoot().y },
                 verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
-                SectionTitle(group.kind.title(s))
+                SectionTitle(stringResource(group.kind.titleRes()))
                 Text(text = stringResource(group.kind.purposeRes()), style = KompassTheme.typography.geologicaRegular14, color = KompassTheme.colors.pebbleGray)
             }
             EssentialModuleGroup(
@@ -398,7 +391,6 @@ private fun CityEssential.toModuleItem(
 @Composable
 private fun UtilitiesView(
     state: EssentialsState,
-    s: EssentialsStrings,
     onRetryClick: () -> Unit,
     onUtilityMapClick: (UtilityCategory?, String?) -> Unit,
     onTurnOnLocationClick: () -> Unit
@@ -433,7 +425,7 @@ private fun UtilitiesView(
         val tileOrder = listOf(UtilityCategory.EMERGENCY) + UtilityCategory.entries.filter { it != UtilityCategory.EMERGENCY }
         UtilityCategoryGrid(
             tiles = tileOrder.filter { it in byCategory }.map { category ->
-                UtilityTile(category.tileLabel(s), category.glyph(), emergency = category == UtilityCategory.EMERGENCY) {
+                UtilityTile(stringResource(category.tileLabelRes()), category.glyph(), emergency = category == UtilityCategory.EMERGENCY) {
                     onUtilityMapClick(category, null)
                 }
             } + UtilityTile(stringResource(Res.string.essentials_tile_all_on_map), EssentialsGlyph.Map) { onUtilityMapClick(null, null) },
@@ -442,7 +434,7 @@ private fun UtilitiesView(
 
         val summaries = SUMMARY_UTILITY_CATEGORIES.mapNotNull(byCategory::get)
         summaries.forEachIndexed { index, section ->
-            val title = section.category.cardTitle(s)
+            val title = stringResource(section.category.cardTitleRes())
             UtilitySummaryCard(
                 title = title,
                 nearbyLabel = section.nearbyText(),
@@ -470,7 +462,7 @@ private fun UtilitiesView(
             .filter { it.category !in SUMMARY_UTILITY_CATEGORIES }
             .forEach { section ->
                 UtilityCompactRow(
-                    title = section.category.cardTitle(s),
+                    title = stringResource(section.category.cardTitleRes()),
                     subtitle = section.nearbyText(),
                     glyph = section.category.glyph(),
                     closestDistance = location?.takeIf { section.nearbyCount > 0 }?.let { section.closestDistanceMeters?.formatDistance() },

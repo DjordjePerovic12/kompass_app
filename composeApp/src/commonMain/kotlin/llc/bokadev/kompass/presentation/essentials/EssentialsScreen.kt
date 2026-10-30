@@ -6,8 +6,6 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import llc.bokadev.kompass.core.presentation.SnackbarBus
 import llc.bokadev.kompass.core.utils.ConnectivityMonitor
-import llc.bokadev.kompass.core.utils.LocalAppLocale
-import llc.bokadev.kompass.core.utils.appStringsFor
 import llc.bokadev.kompass.core.utils.observeWithLifecycle
 import llc.bokadev.kompass.presentation.base.BaseContentView
 import llc.bokadev.kompass.presentation.shared.perform
@@ -28,8 +26,6 @@ fun EssentialsScreen(
     val online by koinInject<ConnectivityMonitor>().isOnline.collectAsStateWithLifecycle()
     val snackbarBus = koinInject<SnackbarBus>()
     val launcher = rememberExternalLauncher()
-    // perform() still takes the AppStrings tables until it is migrated.
-    val strings = appStringsFor(LocalAppLocale.current.substringBefore('-'))
 
     viewModel.snackBarChannel.observeWithLifecycle { message ->
         showSnackBar(message)
@@ -37,7 +33,7 @@ fun EssentialsScreen(
 
     viewModel.eventFlow.observeWithLifecycle { event ->
         if (event is EssentialsEvent.OpenExternal) {
-            launcher.perform(event.launch, snackbarBus, strings)
+            launcher.perform(event.launch, snackbarBus)
         }
     }
 

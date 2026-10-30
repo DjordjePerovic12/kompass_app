@@ -10,7 +10,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import llc.bokadev.kompass.core.utils.LocalAppLocale
-import llc.bokadev.kompass.core.utils.appStringsFor
 import llc.bokadev.kompass.presentation.shared.LanguageChooser
 import llc.bokadev.kompass.ui.theme.KompassTheme
 import llc.bokadev.kompass.ui.theme.pageGradientBackground
@@ -27,8 +26,6 @@ fun LanguagePickerScreenContent(
     Box(modifier.fillMaxSize().windowInsetsPadding(WindowInsets.statusBars), contentAlignment = Alignment.BottomCenter) {
         LanguageChooser(
             currentLanguage = lang,
-            // The shared chooser still takes the AppStrings tables until it is migrated.
-            strings = appStringsFor(lang).language,
             onSelect = onLanguageSelect,
             onUsePhoneLanguage = onUsePhoneLanguageClick,
             onDismiss = null

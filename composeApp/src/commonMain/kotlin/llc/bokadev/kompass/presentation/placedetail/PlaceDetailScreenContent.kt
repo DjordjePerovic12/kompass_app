@@ -52,9 +52,7 @@ import kompass.composeapp.generated.resources.redesign_not_saved
 import kompass.composeapp.generated.resources.redesign_remove_title_from_saved
 import kompass.composeapp.generated.resources.redesign_save_title
 import llc.bokadev.kompass.core.audio.NavAudioMode
-import llc.bokadev.kompass.core.utils.AppStrings
 import llc.bokadev.kompass.core.utils.LocalAppLocale
-import llc.bokadev.kompass.core.utils.appStringsFor
 import llc.bokadev.kompass.core.utils.buildPhotoUrl
 import llc.bokadev.kompass.core.utils.uppercaseFor
 import llc.bokadev.kompass.domain.model.BestTime
@@ -76,7 +74,7 @@ import llc.bokadev.kompass.presentation.shared.detail.DetailPracticalRow
 import llc.bokadev.kompass.presentation.shared.detail.DetailPracticalRows
 import llc.bokadev.kompass.presentation.shared.detail.DetailTextSection
 import llc.bokadev.kompass.presentation.shared.detail.DetailWhereItIs
-import llc.bokadev.kompass.presentation.shared.detail.toDetailLabel
+import llc.bokadev.kompass.presentation.shared.detail.detailLabelRes
 import llc.bokadev.kompass.presentation.shared.detail.toVisitLength
 import llc.bokadev.kompass.presentation.shared.icons.DetailGlyph
 import llc.bokadev.kompass.presentation.shared.icons.DetailIcon
@@ -90,7 +88,6 @@ import org.jetbrains.compose.resources.stringResource
  * section shows only when its data exists, and none renders as an empty container. [audioMode]
  * is the place's free audio state (null = no audio), played via [onListenClick]; the center
  * button opens the library. [relatedActivities] is the embedded related-activities section.
- * The shared detail components still take the AppStrings tables until they are migrated.
  */
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -112,7 +109,6 @@ fun PlaceDetailScreenContent(
     val isFavorited = state.isSaved
     // Language from the composition (AppEnvironment), not Koin, so the content stays previewable.
     val lang = LocalAppLocale.current.substringBefore('-')
-    val strings = appStringsFor(lang)
     val density = LocalDensity.current
     val reduceMotion = rememberReduceMotion()
     val scroll = rememberScrollState()
@@ -139,17 +135,16 @@ fun PlaceDetailScreenContent(
                 backLabel = backLabel,
                 saveLabel = saveLabel,
                 savedStateLabel = savedState,
-                photoOfLabel = strings.detail.photoOf,
                 onBack = onBackClick,
                 onToggleSave = onFavoriteClick,
                 parallax = { if (reduceMotion) 0f else scroll.value.toFloat() }
             )
-            TitleBlock(place, lang, strings) {
-                audioMode?.let { DetailListenControl(it, strings.detail, reduceMotion, onListenClick) }
+            TitleBlock(place, lang) {
+                audioMode?.let { DetailListenControl(it, reduceMotion, onListenClick) }
             }
-            PracticalRows(place, lang, strings)
+            PracticalRows(place, lang)
             EatAndDrinkActions(place, onMenuClick, onCallClick)
-            place.detailAboutText(lang)?.let { DetailTextSection(it, strings.detail) }
+            place.detailAboutText(lang)?.let { DetailTextSection(it) }
             place.detailLocalTip(lang)?.let { LocalTipPanel(it, lang) }
             relatedActivities()
             DetailWhereItIs(
@@ -180,13 +175,13 @@ fun PlaceDetailScreenContent(
 }
 
 @Composable
-private fun TitleBlock(place: Place, lang: String, strings: AppStrings, listen: @Composable () -> Unit) {
+private fun TitleBlock(place: Place, lang: String, listen: @Composable () -> Unit) {
     val colors = KompassTheme.colors
     Column(
         modifier = Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, top = 4.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        Text(text = place.detailTypeLabel(strings, lang), style = KompassTheme.typography.geologicaSemiBold11, color = colors.lampYellow)
+        Text(text = place.detailTypeLabel(lang), style = KompassTheme.typography.geologicaSemiBold11, color = colors.lampYellow)
         Text(
             text = place.localizedName(lang),
             style = KompassTheme.typography.gloockRegular34.copy(fontSize = 40.sp, lineHeight = 41.sp),
@@ -206,8 +201,7 @@ private fun TitleBlock(place: Place, lang: String, strings: AppStrings, listen: 
 }
 
 @Composable
-private fun PracticalRows(place: Place, lang: String, strings: AppStrings) {
-    val s = strings.detail
+private fun PracticalRows(place: Place, lang: String) {
     val eatAndDrink = place.category == PlaceCategory.EAT_AND_DRINK
     val hoursLabel = stringResource(Res.string.detail_opening_hours)
     val priceLabel = stringResource(Res.string.detail_price_level)
@@ -219,8 +213,8 @@ private fun PracticalRows(place: Place, lang: String, strings: AppStrings) {
     // and never presented as an entrance fee for sights (spec §1.4).
     val price = place.priceIndicator?.takeIf { eatAndDrink }
         ?.let { DetailPracticalRow(DetailGlyph.Price, priceLabel, it.toEuros(), priceCompared) }
-    val visit = place.estimatedDuration?.toVisitLength(s)?.let { DetailPracticalRow(DetailGlyph.Visit, visitLabel, it) }
-    val best = place.bestTime.toDetailLabel(s)?.let { DetailPracticalRow(DetailGlyph.Sun, bestLabel, it) }
+    val visit = place.estimatedDuration?.toVisitLength()?.let { DetailPracticalRow(DetailGlyph.Visit, visitLabel, it) }
+    val best = place.bestTime.detailLabelRes()?.let { stringResource(it) }?.let { DetailPracticalRow(DetailGlyph.Sun, bestLabel, it) }
     DetailPracticalRows(fullWidth = listOfNotNull(hours, price), paired = listOfNotNull(visit, best), lang = lang)
 }
 

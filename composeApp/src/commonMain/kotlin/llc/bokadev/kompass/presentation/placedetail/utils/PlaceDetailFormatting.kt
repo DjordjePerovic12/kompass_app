@@ -1,18 +1,17 @@
 package llc.bokadev.kompass.presentation.placedetail.utils
 
-import llc.bokadev.kompass.core.utils.AppStrings
-import llc.bokadev.kompass.core.utils.DetailStrings
-import llc.bokadev.kompass.core.utils.localizedTypeLabel
+import androidx.compose.runtime.Composable
 import llc.bokadev.kompass.core.utils.toTitleCaseLabel
 import llc.bokadev.kompass.core.utils.uppercaseFor
-import llc.bokadev.kompass.domain.model.BestTime
 import llc.bokadev.kompass.domain.model.Place
 import llc.bokadev.kompass.domain.model.PriceIndicator
 import llc.bokadev.kompass.presentation.shared.detail.normalizedForCompare
+import llc.bokadev.kompass.presentation.shared.localizedTypeLabel
 
 /** "CHURCH · OLD TOWN": one primary type plus the area, uppercased for the app language. */
-fun Place.detailTypeLabel(strings: AppStrings, lang: String): String =
-    listOfNotNull(localizedTypeLabel(strings), detailAreaLabel())
+@Composable
+fun Place.detailTypeLabel(lang: String): String =
+    listOfNotNull(localizedTypeLabel(), detailAreaLabel())
         .joinToString(" · ")
         .uppercaseFor(lang)
 

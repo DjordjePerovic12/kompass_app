@@ -40,9 +40,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import llc.bokadev.kompass.core.utils.LanguageStrings
+import kompass.composeapp.generated.resources.Res
+import kompass.composeapp.generated.resources.language_close
+import kompass.composeapp.generated.resources.language_current
+import kompass.composeapp.generated.resources.language_names_de
+import kompass.composeapp.generated.resources.language_names_en
+import kompass.composeapp.generated.resources.language_names_es
+import kompass.composeapp.generated.resources.language_names_fr
+import kompass.composeapp.generated.resources.language_names_tr
+import kompass.composeapp.generated.resources.language_subtitle
+import kompass.composeapp.generated.resources.language_title
+import kompass.composeapp.generated.resources.language_use_phone_language
 import llc.bokadev.kompass.core.utils.SUPPORTED_LANGUAGES
-import llc.bokadev.kompass.core.utils.languageStringsFor
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
 import llc.bokadev.kompass.presentation.shared.icons.CheckIcon
 import llc.bokadev.kompass.presentation.shared.icons.DetailGlyph
 import llc.bokadev.kompass.presentation.shared.icons.DetailIcon
@@ -62,7 +73,6 @@ private val SheetShape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
 @Composable
 fun LanguageSheet(
     currentLanguage: String,
-    strings: LanguageStrings,
     onSelect: (String) -> Unit,
     onUsePhoneLanguage: () -> Unit,
     onDismiss: () -> Unit
@@ -76,7 +86,7 @@ fun LanguageSheet(
         // The gradient runs behind the system navigation bar; the body pads itself above it.
         contentWindowInsets = { WindowInsets(0) }
     ) {
-        LanguageChooser(currentLanguage, strings, onSelect, onUsePhoneLanguage, onDismiss)
+        LanguageChooser(currentLanguage, onSelect, onUsePhoneLanguage, onDismiss)
     }
 }
 
@@ -87,13 +97,13 @@ fun LanguageSheet(
 @Composable
 internal fun LanguageChooser(
     currentLanguage: String,
-    strings: LanguageStrings,
     onSelect: (String) -> Unit,
     onUsePhoneLanguage: () -> Unit,
     onDismiss: (() -> Unit)?,
     modifier: Modifier = Modifier
 ) {
     val colors = KompassTheme.colors
+    val closeLabel = stringResource(Res.string.language_close)
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -112,12 +122,12 @@ internal fun LanguageChooser(
         Row(Modifier.padding(top = 18.dp), verticalAlignment = Alignment.Top) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text(
-                    text = strings.title,
+                    text = stringResource(Res.string.language_title),
                     style = KompassTheme.typography.gloockRegular32.copy(fontSize = 40.sp, lineHeight = 42.sp),
                     color = Color.White,
                     modifier = Modifier.semantics { heading() }
                 )
-                Text(text = strings.subtitle, style = KompassTheme.typography.geologicaRegular14.copy(fontSize = 15.sp, lineHeight = 21.sp), color = KompassTheme.colors.white85)
+                Text(text = stringResource(Res.string.language_subtitle), style = KompassTheme.typography.geologicaRegular14.copy(fontSize = 15.sp, lineHeight = 21.sp), color = KompassTheme.colors.white85)
             }
             if (onDismiss != null) Box(
                 Modifier
@@ -126,7 +136,7 @@ internal fun LanguageChooser(
                     .clip(CircleShape)
                     .background(KompassTheme.colors.inkBlack.copy(alpha = 0.35f))
                     .clickable(onClick = onDismiss)
-                    .semantics { role = Role.Button; contentDescription = strings.close },
+                    .semantics { role = Role.Button; contentDescription = closeLabel },
                 contentAlignment = Alignment.Center
             ) {
                 CloseGlyph()
@@ -167,7 +177,7 @@ internal fun LanguageChooser(
                     Column(Modifier.weight(1f)) {
                         Text(text = endonym, style = KompassTheme.typography.geologicaSemiBold17, color = if (selected) KompassTheme.colors.lavenderLight else colors.boneWhite)
                         Text(
-                            text = if (selected) strings.current else strings.names[code].orEmpty(),
+                            text = if (selected) stringResource(Res.string.language_current) else languageNameRes(code)?.let { stringResource(it) }.orEmpty(),
                             style = KompassTheme.typography.geologicaRegular14,
                             color = colors.stoneGray
                         )
@@ -196,9 +206,19 @@ internal fun LanguageChooser(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             DetailIcon(DetailGlyph.Phone, color = KompassTheme.colors.lavenderLight, size = 18.dp)
-            Text(text = strings.usePhoneLanguage, style = KompassTheme.typography.geologicaMedium16.copy(fontWeight = FontWeight.SemiBold), color = KompassTheme.colors.lavenderLight)
+            Text(text = stringResource(Res.string.language_use_phone_language), style = KompassTheme.typography.geologicaMedium16.copy(fontWeight = FontWeight.SemiBold), color = KompassTheme.colors.lavenderLight)
         }
     }
+}
+
+/** A language's name in the current UI language (e.g. "German" in English), null for an unknown code. */
+private fun languageNameRes(code: String): StringResource? = when (code) {
+    "en" -> Res.string.language_names_en
+    "de" -> Res.string.language_names_de
+    "fr" -> Res.string.language_names_fr
+    "es" -> Res.string.language_names_es
+    "tr" -> Res.string.language_names_tr
+    else -> null
 }
 
 @Composable
@@ -213,5 +233,5 @@ private fun CloseGlyph() {
 @Preview
 @Composable
 private fun LanguageSheetPreview() {
-    LanguageChooser("en", languageStringsFor("en"), {}, {}, {})
+    LanguageChooser("en", {}, {}, {})
 }

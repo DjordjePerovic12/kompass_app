@@ -30,8 +30,6 @@ import kompass.composeapp.generated.resources.redesign_chosen_area_status
 import kompass.composeapp.generated.resources.redesign_fallback
 import kompass.composeapp.generated.resources.redesign_use_my_location_link
 import kompass.composeapp.generated.resources.search_placeholder
-import llc.bokadev.kompass.core.utils.LocalAppLocale
-import llc.bokadev.kompass.core.utils.appStringsFor
 import llc.bokadev.kompass.domain.model.HomeArea
 import llc.bokadev.kompass.presentation.home.HomeSection
 import llc.bokadev.kompass.presentation.home.HomeState
@@ -42,12 +40,12 @@ import llc.bokadev.kompass.ui.theme.KompassDimens
 import llc.bokadev.kompass.presentation.shared.icons.ChevronDownIcon
 import llc.bokadev.kompass.ui.theme.pageGradientBackground
 import org.jetbrains.compose.resources.stringResource
+import llc.bokadev.kompass.presentation.shared.shortLabel
 
 /**
  * "Lamplight" top bar (spec §3.1): the shared [LamplightHeader] with Home's "Around {area}" title
  * (opens the area picker) and a status line explaining where results are coming from. Lives directly in `components/` (not folded into `HomeMasthead`/`HomeAreaControl`) since
- * the spec treats it as one cohesive unit, replacing both. The area names still come from the
- * AppStrings tables through [HomeArea.shortLabel] until that shared model is migrated.
+ * the spec treats it as one cohesive unit, replacing both.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -60,11 +58,10 @@ fun LamplightTopBar(
     modifier: Modifier = Modifier
 ) {
     val colors = KompassTheme.colors
-    val strings = appStringsFor(LocalAppLocale.current.substringBefore('-'))
     // With the device location in use the headline is visitor-facing ("Near you"); "Device
     // location" stays only as the option name in the area picker.
     val usingDevice = state.area == HomeArea.DEVICE && state.isUsingCurrentLocation
-    val areaBigLabel = if (usingDevice) stringResource(Res.string.home_near_you) else state.effectiveArea.shortLabel(strings)
+    val areaBigLabel = if (usingDevice) stringResource(Res.string.home_near_you) else state.effectiveArea.shortLabel()
 
     LamplightHeader(
         searchPlaceholder = stringResource(Res.string.search_placeholder),

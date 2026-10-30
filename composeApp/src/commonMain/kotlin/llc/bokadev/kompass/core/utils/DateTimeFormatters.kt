@@ -54,3 +54,12 @@ fun LocalDate.toDayLabel(lang: String): String {
     val months = monthAbbreviations[lang] ?: monthAbbreviations.getValue("en")
     return "$day ${months[month.number - 1]}"
 }
+
+/** "1:05", or "61:05" past the hour; null for an unknown/zero duration. */
+fun Long.toClockDuration(): String? {
+    if (this <= 0) return null
+    val totalSeconds = this / 1000
+    val minutes = totalSeconds / 60
+    val seconds = totalSeconds % 60
+    return "$minutes:${seconds.toString().padStart(2, '0')}"
+}

@@ -1,13 +1,16 @@
 package llc.bokadev.kompass.presentation.shared.detail
 
-import llc.bokadev.kompass.core.utils.AppStrings
-import llc.bokadev.kompass.core.utils.DetailStrings
-import llc.bokadev.kompass.core.utils.localizedTypeLabel
-import llc.bokadev.kompass.core.utils.toTitleCaseLabel
-import llc.bokadev.kompass.core.utils.uppercaseFor
+import androidx.compose.runtime.Composable
+import kompass.composeapp.generated.resources.Res
+import kompass.composeapp.generated.resources.detail_about_hours
+import kompass.composeapp.generated.resources.detail_about_hours_minutes
+import kompass.composeapp.generated.resources.detail_about_minutes
+import kompass.composeapp.generated.resources.detail_best_afternoon
+import kompass.composeapp.generated.resources.detail_best_evening
+import kompass.composeapp.generated.resources.detail_best_morning
 import llc.bokadev.kompass.domain.model.BestTime
-import llc.bokadev.kompass.domain.model.Place
-import llc.bokadev.kompass.domain.model.PriceIndicator
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
 
 fun String.prettyLabel(): String =
     split('_', '-', ' ')
@@ -18,18 +21,19 @@ fun String.prettyLabel(): String =
             }
         }
 
-fun Int.toVisitLength(strings: DetailStrings): String? = when {
+@Composable
+fun Int.toVisitLength(): String? = when {
     this <= 0 -> null
-    this < 60 -> strings.aboutMinutes.replace("{n}", toString())
-    this % 60 == 0 -> strings.aboutHours.replace("{h}", (this / 60).toString())
-    else -> strings.aboutHoursMinutes.replace("{h}", (this / 60).toString()).replace("{m}", (this % 60).toString())
+    this < 60 -> stringResource(Res.string.detail_about_minutes, toString())
+    this % 60 == 0 -> stringResource(Res.string.detail_about_hours, (this / 60).toString())
+    else -> stringResource(Res.string.detail_about_hours_minutes, (this / 60).toString(), (this % 60).toString())
 }
 
 /** Null for "any time": a generic default isn't advice, so the row hides (spec §1.4). */
-fun BestTime.toDetailLabel(strings: DetailStrings): String? = when (this) {
-    BestTime.MORNING -> strings.bestMorning
-    BestTime.AFTERNOON -> strings.bestAfternoon
-    BestTime.EVENING -> strings.bestEvening
+fun BestTime.detailLabelRes(): StringResource? = when (this) {
+    BestTime.MORNING -> Res.string.detail_best_morning
+    BestTime.AFTERNOON -> Res.string.detail_best_afternoon
+    BestTime.EVENING -> Res.string.detail_best_evening
     BestTime.ANYTIME -> null
 }
 

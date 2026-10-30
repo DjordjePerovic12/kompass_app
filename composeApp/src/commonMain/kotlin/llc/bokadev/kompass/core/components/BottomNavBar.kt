@@ -35,10 +35,15 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import llc.bokadev.kompass.core.utils.rememberAppStrings
 import llc.bokadev.kompass.ui.theme.KompassTheme
 import llc.bokadev.kompass.ui.theme.KompassShapes
 import llc.bokadev.kompass.ui.theme.KompassColors
+import kompass.composeapp.generated.resources.Res
+import kompass.composeapp.generated.resources.bottom_essentials
+import kompass.composeapp.generated.resources.bottom_home
+import kompass.composeapp.generated.resources.redesign_explore
+import kompass.composeapp.generated.resources.redesign_saved
+import org.jetbrains.compose.resources.stringResource
 
 enum class BottomTab {
     Home,
@@ -60,7 +65,6 @@ fun KompassBottomNavBar(
     onTabSelected: (BottomTab) -> Unit,
     audioButton: @Composable () -> Unit
 ) {
-    val strings = rememberAppStrings()
     val colors = KompassTheme.colors
     val shellShape = KompassShapes.nav
 
@@ -99,11 +103,11 @@ fun KompassBottomNavBar(
             // Bottom: every label (including the taller center Listen button's) on one baseline.
             verticalAlignment = Alignment.Bottom
         ) {
-            BottomNavItem(tab = BottomTab.Home, label = strings.bottomHome, selected = selectedTab == BottomTab.Home, colors = colors, onClick = { onTabSelected(BottomTab.Home) })
-            BottomNavItem(tab = BottomTab.Explore, label = strings.redesign.explore, selected = selectedTab == BottomTab.Explore, colors = colors, onClick = { onTabSelected(BottomTab.Explore) })
+            BottomNavItem(tab = BottomTab.Home, label = stringResource(Res.string.bottom_home), selected = selectedTab == BottomTab.Home, colors = colors, onClick = { onTabSelected(BottomTab.Home) })
+            BottomNavItem(tab = BottomTab.Explore, label = stringResource(Res.string.redesign_explore), selected = selectedTab == BottomTab.Explore, colors = colors, onClick = { onTabSelected(BottomTab.Explore) })
             audioButton()
-            BottomNavItem(tab = BottomTab.Saved, label = strings.redesign.saved, selected = selectedTab == BottomTab.Saved, colors = colors, onClick = { onTabSelected(BottomTab.Saved) })
-            BottomNavItem(tab = BottomTab.Essentials, label = strings.bottomEssentials, selected = selectedTab == BottomTab.Essentials, colors = colors, onClick = { onTabSelected(BottomTab.Essentials) })
+            BottomNavItem(tab = BottomTab.Saved, label = stringResource(Res.string.redesign_saved), selected = selectedTab == BottomTab.Saved, colors = colors, onClick = { onTabSelected(BottomTab.Saved) })
+            BottomNavItem(tab = BottomTab.Essentials, label = stringResource(Res.string.bottom_essentials), selected = selectedTab == BottomTab.Essentials, colors = colors, onClick = { onTabSelected(BottomTab.Essentials) })
         }
     }
 }

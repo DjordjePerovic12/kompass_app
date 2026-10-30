@@ -91,11 +91,8 @@ import kompass.composeapp.generated.resources.search_ui_placeholder
 import kompass.composeapp.generated.resources.search_update
 import kompass.composeapp.generated.resources.search_updates
 import kotlinx.coroutines.delay
-import llc.bokadev.kompass.core.utils.AppStrings
 import llc.bokadev.kompass.core.utils.LocalAppLocale
-import llc.bokadev.kompass.core.utils.appStringsFor
 import llc.bokadev.kompass.core.utils.buildPhotoUrl
-import llc.bokadev.kompass.core.utils.localizedLabel
 import llc.bokadev.kompass.core.utils.toDateTag
 import llc.bokadev.kompass.core.utils.uppercaseFor
 import llc.bokadev.kompass.domain.model.SearchHit
@@ -107,8 +104,9 @@ import llc.bokadev.kompass.presentation.shared.EssentialGroupKind
 import llc.bokadev.kompass.presentation.shared.icons.EssentialsGlyph
 import llc.bokadev.kompass.presentation.shared.icons.EssentialsIcon
 import llc.bokadev.kompass.presentation.shared.icons.glyph
-import llc.bokadev.kompass.presentation.shared.tileLabel
-import llc.bokadev.kompass.presentation.shared.title
+import llc.bokadev.kompass.presentation.shared.tileLabelRes
+import llc.bokadev.kompass.presentation.shared.titleRes
+import llc.bokadev.kompass.presentation.shared.labelRes
 import llc.bokadev.kompass.presentation.shared.icons.LandmarkIcon
 import llc.bokadev.kompass.presentation.search.components.SearchGlyph
 import llc.bokadev.kompass.presentation.search.components.SearchGlyphIcon
@@ -122,7 +120,6 @@ import org.jetbrains.compose.resources.stringResource
 /**
  * Lamplight Search: the field is the header; below it, Recent + Try before typing, then type
  * chips, a status line and result rows. Scrolling the results closes the keyboard.
- * The shared category/essentials labels still take the AppStrings tables until they are migrated.
  */
 @Composable
 fun SearchScreenContent(
@@ -142,7 +139,6 @@ fun SearchScreenContent(
 ) {
     // Language from the composition (AppEnvironment), not Koin, so the content stays previewable.
     val lang = LocalAppLocale.current.substringBefore('-')
-    val strings = appStringsFor(lang)
     val keyboard = LocalSoftwareKeyboardController.current
     val hideKeyboardOnDrag = remember(keyboard) {
         object : NestedScrollConnection {
@@ -191,7 +187,7 @@ fun SearchScreenContent(
                     item(key = "chips") { TypeChips(state, onKindChange) }
                     item(key = "status") { StatusLine(state) }
                     items(state.visible, key = { "${it.item.kind}-${it.item.id}" }) { hit ->
-                        ResultRow(hit, strings, lang) { onResultClick(hit) }
+                        ResultRow(hit, lang) { onResultClick(hit) }
                     }
                     if (state.hasMore) {
                         item(key = "more") {
@@ -323,15 +319,15 @@ private fun StatusLine(state: SearchState) {
 }
 
 @Composable
-private fun ResultRow(hit: SearchHit, strings: AppStrings, lang: String, onClick: () -> Unit) {
+private fun ResultRow(hit: SearchHit, lang: String, onClick: () -> Unit) {
     val item = hit.item
     val onMapLabel = item.pointCount?.let { stringResource(Res.string.search_on_map, it.toString()) }
     SearchResultRow(
-        typeLabel = (item.utilityCategory?.takeIf { item.pointCount == null }?.tileLabel(strings.essentials) ?: item.kind.singularLabel()).uppercaseFor(lang),
+        typeLabel = (item.utilityCategory?.takeIf { item.pointCount == null }?.let { stringResource(it.tileLabelRes()) } ?: item.kind.singularLabel()).uppercaseFor(lang),
         name = item.name,
         matchStart = hit.start,
         matchLength = hit.length,
-        context = item.contextLine(strings, lang, stringResource(Res.string.search_read_or_listen), onMapLabel),
+        context = item.contextLine(lang, stringResource(Res.string.search_read_or_listen), onMapLabel),
         photoUrl = item.photo?.let(::buildPhotoUrl),
         essential = item.kind == SearchKind.ESSENTIAL,
         icon = { color -> KindIcon(item, color) },
@@ -467,11 +463,12 @@ private fun SearchKind.singularLabel(): String = when (this) {
 }
 
 /** `{subtype} · {area}` for places/activities, the group for Essentials, "Read or listen" for stories. */
-private fun SearchIndexItem.contextLine(strings: AppStrings, lang: String, readOrListen: String, onMapLabel: String?): String? = when (kind) {
-    SearchKind.PLACE -> listOfNotNull(subtype ?: placeCategory?.localizedLabel(strings), area).joinToString(" · ")
+@Composable
+private fun SearchIndexItem.contextLine(lang: String, readOrListen: String, onMapLabel: String?): String? = when (kind) {
+    SearchKind.PLACE -> listOfNotNull(subtype ?: placeCategory?.let { stringResource(it.labelRes()) }, area).joinToString(" · ")
     SearchKind.ACTIVITY -> listOfNotNull(subtype, area).joinToString(" · ")
     SearchKind.STORY -> readOrListen
-    SearchKind.ESSENTIAL -> EssentialGroupKind.entries.firstOrNull { it.category == essentialCategory }?.title(strings.essentials)
+    SearchKind.ESSENTIAL -> EssentialGroupKind.entries.firstOrNull { it.category == essentialCategory }?.let { stringResource(it.titleRes()) }
     SearchKind.EVENT -> listOfNotNull(eventStart?.toDateTag(lang), area).joinToString(" · ")
     SearchKind.UTILITY -> onMapLabel ?: area
     SearchKind.SERVICE, SearchKind.NOTICE -> area

@@ -34,7 +34,6 @@ import kompass.composeapp.generated.resources.events_venue
 import kotlinx.datetime.toLocalDateTime
 import llc.bokadev.kompass.core.utils.buildPhotoUrl
 import llc.bokadev.kompass.core.utils.LocalAppLocale
-import llc.bokadev.kompass.core.utils.appStringsFor
 import llc.bokadev.kompass.core.utils.toDayLabel
 import llc.bokadev.kompass.core.utils.toTitleCaseLabel
 import llc.bokadev.kompass.core.utils.uppercaseFor
@@ -57,7 +56,6 @@ import kotlin.time.ExperimentalTime
 /**
  * Event detail in the shared detail language: when, where and price first, then the official
  * ticket link, then the description and map. Times are Kotor time; sections show only with data.
- * The shared detail components still take the AppStrings tables until they are migrated.
  */
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -72,7 +70,6 @@ fun EventDetailScreenContent(
     val event = state.event ?: return
     // Language from the composition (AppEnvironment), not Koin, so the content stays previewable.
     val lang = LocalAppLocale.current.substringBefore('-')
-    val strings = appStringsFor(lang)
     val colors = KompassTheme.colors
     val density = LocalDensity.current
     val name = event.localizedName(lang)
@@ -91,7 +88,6 @@ fun EventDetailScreenContent(
             backLabel = stringResource(Res.string.detail_back),
             saveLabel = "",
             savedStateLabel = "",
-            photoOfLabel = strings.detail.photoOf,
             onBack = onBackClick,
             onToggleSave = null
         )
@@ -128,7 +124,7 @@ fun EventDetailScreenContent(
                 modifier = Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, top = 20.dp)
             )
         }
-        DetailTextSection(event.localizedDescription(lang).trim(), strings.detail)
+        DetailTextSection(event.localizedDescription(lang).trim())
         if (event.latitude != 0.0 || event.longitude != 0.0) {
             DetailWhereItIs(
                 title = stringResource(Res.string.detail_where_it_is),

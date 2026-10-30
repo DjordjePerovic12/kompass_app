@@ -8,8 +8,6 @@ import kompass.composeapp.generated.resources.Res
 import kompass.composeapp.generated.resources.detail_back
 import kompass.composeapp.generated.resources.retry
 import llc.bokadev.kompass.core.presentation.SnackbarBus
-import llc.bokadev.kompass.core.utils.LocalAppLocale
-import llc.bokadev.kompass.core.utils.appStringsFor
 import llc.bokadev.kompass.core.utils.observeWithLifecycle
 import llc.bokadev.kompass.presentation.base.BaseContentView
 import llc.bokadev.kompass.presentation.shared.detail.DetailLoadState
@@ -29,8 +27,6 @@ fun InfoCenterDetailScreen(
     val state by viewModel.infoCenterDetailState.collectAsStateWithLifecycle()
     val snackbarBus = koinInject<SnackbarBus>()
     val launcher = rememberExternalLauncher()
-    // The shared launcher still takes the AppStrings tables for its failure snackbars.
-    val strings = appStringsFor(LocalAppLocale.current.substringBefore('-'))
 
     StatusBarIconsEffect(lightIcons = true)
 
@@ -40,7 +36,7 @@ fun InfoCenterDetailScreen(
 
     viewModel.eventFlow.observeWithLifecycle { event ->
         if (event is InfoCenterDetailEvent.OpenExternal) {
-            launcher.perform(event.launch, snackbarBus, strings)
+            launcher.perform(event.launch, snackbarBus)
         }
     }
 

@@ -60,9 +60,8 @@ import kompass.composeapp.generated.resources.retry
 import kompass.composeapp.generated.resources.saved_activity
 import kompass.composeapp.generated.resources.saved_audio
 import llc.bokadev.kompass.core.utils.LocalAppLocale
-import llc.bokadev.kompass.core.utils.appStringsFor
 import llc.bokadev.kompass.core.utils.buildPhotoUrl
-import llc.bokadev.kompass.core.utils.localizedTypeLabel
+import llc.bokadev.kompass.presentation.shared.localizedTypeLabel
 import llc.bokadev.kompass.core.utils.uppercaseFor
 import llc.bokadev.kompass.domain.model.CategoryListKind
 import llc.bokadev.kompass.presentation.categorylist.components.CategoryListCard
@@ -153,8 +152,7 @@ private fun Card(
     // Language from the composition (AppEnvironment), not Koin, so the content stays previewable.
     val lang = LocalAppLocale.current.substringBefore('-')
     val title = item.place?.localizedName(lang) ?: item.activity?.localizedName(lang).orEmpty()
-    // localizedTypeLabel still takes the AppStrings tables until it is migrated.
-    val type = item.place?.localizedTypeLabel(appStringsFor(lang)) ?: stringResource(Res.string.saved_activity)
+    val type = item.place?.localizedTypeLabel() ?: stringResource(Res.string.saved_activity)
     val label = listOfNotNull(type, item.areaKey.areaLabel()).joinToString(" · ").uppercaseFor(lang)
     val hasAudio = item.place?.localizedAudioFile(lang) != null || item.activity?.localizedAudioFile(lang) != null
     val photo = item.place?.photos?.firstOrNull() ?: item.activity?.photos?.firstOrNull()
