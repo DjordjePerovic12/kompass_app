@@ -8,10 +8,10 @@ import llc.bokadev.kompass.core.audio.NavAudioHost
 import llc.bokadev.kompass.core.presentation.mvi.BaseViewModel
 import llc.bokadev.kompass.core.presentation.mvi.Navigator
 import llc.bokadev.kompass.core.presentation.mvi.UiText
-import llc.bokadev.kompass.presentation.navigation.Route
+import llc.bokadev.kompass.core.navigation.Screen
 import llc.bokadev.kompass.presentation.shared.ExternalLaunch
 import llc.bokadev.kompass.core.audio.AudioTrack
-import llc.bokadev.kompass.core.util.AppPreferences
+import llc.bokadev.kompass.core.utils.AppPreferences
 import llc.bokadev.kompass.domain.model.LocalFind
 import llc.bokadev.kompass.domain.repository.AudioGuideRepository
 import llc.bokadev.kompass.domain.usecase.GetLocalFindByIdUseCase
@@ -47,8 +47,8 @@ class LocalFindDetailViewModel(
             is LocalFindDetailAction.OpenMap ->
                 sendEvent(LocalFindDetailEvent.Launch(ExternalLaunch.Maps(action.latitude, action.longitude, action.title)))
             is LocalFindDetailAction.OpenNext -> navigator.navigateTo(
-                Route.LocalFindDetail(action.id, filter),
-                popUpToRoute = Route.LocalFindDetail(id, filter),
+                Screen.LocalFindDetailScreen(action.id, filter),
+                popUpToRoute = Screen.LocalFindDetailScreen(id, filter),
                 popUpToInclusive = true
             )
             LocalFindDetailAction.UserScrolled -> navAudio.notifyUserScrolled()

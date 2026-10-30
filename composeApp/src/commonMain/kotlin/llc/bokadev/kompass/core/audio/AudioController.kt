@@ -7,9 +7,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import llc.bokadev.kompass.core.util.AudioGuidePlaybackState
-import llc.bokadev.kompass.core.util.AudioGuidePlayer
-import llc.bokadev.kompass.core.util.PlaybackRequestGuard
+import llc.bokadev.kompass.core.utils.AudioGuidePlaybackState
+import llc.bokadev.kompass.core.utils.AudioGuidePlayer
+import llc.bokadev.kompass.core.utils.PlaybackRequestGuard
 
 /**
  * The single app-wide owner of center-button playback (place detail spec §2.5). Wraps the

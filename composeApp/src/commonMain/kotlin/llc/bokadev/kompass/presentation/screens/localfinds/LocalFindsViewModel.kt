@@ -8,8 +8,8 @@ import llc.bokadev.kompass.core.presentation.mvi.BaseViewModel
 import llc.bokadev.kompass.core.presentation.mvi.Navigator
 import llc.bokadev.kompass.core.presentation.mvi.UiText
 import llc.bokadev.kompass.domain.repository.AnalyticsRepository
-import llc.bokadev.kompass.presentation.navigation.Route
-import llc.bokadev.kompass.core.util.AppPreferences
+import llc.bokadev.kompass.core.navigation.Screen
+import llc.bokadev.kompass.core.utils.AppPreferences
 import llc.bokadev.kompass.domain.model.LocalFind
 import llc.bokadev.kompass.domain.usecase.GetLocalFindsUseCase
 
@@ -42,7 +42,7 @@ class LocalFindsViewModel(
                 updateState { it.copy(filter = action.kind) }
                 rebuild()
             }
-            is LocalFindsAction.Open -> navigator.navigateTo(Route.LocalFindDetail(action.id, state.value.filter?.name))
+            is LocalFindsAction.Open -> navigator.navigateTo(Screen.LocalFindDetailScreen(action.id, state.value.filter?.name))
             LocalFindsAction.Back -> navigator.navigateUp()
         }
     }

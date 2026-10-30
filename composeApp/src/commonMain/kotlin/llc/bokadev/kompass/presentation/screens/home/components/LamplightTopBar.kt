@@ -21,7 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import llc.bokadev.kompass.core.util.AppStrings
+import llc.bokadev.kompass.core.utils.AppStrings
 import llc.bokadev.kompass.presentation.screens.home.HomeArea
 import llc.bokadev.kompass.presentation.screens.home.HomeSection
 import llc.bokadev.kompass.presentation.screens.home.HomeState

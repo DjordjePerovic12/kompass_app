@@ -15,7 +15,7 @@ import llc.bokadev.kompass.domain.model.UtilityCategory
 import llc.bokadev.kompass.domain.model.distanceKmTo
 import llc.bokadev.kompass.domain.repository.AnalyticsRepository
 import llc.bokadev.kompass.domain.usecase.GetUtilitiesUseCase
-import llc.bokadev.kompass.presentation.navigation.ALL_CATEGORIES
+import llc.bokadev.kompass.core.navigation.ALL_CATEGORIES
 import llc.bokadev.kompass.presentation.shared.ExternalLaunch
 
 class UtilityMapViewModel(

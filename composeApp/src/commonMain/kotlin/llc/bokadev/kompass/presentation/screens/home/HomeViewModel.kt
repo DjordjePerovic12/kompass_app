@@ -6,7 +6,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import llc.bokadev.kompass.core.presentation.mvi.BaseViewModel
 import llc.bokadev.kompass.core.presentation.mvi.Navigator
-import llc.bokadev.kompass.core.util.AppPreferences
+import llc.bokadev.kompass.core.utils.AppPreferences
 import llc.bokadev.kompass.domain.location.UserLocationProvider
 import llc.bokadev.kompass.domain.model.FavoriteItemType
 import llc.bokadev.kompass.domain.model.PlaceCategory
@@ -18,7 +18,7 @@ import llc.bokadev.kompass.domain.usecase.GetMustSeePlacesUseCase
 import llc.bokadev.kompass.domain.usecase.GetNearbyFallbackPlacesUseCase
 import llc.bokadev.kompass.domain.usecase.GetNearbyPlacesUseCase
 import llc.bokadev.kompass.domain.usecase.GetUpcomingEventsUseCase
-import llc.bokadev.kompass.presentation.navigation.Route
+import llc.bokadev.kompass.core.navigation.Screen
 import llc.bokadev.kompass.presentation.screens.categorylist.CategoryListKind
 import llc.bokadev.kompass.presentation.shared.LanguageSheetHost
 import androidx.lifecycle.viewModelScope
@@ -73,25 +73,25 @@ class HomeViewModel(
 
             is HomeAction.PlaceClicked -> {
                 trackPlaceView(action.id, action.origin)
-                navigator.navigateTo(Route.PlaceDetail(action.id))
+                navigator.navigateTo(Screen.PlaceDetailScreen(action.id))
             }
 
             is HomeAction.ListenClicked -> {
                 trackPlaceView(action.placeId, origin = "nearby_listen")
                 // The current place detail plays the audio; the legacy guide screen is no longer used.
-                navigator.navigateTo(Route.PlaceDetail(action.placeId, autoplay = true))
+                navigator.navigateTo(Screen.PlaceDetailScreen(action.placeId, autoplay = true))
             }
 
             is HomeAction.EventClicked -> {
                 analytics.trackEventView(action.id, contentOrigin = "events_home")
-                navigator.navigateTo(Route.EventDetail(action.id))
+                navigator.navigateTo(Screen.EventDetailScreen(action.id))
             }
 
             is HomeAction.NoticeClicked -> {
                 state.value.infoCenterNotices.firstOrNull { it.id == action.id }?.let {
                     analytics.trackInfoNoticeView(noticeId = it.id, cityId = it.cityId, contentOrigin = "news_home")
                 }
-                navigator.navigateTo(Route.InfoCenterDetail(action.id))
+                navigator.navigateTo(Screen.InfoCenterDetailScreen(action.id))
             }
 
             is HomeAction.SetFavorite ->
@@ -100,17 +100,17 @@ class HomeViewModel(
 
             // The shared category list; a manual area carries over as its area filter.
             HomeAction.SeeAllNearby -> navigator.navigateTo(
-                Route.CategoryList(
+                Screen.CategoryListScreen(
                     CategoryListKind.PLACES.name,
                     area = state.value.area.takeIf { it != HomeArea.DEVICE }?.preferenceValue
                 )
             )
-            HomeAction.SeeAllMustSee -> navigator.navigateTo(Route.CategoryList(CategoryListKind.MUST_SEE.name))
-            HomeAction.SeeAllInfoCenter -> navigator.navigateTo(Route.InfoCenter)
-            HomeAction.SeeAllEvents -> navigator.navigateTo(Route.Events)
-            HomeAction.OpenSearch -> navigator.navigateTo(Route.Search)
+            HomeAction.SeeAllMustSee -> navigator.navigateTo(Screen.CategoryListScreen(CategoryListKind.MUST_SEE.name))
+            HomeAction.SeeAllInfoCenter -> navigator.navigateTo(Screen.InfoCenterScreen)
+            HomeAction.SeeAllEvents -> navigator.navigateTo(Screen.EventsScreen)
+            HomeAction.OpenSearch -> navigator.navigateTo(Screen.SearchScreen)
             HomeAction.OpenLanguagePicker -> languageSheet.open()
-            HomeAction.OpenMyGuides -> navigator.navigateTo(Route.MyGuides)
+            HomeAction.OpenMyGuides -> navigator.navigateTo(Screen.ListenScreen)
 
             HomeAction.RequestLocationPermission -> {
                 preferences.setSeenLocationEducationPrompt(true)

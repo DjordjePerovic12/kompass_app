@@ -6,16 +6,21 @@ import kotlinx.coroutines.SupervisorJob
 import llc.bokadev.kompass.core.audio.AudioController
 import llc.bokadev.kompass.core.audio.NavAudioHost
 import llc.bokadev.kompass.core.presentation.SnackbarBus
-import llc.bokadev.kompass.core.presentation.mvi.Navigator
-import llc.bokadev.kompass.core.presentation.mvi.NavigatorImpl
-import llc.bokadev.kompass.core.util.PlaybackRequestGuard
+import llc.bokadev.kompass.core.navigation.utils.Navigator
+import llc.bokadev.kompass.core.navigation.utils.NavigatorImpl
+import llc.bokadev.kompass.core.presentation.mvi.Navigator as LegacyNavigator
+import org.koin.core.module.dsl.bind
+import llc.bokadev.kompass.core.navigation.utils.LegacyNavigatorAdapter
+import org.koin.core.module.dsl.singleOf
+import llc.bokadev.kompass.core.utils.PlaybackRequestGuard
 import llc.bokadev.kompass.domain.repository.AudioGuideRepository
 import llc.bokadev.kompass.presentation.shared.LanguageSheetHost
 import org.koin.dsl.module
 
 val appModule = module {
     single { PlaybackRequestGuard() }
-    single<Navigator> { NavigatorImpl() }
+    singleOf(::NavigatorImpl) { bind<Navigator>() }
+    single<LegacyNavigator> { LegacyNavigatorAdapter(get()) }
     single { SnackbarBus() }
     single { NavAudioHost() }
     single { LanguageSheetHost() }

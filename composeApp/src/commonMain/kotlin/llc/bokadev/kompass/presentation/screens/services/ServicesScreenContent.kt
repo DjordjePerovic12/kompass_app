@@ -13,8 +13,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import llc.bokadev.kompass.core.presentation.mvi.asString
-import llc.bokadev.kompass.core.util.currentAppLanguage
-import llc.bokadev.kompass.core.util.rememberAppStrings
+import llc.bokadev.kompass.core.utils.currentAppLanguage
+import llc.bokadev.kompass.core.utils.rememberAppStrings
 import llc.bokadev.kompass.presentation.screens.essentials.linkTitle
 import llc.bokadev.kompass.presentation.screens.services.components.ServiceRow
 import llc.bokadev.kompass.presentation.shared.LamplightCompactHeader

@@ -5,15 +5,14 @@ import kotlinx.coroutines.flow.emptyFlow
 import llc.bokadev.kompass.core.presentation.mvi.NavigationCommand
 import llc.bokadev.kompass.core.presentation.mvi.Navigator
 import llc.bokadev.kompass.domain.repository.AnalyticsRepository
-import llc.bokadev.kompass.presentation.navigation.BottomTab
-import llc.bokadev.kompass.presentation.navigation.Route
+import llc.bokadev.kompass.core.components.BottomTab
+import llc.bokadev.kompass.core.navigation.Screen
 
 /** Records what a ViewModel asked the Navigator to do, synchronously. */
 class RecordingNavigator : Navigator {
     val recorded = mutableListOf<NavigationCommand>()
-    override val commands: Flow<NavigationCommand> = emptyFlow()
 
-    override fun navigateTo(route: Route, popUpToRoute: Route?, popUpToInclusive: Boolean, isSingleTop: Boolean, restoreState: Boolean) {
+    override fun navigateTo(route: Screen, popUpToRoute: Screen?, popUpToInclusive: Boolean, isSingleTop: Boolean, restoreState: Boolean) {
         recorded += NavigationCommand.NavigateTo(route, popUpToRoute, popUpToInclusive, isSingleTop, restoreState)
     }
 
@@ -26,7 +25,7 @@ class RecordingNavigator : Navigator {
     }
 
     /** Routes from navigateTo, in order. */
-    val routes: List<Route> get() = recorded.filterIsInstance<NavigationCommand.NavigateTo>().map { it.route }
+    val routes: List<Screen> get() = recorded.filterIsInstance<NavigationCommand.NavigateTo>().map { it.route }
 }
 
 class NoOpAnalytics : AnalyticsRepository {

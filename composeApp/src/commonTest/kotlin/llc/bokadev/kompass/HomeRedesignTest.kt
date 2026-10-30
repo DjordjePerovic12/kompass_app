@@ -9,13 +9,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.*
 import kotlinx.coroutines.flow.first
 import llc.bokadev.kompass.core.presentation.mvi.NavigationCommand
-import llc.bokadev.kompass.core.presentation.mvi.NavigatorImpl
-import llc.bokadev.kompass.core.util.*
+import llc.bokadev.kompass.testutil.RecordingNavigator
+import llc.bokadev.kompass.core.utils.*
 import llc.bokadev.kompass.domain.location.UserLocationProvider
 import llc.bokadev.kompass.domain.model.*
 import llc.bokadev.kompass.domain.repository.*
 import llc.bokadev.kompass.domain.usecase.*
-import llc.bokadev.kompass.presentation.navigation.Route
+import llc.bokadev.kompass.core.navigation.Screen
 import llc.bokadev.kompass.presentation.shared.LanguageSheetHost
 import llc.bokadev.kompass.presentation.screens.home.*
 import llc.bokadev.kompass.presentation.shared.dotWindow
@@ -135,12 +135,12 @@ class HomeRedesignTest {
     @Test fun listenOpensPlaceDetailWithAutoplay() = runTest {
         Dispatchers.setMain(StandardTestDispatcher(testScheduler))
         try {
-            val navigator = NavigatorImpl()
+            val navigator = RecordingNavigator()
             val vm = model(TestPlaces(), TestEvents(), TestPreferences(), TestLocation(), navigator)
             advanceUntilIdle()
             vm.onAction(HomeAction.ListenClicked("nearest"))
-            val command = navigator.commands.first()
-            assertEquals(Route.PlaceDetail("nearest", autoplay = true), (command as NavigationCommand.NavigateTo).route)
+            val command = navigator.recorded.first()
+            assertEquals(Screen.PlaceDetailScreen("nearest", autoplay = true), (command as NavigationCommand.NavigateTo).route)
         } finally { Dispatchers.resetMain() }
     }
 
@@ -165,7 +165,7 @@ class HomeRedesignTest {
     @Test fun seeAllOpensTheSharedListWithTheManualArea() = runTest {
         Dispatchers.setMain(StandardTestDispatcher(testScheduler))
         try {
-            val navigator = NavigatorImpl()
+            val navigator = RecordingNavigator()
             val prefs = TestPreferences().apply { setString(HomeArea.PREFERENCE_KEY, "perast") }
             val vm = model(TestPlaces(), TestEvents(), prefs, TestLocation(), navigator)
             advanceUntilIdle()
@@ -173,12 +173,12 @@ class HomeRedesignTest {
             vm.onAction(HomeAction.SelectArea(HomeArea.DEVICE))
             vm.onAction(HomeAction.SeeAllNearby)
             vm.onAction(HomeAction.SeeAllMustSee)
-            val routes = navigator.commands.take(3).toList().map { (it as NavigationCommand.NavigateTo).route }
+            val routes = navigator.recorded.take(3).map { (it as NavigationCommand.NavigateTo).route }
             assertEquals(
                 listOf(
-                    Route.CategoryList("PLACES", area = "perast"),
-                    Route.CategoryList("PLACES", area = null),
-                    Route.CategoryList("MUST_SEE")
+                    Screen.CategoryListScreen("PLACES", area = "perast"),
+                    Screen.CategoryListScreen("PLACES", area = null),
+                    Screen.CategoryListScreen("MUST_SEE")
                 ),
                 routes
             )
@@ -206,7 +206,7 @@ class HomeRedesignTest {
         events: TestEvents,
         prefs: TestPreferences,
         location: TestLocation,
-        navigator: NavigatorImpl = NavigatorImpl()
+        navigator: RecordingNavigator = RecordingNavigator()
     ) =
         HomeViewModel(
             getMustSeePlaces = GetMustSeePlacesUseCase(places),

@@ -16,8 +16,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import llc.bokadev.kompass.core.util.RedesignStrings
-import llc.bokadev.kompass.core.util.redesignStringsFor
+import llc.bokadev.kompass.core.utils.RedesignStrings
+import llc.bokadev.kompass.core.utils.redesignStringsFor
 import llc.bokadev.kompass.presentation.shared.PagerDots
 import kotlin.math.absoluteValue
 

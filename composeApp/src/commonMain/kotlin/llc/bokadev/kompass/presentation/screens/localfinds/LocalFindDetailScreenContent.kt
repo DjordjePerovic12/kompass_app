@@ -48,11 +48,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import llc.bokadev.kompass.core.audio.NavAudioMode
-import llc.bokadev.kompass.core.util.AppStrings
-import llc.bokadev.kompass.core.util.StoriesStrings
-import llc.bokadev.kompass.core.util.buildPhotoUrl
-import llc.bokadev.kompass.core.util.toClockDuration
-import llc.bokadev.kompass.core.util.uppercaseFor
+import llc.bokadev.kompass.core.utils.AppStrings
+import llc.bokadev.kompass.core.utils.StoriesStrings
+import llc.bokadev.kompass.core.utils.buildPhotoUrl
+import llc.bokadev.kompass.core.utils.toClockDuration
+import llc.bokadev.kompass.core.utils.uppercaseFor
 import llc.bokadev.kompass.domain.model.LocalFind
 import llc.bokadev.kompass.presentation.screens.essentials.components.EssentialsGlyph
 import llc.bokadev.kompass.presentation.screens.essentials.components.EssentialsIcon

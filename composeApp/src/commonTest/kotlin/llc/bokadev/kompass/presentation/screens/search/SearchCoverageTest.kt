@@ -2,12 +2,12 @@ package llc.bokadev.kompass.presentation.screens.search
 
 import kotlin.test.*
 import kotlinx.coroutines.test.runTest
-import llc.bokadev.kompass.core.util.SearchVocabularyTable
+import llc.bokadev.kompass.core.utils.SearchVocabularyTable
 import llc.bokadev.kompass.domain.model.*
 import llc.bokadev.kompass.domain.repository.*
 import llc.bokadev.kompass.domain.usecase.*
-import llc.bokadev.kompass.presentation.navigation.ALL_CATEGORIES
-import llc.bokadev.kompass.presentation.navigation.Route
+import llc.bokadev.kompass.core.navigation.ALL_CATEGORIES
+import llc.bokadev.kompass.core.navigation.Screen
 
 /** Step 10 search: category words, the reviewed vocabulary, new source types, partial availability. */
 class SearchCoverageTest {
@@ -48,17 +48,17 @@ class SearchCoverageTest {
         val pharmacy = searchIndex("pharmacy", index).single().item
         assertEquals("${UTILITY_CATEGORY_PREFIX}PHARMACY", pharmacy.id)
         assertEquals(1, pharmacy.pointCount)
-        assertEquals(Route.UtilityMap(UtilityCategory.PHARMACY.name, null), routeFor(pharmacy))
+        assertEquals(Screen.UtilityMapScreen(UtilityCategory.PHARMACY.name, null), routeFor(pharmacy))
     }
 
     @Test fun newTypesOpenTheirOwnDestinationsById() = runTest {
         val index = build().getOrThrow()
         val atm = searchIndex("nlb", index).single().item
         assertEquals(SearchKind.UTILITY, atm.kind)
-        assertEquals(Route.UtilityMap(UtilityCategory.ATM.name, "atm-nlb"), routeFor(atm))
-        assertEquals(Route.ServiceDetail("svc"), routeFor(searchIndex("car rental", index).single().item))
-        assertEquals(Route.InfoCenterDetail("water"), routeFor(searchIndex("water", index).single().item))
-        assertEquals(Route.UtilityMap(ALL_CATEGORIES, "x"), routeFor(SearchIndexItem(SearchKind.UTILITY, "x", "X")))
+        assertEquals(Screen.UtilityMapScreen(UtilityCategory.ATM.name, "atm-nlb"), routeFor(atm))
+        assertEquals(Screen.ServiceDetailScreen("svc"), routeFor(searchIndex("car rental", index).single().item))
+        assertEquals(Screen.InfoCenterDetailScreen("water"), routeFor(searchIndex("water", index).single().item))
+        assertEquals(Screen.UtilityMapScreen(ALL_CATEGORIES, "x"), routeFor(SearchIndexItem(SearchKind.UTILITY, "x", "X")))
     }
 
     @Test fun editorialCollectionsAndOverviewsAreNotSearchWords() {

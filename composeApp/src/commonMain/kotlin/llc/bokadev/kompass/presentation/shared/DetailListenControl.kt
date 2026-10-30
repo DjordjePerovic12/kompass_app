@@ -5,8 +5,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import llc.bokadev.kompass.core.audio.AudioTrack
 import llc.bokadev.kompass.core.audio.NavAudioMode
-import llc.bokadev.kompass.core.util.DetailStrings
-import llc.bokadev.kompass.core.util.toClockDuration
+import llc.bokadev.kompass.core.utils.DetailStrings
+import llc.bokadev.kompass.core.utils.toClockDuration
 import llc.bokadev.kompass.domain.model.AudioSource
 
 /**
@@ -62,5 +62,5 @@ private fun NavAudioMode.description(strings: DetailStrings, label: String): Str
 @Composable
 private fun DetailListenControlPreview() {
     val track = AudioTrack(AudioSource.PLACE, "p", "Saint Tryphon", "Old Town", "a.mp3", "en", isEnglishFallback = true, isDownloaded = false)
-    DetailListenControl(NavAudioMode.Ready(track), llc.bokadev.kompass.core.util.appStringsFor("fr").detail, reduceMotion = true, onClick = {})
+    DetailListenControl(NavAudioMode.Ready(track), llc.bokadev.kompass.core.utils.appStringsFor("fr").detail, reduceMotion = true, onClick = {})
 }

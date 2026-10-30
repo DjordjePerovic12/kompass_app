@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
-import llc.bokadev.kompass.core.util.AppPreferences
+import llc.bokadev.kompass.core.utils.AppPreferences
 import llc.bokadev.kompass.domain.model.FavoriteEntry
 import llc.bokadev.kompass.domain.model.FavoriteItemType
 import llc.bokadev.kompass.domain.model.FavoriteKey

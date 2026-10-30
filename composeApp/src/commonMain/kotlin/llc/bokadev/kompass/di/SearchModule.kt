@@ -1,6 +1,6 @@
 package llc.bokadev.kompass.di
 
-import llc.bokadev.kompass.core.util.SearchVocabularyTable
+import llc.bokadev.kompass.core.utils.SearchVocabularyTable
 import llc.bokadev.kompass.data.repository.SearchRepositoryImpl
 import llc.bokadev.kompass.domain.model.SearchVocabulary
 import llc.bokadev.kompass.data.repository.RecentSearchesStore

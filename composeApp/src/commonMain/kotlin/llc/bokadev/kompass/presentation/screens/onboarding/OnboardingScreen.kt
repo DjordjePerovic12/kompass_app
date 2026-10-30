@@ -30,7 +30,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import llc.bokadev.kompass.core.util.rememberAppStrings
+import llc.bokadev.kompass.core.utils.rememberAppStrings
 import llc.bokadev.kompass.presentation.theme.LamplightShapes
 import llc.bokadev.kompass.presentation.theme.LamplightTheme
 import llc.bokadev.kompass.presentation.theme.LamplightType

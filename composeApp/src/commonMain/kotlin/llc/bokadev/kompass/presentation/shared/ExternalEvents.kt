@@ -1,7 +1,7 @@
 package llc.bokadev.kompass.presentation.shared
 
 import llc.bokadev.kompass.core.presentation.SnackbarBus
-import llc.bokadev.kompass.core.util.AppStrings
+import llc.bokadev.kompass.core.utils.AppStrings
 
 /** A hand-off to another app, requested by a ViewModel and performed by the screen's orchestrator. */
 sealed interface ExternalLaunch {

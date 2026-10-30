@@ -5,7 +5,7 @@ import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.query.Order
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
-import llc.bokadev.kompass.core.util.AppPreferences
+import llc.bokadev.kompass.core.utils.AppPreferences
 import llc.bokadev.kompass.data.mapper.toDomain
 import llc.bokadev.kompass.data.remote.dto.EventDto
 import llc.bokadev.kompass.data.remote.dto.EventFilterDto

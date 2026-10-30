@@ -39,8 +39,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
-import llc.bokadev.kompass.core.util.RedesignStrings
-import llc.bokadev.kompass.core.util.redesignStringsFor
+import llc.bokadev.kompass.core.utils.RedesignStrings
+import llc.bokadev.kompass.core.utils.redesignStringsFor
 import llc.bokadev.kompass.presentation.theme.LamplightShapes
 import llc.bokadev.kompass.presentation.theme.LamplightTheme
 import llc.bokadev.kompass.presentation.theme.LamplightType

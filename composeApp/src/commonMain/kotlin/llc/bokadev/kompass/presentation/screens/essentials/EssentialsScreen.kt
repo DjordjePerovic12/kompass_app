@@ -5,8 +5,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import llc.bokadev.kompass.core.presentation.SnackbarBus
-import llc.bokadev.kompass.core.util.ConnectivityMonitor
-import llc.bokadev.kompass.core.util.rememberAppStrings
+import llc.bokadev.kompass.core.utils.ConnectivityMonitor
+import llc.bokadev.kompass.core.utils.rememberAppStrings
 import llc.bokadev.kompass.presentation.shared.perform
 import llc.bokadev.kompass.presentation.shared.rememberExternalLauncher
 import org.koin.compose.koinInject
@@ -14,7 +14,7 @@ import org.koin.compose.viewmodel.koinViewModel
 
 /**
  * Orchestrator: ViewModel, state, connectivity and the external hand-offs (dialer, maps, browser,
- * settings) the ViewModel asks for. Route.EssentialModule(id) opens the same screen focused on one module.
+ * settings) the ViewModel asks for. Screen.EssentialModuleScreen(id) opens the same screen focused on one module.
  */
 @Composable
 fun EssentialsScreen(vmKey: String = "essentials") {

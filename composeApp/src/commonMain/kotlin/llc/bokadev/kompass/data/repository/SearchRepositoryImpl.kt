@@ -14,7 +14,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import llc.bokadev.kompass.BuildKonfig
-import llc.bokadev.kompass.core.util.AppPreferences
+import llc.bokadev.kompass.core.utils.AppPreferences
 import llc.bokadev.kompass.domain.model.SearchCachePayload
 import llc.bokadev.kompass.domain.model.SearchFilterType
 import llc.bokadev.kompass.domain.model.SearchResponse

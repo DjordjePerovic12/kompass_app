@@ -1,10 +1,10 @@
 package llc.bokadev.kompass.presentation.screens.placedetail
 
-import llc.bokadev.kompass.core.util.AppStrings
-import llc.bokadev.kompass.core.util.DetailStrings
-import llc.bokadev.kompass.core.util.localizedTypeLabel
-import llc.bokadev.kompass.core.util.toTitleCaseLabel
-import llc.bokadev.kompass.core.util.uppercaseFor
+import llc.bokadev.kompass.core.utils.AppStrings
+import llc.bokadev.kompass.core.utils.DetailStrings
+import llc.bokadev.kompass.core.utils.localizedTypeLabel
+import llc.bokadev.kompass.core.utils.toTitleCaseLabel
+import llc.bokadev.kompass.core.utils.uppercaseFor
 import llc.bokadev.kompass.domain.model.BestTime
 import llc.bokadev.kompass.domain.model.Place
 import llc.bokadev.kompass.domain.model.PriceIndicator

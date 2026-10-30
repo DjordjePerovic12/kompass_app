@@ -8,7 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import llc.bokadev.kompass.core.util.rememberAppStrings
+import llc.bokadev.kompass.core.utils.rememberAppStrings
 import llc.bokadev.kompass.presentation.shared.StateMessage
 import llc.bokadev.kompass.presentation.theme.LamplightTheme
 

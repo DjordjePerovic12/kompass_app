@@ -8,7 +8,7 @@ import llc.bokadev.kompass.core.presentation.mvi.Navigator
 import llc.bokadev.kompass.core.presentation.mvi.UiText
 import llc.bokadev.kompass.domain.repository.AnalyticsRepository
 import llc.bokadev.kompass.domain.usecase.GetServicesUseCase
-import llc.bokadev.kompass.presentation.navigation.Route
+import llc.bokadev.kompass.core.navigation.Screen
 
 class ServicesViewModel(
     private val getServices: GetServicesUseCase,
@@ -27,7 +27,7 @@ class ServicesViewModel(
         when (action) {
             ServicesAction.Retry -> load()
             ServicesAction.Back -> navigator.navigateUp()
-            is ServicesAction.OpenService -> navigator.navigateTo(Route.ServiceDetail(action.id))
+            is ServicesAction.OpenService -> navigator.navigateTo(Screen.ServiceDetailScreen(action.id))
         }
     }
 

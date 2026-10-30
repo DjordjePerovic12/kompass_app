@@ -1,6 +1,6 @@
 package llc.bokadev.kompass.presentation.screens.home
 
-import llc.bokadev.kompass.core.util.AppStrings
+import llc.bokadev.kompass.core.utils.AppStrings
 
 enum class HomeArea(val preferenceValue: String) {
     DEVICE("device"), OLD_TOWN("old_town"), DOBROTA("dobrota"), PERAST("perast");

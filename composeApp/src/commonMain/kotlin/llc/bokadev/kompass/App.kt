@@ -2,10 +2,10 @@ package llc.bokadev.kompass
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import llc.bokadev.kompass.core.util.AppPreferences
-import llc.bokadev.kompass.core.util.PilotFeatures
+import llc.bokadev.kompass.core.utils.AppPreferences
+import llc.bokadev.kompass.core.utils.PilotFeatures
 import llc.bokadev.kompass.domain.repository.DeepPurchaseRepository
-import llc.bokadev.kompass.presentation.navigation.KompassNavHost
+import llc.bokadev.kompass.core.navigation.KompassAppNavigation
 import llc.bokadev.kompass.presentation.theme.KOmpassTheme
 import org.koin.compose.koinInject
 
@@ -20,6 +20,6 @@ fun App() {
     }
 
     KOmpassTheme {
-        KompassNavHost(isFirstLaunch = prefs.isFirstLaunch())
+        KompassAppNavigation(isFirstLaunch = prefs.isFirstLaunch())
     }
 }

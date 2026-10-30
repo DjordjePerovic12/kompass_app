@@ -8,7 +8,7 @@ import kotlinx.coroutines.launch
 import llc.bokadev.kompass.core.presentation.mvi.BaseViewModel
 import llc.bokadev.kompass.core.presentation.mvi.Navigator
 import llc.bokadev.kompass.core.presentation.mvi.UiText
-import llc.bokadev.kompass.presentation.navigation.Route
+import llc.bokadev.kompass.core.navigation.Screen
 import llc.bokadev.kompass.domain.location.UserLocationProvider
 import llc.bokadev.kompass.domain.model.Experience
 import llc.bokadev.kompass.domain.model.FavoriteItemType
@@ -74,9 +74,9 @@ class CategoryListViewModel(
                 rebuild()
             }
             is CategoryListAction.Open -> navigator.navigateTo(
-                if (action.item.type == FavoriteItemType.PLACE) Route.PlaceDetail(action.item.id) else Route.ExperienceDetail(action.item.id)
+                if (action.item.type == FavoriteItemType.PLACE) Screen.PlaceDetailScreen(action.item.id) else Screen.ExperienceDetailScreen(action.item.id)
             )
-            CategoryListAction.OpenSearch -> navigator.navigateTo(Route.Search)
+            CategoryListAction.OpenSearch -> navigator.navigateTo(Screen.SearchScreen)
             CategoryListAction.Retry -> load()
             CategoryListAction.Back -> navigator.navigateUp()
         }

@@ -10,10 +10,10 @@ import llc.bokadev.kompass.core.presentation.mvi.BaseViewModel
 import llc.bokadev.kompass.core.presentation.mvi.Navigator
 import llc.bokadev.kompass.core.presentation.mvi.UiText
 import llc.bokadev.kompass.domain.repository.AnalyticsRepository
-import llc.bokadev.kompass.presentation.navigation.Route
+import llc.bokadev.kompass.core.navigation.Screen
 import llc.bokadev.kompass.core.audio.AudioTrack
-import llc.bokadev.kompass.core.util.AppPreferences
-import llc.bokadev.kompass.core.util.ConnectivityMonitor
+import llc.bokadev.kompass.core.utils.AppPreferences
+import llc.bokadev.kompass.core.utils.ConnectivityMonitor
 import llc.bokadev.kompass.domain.location.UserLocationProvider
 import llc.bokadev.kompass.domain.model.GeoPoint
 import llc.bokadev.kompass.domain.model.AudioCatalogEntry
@@ -199,8 +199,8 @@ internal fun orderTracks(tracks: List<ListenTrack>, currentArea: String?): List<
 }
 
 /** Where a library row (or the Now playing card) opens: the item's own detail. */
-internal fun routeFor(source: AudioSource, id: String): Route = when (source) {
-    AudioSource.PLACE -> Route.PlaceDetail(id)
-    AudioSource.ACTIVITY -> Route.ExperienceDetail(id)
-    AudioSource.STORY -> Route.LocalFindDetail(id)
+internal fun routeFor(source: AudioSource, id: String): Screen = when (source) {
+    AudioSource.PLACE -> Screen.PlaceDetailScreen(id)
+    AudioSource.ACTIVITY -> Screen.ExperienceDetailScreen(id)
+    AudioSource.STORY -> Screen.LocalFindDetailScreen(id)
 }

@@ -7,7 +7,7 @@ import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import llc.bokadev.kompass.data.mapper.toDomain
 import llc.bokadev.kompass.data.remote.dto.PlaceDto
-import llc.bokadev.kompass.core.util.AppPreferences
+import llc.bokadev.kompass.core.utils.AppPreferences
 import llc.bokadev.kompass.domain.model.Place
 import llc.bokadev.kompass.domain.model.PlaceCategory
 import llc.bokadev.kompass.domain.repository.PlaceRepository

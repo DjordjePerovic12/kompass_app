@@ -31,11 +31,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import llc.bokadev.kompass.core.presentation.mvi.BaseContentView
-import llc.bokadev.kompass.core.util.AppStrings
-import llc.bokadev.kompass.core.util.buildPhotoUrl
-import llc.bokadev.kompass.core.util.currentAppLanguage
-import llc.bokadev.kompass.core.util.rememberAppStrings
-import llc.bokadev.kompass.core.util.uppercaseFor
+import llc.bokadev.kompass.core.utils.AppStrings
+import llc.bokadev.kompass.core.utils.buildPhotoUrl
+import llc.bokadev.kompass.core.utils.currentAppLanguage
+import llc.bokadev.kompass.core.utils.rememberAppStrings
+import llc.bokadev.kompass.core.utils.uppercaseFor
 import llc.bokadev.kompass.domain.model.Experience
 import llc.bokadev.kompass.domain.model.GeoPoint
 import llc.bokadev.kompass.presentation.screens.placedetail.components.DetailCompactBar

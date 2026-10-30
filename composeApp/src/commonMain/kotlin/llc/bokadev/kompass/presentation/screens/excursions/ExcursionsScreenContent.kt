@@ -12,7 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import llc.bokadev.kompass.core.util.*
+import llc.bokadev.kompass.core.utils.*
 import llc.bokadev.kompass.domain.model.*
 import llc.bokadev.kompass.core.presentation.mvi.asString
 import llc.bokadev.kompass.presentation.screens.excursions.components.ExcursionRow

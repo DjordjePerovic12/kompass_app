@@ -36,10 +36,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import llc.bokadev.kompass.core.presentation.mvi.asString
-import llc.bokadev.kompass.core.util.AppStrings
-import llc.bokadev.kompass.core.util.StoriesStrings
-import llc.bokadev.kompass.core.util.buildPhotoUrl
-import llc.bokadev.kompass.core.util.uppercaseFor
+import llc.bokadev.kompass.core.utils.AppStrings
+import llc.bokadev.kompass.core.utils.StoriesStrings
+import llc.bokadev.kompass.core.utils.buildPhotoUrl
+import llc.bokadev.kompass.core.utils.uppercaseFor
 import llc.bokadev.kompass.presentation.screens.home.components.ChevronLeftIcon
 import llc.bokadev.kompass.presentation.screens.localfinds.components.StoryCompactCard
 import llc.bokadev.kompass.presentation.screens.localfinds.components.StoryFeatureCard

@@ -6,8 +6,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import llc.bokadev.kompass.core.presentation.mvi.BaseViewModel
 import llc.bokadev.kompass.core.presentation.mvi.Navigator
-import llc.bokadev.kompass.presentation.navigation.BottomTab
-import llc.bokadev.kompass.presentation.navigation.Route
+import llc.bokadev.kompass.core.components.BottomTab
+import llc.bokadev.kompass.core.navigation.Screen
 import llc.bokadev.kompass.presentation.shared.LanguageSheetHost
 import llc.bokadev.kompass.domain.location.UserLocationProvider
 import llc.bokadev.kompass.domain.model.Experience
@@ -94,7 +94,7 @@ class FavoritesViewModel(
             }
             is FavoritesAction.Undo -> favoritesRepository.restore(action.entry)
             is FavoritesAction.Open -> navigator.navigateTo(
-                if (action.type == FavoriteItemType.PLACE) Route.PlaceDetail(action.id) else Route.ExperienceDetail(action.id)
+                if (action.type == FavoriteItemType.PLACE) Screen.PlaceDetailScreen(action.id) else Screen.ExperienceDetailScreen(action.id)
             )
             FavoritesAction.ExploreKotor -> navigator.switchTab(BottomTab.Explore)
             FavoritesAction.OpenLanguage -> languageSheet.open()

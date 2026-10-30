@@ -8,8 +8,8 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import llc.bokadev.kompass.core.util.currentAppLanguage
-import llc.bokadev.kompass.core.util.rememberAppStrings
+import llc.bokadev.kompass.core.utils.currentAppLanguage
+import llc.bokadev.kompass.core.utils.rememberAppStrings
 import llc.bokadev.kompass.presentation.shared.LanguageChooser
 import llc.bokadev.kompass.presentation.theme.ProvideLamplightTheme
 import llc.bokadev.kompass.presentation.theme.pageGradientBackground

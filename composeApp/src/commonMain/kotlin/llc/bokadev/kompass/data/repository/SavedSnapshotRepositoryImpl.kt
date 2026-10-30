@@ -3,7 +3,7 @@ package llc.bokadev.kompass.data.repository
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
-import llc.bokadev.kompass.core.util.AppPreferences
+import llc.bokadev.kompass.core.utils.AppPreferences
 import llc.bokadev.kompass.domain.model.FavoriteKey
 import llc.bokadev.kompass.domain.model.SavedSnapshot
 import llc.bokadev.kompass.domain.repository.SavedSnapshotRepository

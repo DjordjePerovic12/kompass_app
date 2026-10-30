@@ -8,7 +8,7 @@ import llc.bokadev.kompass.core.presentation.mvi.Navigator
 import llc.bokadev.kompass.core.presentation.mvi.UiText
 import llc.bokadev.kompass.domain.repository.AnalyticsRepository
 import llc.bokadev.kompass.domain.usecase.GetCurrentInfoNoticesUseCase
-import llc.bokadev.kompass.presentation.navigation.Route
+import llc.bokadev.kompass.core.navigation.Screen
 
 class InfoCenterViewModel(
     private val getCurrentInfoNotices: GetCurrentInfoNoticesUseCase,
@@ -31,7 +31,7 @@ class InfoCenterViewModel(
                 state.value.notices.firstOrNull { it.id == action.id }?.let {
                     analytics.trackInfoNoticeView(noticeId = it.id, cityId = it.cityId, contentOrigin = "info_center")
                 }
-                navigator.navigateTo(Route.InfoCenterDetail(action.id))
+                navigator.navigateTo(Screen.InfoCenterDetailScreen(action.id))
             }
         }
     }

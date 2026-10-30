@@ -45,9 +45,9 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
-import llc.bokadev.kompass.core.util.AppStrings
-import llc.bokadev.kompass.core.util.currentAppLanguage
-import llc.bokadev.kompass.core.util.rememberAppStrings
+import llc.bokadev.kompass.core.utils.AppStrings
+import llc.bokadev.kompass.core.utils.currentAppLanguage
+import llc.bokadev.kompass.core.utils.rememberAppStrings
 import llc.bokadev.kompass.domain.model.CityEssential
 import llc.bokadev.kompass.domain.model.GeoPoint
 import llc.bokadev.kompass.domain.model.UtilityCategory

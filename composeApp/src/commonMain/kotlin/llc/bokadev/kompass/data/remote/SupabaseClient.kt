@@ -12,7 +12,7 @@ import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
 import llc.bokadev.kompass.BuildKonfig
-import llc.bokadev.kompass.core.util.AppPreferences
+import llc.bokadev.kompass.core.utils.AppPreferences
 
 @OptIn(SupabaseInternal::class)
 fun createKompassSupabaseClient(

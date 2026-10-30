@@ -19,7 +19,7 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import llc.bokadev.kompass.core.util.uppercaseFor
+import llc.bokadev.kompass.core.utils.uppercaseFor
 import llc.bokadev.kompass.presentation.theme.LamplightTheme
 import llc.bokadev.kompass.presentation.theme.LamplightType
 

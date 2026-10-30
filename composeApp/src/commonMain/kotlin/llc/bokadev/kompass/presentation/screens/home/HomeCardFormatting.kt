@@ -1,10 +1,10 @@
 package llc.bokadev.kompass.presentation.screens.home
 
-import llc.bokadev.kompass.core.util.AppStrings
-import llc.bokadev.kompass.core.util.localizedTypeLabel
-import llc.bokadev.kompass.core.util.toTitleCaseLabel
-import llc.bokadev.kompass.core.util.toClockTime
-import llc.bokadev.kompass.core.util.toNoticeDate
+import llc.bokadev.kompass.core.utils.AppStrings
+import llc.bokadev.kompass.core.utils.localizedTypeLabel
+import llc.bokadev.kompass.core.utils.toTitleCaseLabel
+import llc.bokadev.kompass.core.utils.toClockTime
+import llc.bokadev.kompass.core.utils.toNoticeDate
 import llc.bokadev.kompass.domain.model.Event
 import llc.bokadev.kompass.domain.model.InfoNotice
 import llc.bokadev.kompass.domain.model.NearbyPlace

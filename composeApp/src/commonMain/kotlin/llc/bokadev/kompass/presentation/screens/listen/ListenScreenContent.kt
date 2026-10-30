@@ -2,7 +2,7 @@ package llc.bokadev.kompass.presentation.screens.listen
 
 import llc.bokadev.kompass.domain.model.AudioCatalogEntry
 import llc.bokadev.kompass.domain.model.AudioSource
-import llc.bokadev.kompass.core.util.toTitleCaseLabel
+import llc.bokadev.kompass.core.utils.toTitleCaseLabel
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -40,11 +40,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import llc.bokadev.kompass.core.audio.AudioState
-import llc.bokadev.kompass.core.util.AppStrings
-import llc.bokadev.kompass.core.util.ListenStrings
-import llc.bokadev.kompass.core.util.buildPhotoUrl
-import llc.bokadev.kompass.core.util.toClockDuration
-import llc.bokadev.kompass.core.util.uppercaseFor
+import llc.bokadev.kompass.core.utils.AppStrings
+import llc.bokadev.kompass.core.utils.ListenStrings
+import llc.bokadev.kompass.core.utils.buildPhotoUrl
+import llc.bokadev.kompass.core.utils.toClockDuration
+import llc.bokadev.kompass.core.utils.uppercaseFor
 import llc.bokadev.kompass.presentation.screens.categorylist.areaLabel
 import llc.bokadev.kompass.presentation.screens.home.components.ChevronLeftIcon
 import llc.bokadev.kompass.presentation.screens.home.components.HeadphonesIcon

@@ -12,7 +12,7 @@ import llc.bokadev.kompass.domain.model.FavoriteItemType
 import llc.bokadev.kompass.domain.model.FavoriteKey
 import llc.bokadev.kompass.domain.repository.ExcursionRepository
 import llc.bokadev.kompass.domain.repository.FavoritesRepository
-import llc.bokadev.kompass.presentation.navigation.Route
+import llc.bokadev.kompass.core.navigation.Screen
 
 class ExcursionsViewModel(
     private val repository: ExcursionRepository,
@@ -46,7 +46,7 @@ class ExcursionsViewModel(
             is ExcursionsAction.SetSaved ->
                 if (action.saved) favorites.save(action.type, action.id) else favorites.remove(action.type, action.id)
             is ExcursionsAction.Open -> navigator.navigateTo(
-                if (action.type == FavoriteItemType.PLACE) Route.PlaceDetail(action.id) else Route.ExperienceDetail(action.id)
+                if (action.type == FavoriteItemType.PLACE) Screen.PlaceDetailScreen(action.id) else Screen.ExperienceDetailScreen(action.id)
             )
             ExcursionsAction.Back -> navigator.navigateUp()
         }

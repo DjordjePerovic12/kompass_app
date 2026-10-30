@@ -1,6 +1,6 @@
 package llc.bokadev.kompass.presentation.screens.categorylist
 
-import llc.bokadev.kompass.presentation.navigation.Route
+import llc.bokadev.kompass.core.navigation.Screen
 import llc.bokadev.kompass.testutil.RecordingNavigator
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
@@ -94,7 +94,7 @@ class CategoryListViewModelTest {
     @Test fun openingARowNavigatesToItsDetail() = withVm(emptyList()) { vm, _, _, _ ->
         vm.onAction(CategoryListAction.Open(vm.state.value.items.first { it.id == "rocks" }))
         vm.onAction(CategoryListAction.OpenSearch)
-        assertEquals(listOf<Route>(Route.PlaceDetail("rocks"), Route.Search), lastNavigator.routes)
+        assertEquals(listOf<Screen>(Screen.PlaceDetailScreen("rocks"), Screen.SearchScreen), lastNavigator.routes)
     }
 
     private lateinit var lastNavigator: RecordingNavigator

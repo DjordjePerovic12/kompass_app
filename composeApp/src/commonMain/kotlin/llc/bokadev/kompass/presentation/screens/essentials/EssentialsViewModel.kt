@@ -9,10 +9,10 @@ import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 import llc.bokadev.kompass.core.presentation.mvi.BaseViewModel
 import llc.bokadev.kompass.core.presentation.mvi.Navigator
-import llc.bokadev.kompass.core.util.AppPreferences
+import llc.bokadev.kompass.core.utils.AppPreferences
 import llc.bokadev.kompass.domain.repository.AnalyticsRepository
-import llc.bokadev.kompass.presentation.navigation.ALL_CATEGORIES
-import llc.bokadev.kompass.presentation.navigation.Route
+import llc.bokadev.kompass.core.navigation.ALL_CATEGORIES
+import llc.bokadev.kompass.core.navigation.Screen
 import llc.bokadev.kompass.presentation.shared.ExternalLaunch
 import llc.bokadev.kompass.presentation.shared.LanguageSheetHost
 import llc.bokadev.kompass.domain.location.UserLocationProvider
@@ -39,7 +39,7 @@ class EssentialsViewModel(
         } ?: EssentialsTab.INFO,
         expandedIds = savedState.get<List<String>>("expandedIds")?.toSet() ?: emptySet(),
         reminderHidden = appPreferences.getString(REMINDER_HIDDEN_KEY) == "true",
-        // Route.EssentialModule(id) — Search opened one module.
+        // Screen.EssentialModuleScreen(id) — Search opened one module.
         focusModuleId = savedState.get<String>("id")
     )
 ) {
@@ -78,7 +78,7 @@ class EssentialsViewModel(
             EssentialsAction.Retry -> load()
             EssentialsAction.OpenLanguage -> languageSheet.open()
             is EssentialsAction.OpenUtilityMap ->
-                navigator.navigateTo(Route.UtilityMap(action.category?.name ?: ALL_CATEGORIES, action.selectedId))
+                navigator.navigateTo(Screen.UtilityMapScreen(action.category?.name ?: ALL_CATEGORIES, action.selectedId))
             is EssentialsAction.Dial -> sendEvent(EssentialsEvent.Launch(ExternalLaunch.Dial(action.number)))
             is EssentialsAction.OpenLocation ->
                 sendEvent(EssentialsEvent.Launch(ExternalLaunch.Maps(action.latitude, action.longitude, action.title)))

@@ -7,9 +7,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import llc.bokadev.kompass.core.util.AudioGuidePlaybackState
-import llc.bokadev.kompass.core.util.AudioGuidePlayer
-import llc.bokadev.kompass.core.util.PlaybackRequestGuard
+import llc.bokadev.kompass.core.utils.AudioGuidePlaybackState
+import llc.bokadev.kompass.core.utils.AudioGuidePlayer
+import llc.bokadev.kompass.core.utils.PlaybackRequestGuard
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs

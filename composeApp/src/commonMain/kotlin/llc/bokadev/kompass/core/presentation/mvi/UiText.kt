@@ -1,8 +1,8 @@
 package llc.bokadev.kompass.core.presentation.mvi
 
 import androidx.compose.runtime.Composable
-import llc.bokadev.kompass.core.util.AppStrings
-import llc.bokadev.kompass.core.util.rememberAppStrings
+import llc.bokadev.kompass.core.utils.AppStrings
+import llc.bokadev.kompass.core.utils.rememberAppStrings
 
 /**
  * Visitor-facing text a ViewModel can hand to the UI without knowing the current language:

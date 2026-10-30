@@ -7,10 +7,10 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import llc.bokadev.kompass.core.presentation.mvi.BaseViewModel
 import llc.bokadev.kompass.core.presentation.mvi.Navigator
-import llc.bokadev.kompass.presentation.navigation.BottomTab
-import llc.bokadev.kompass.presentation.navigation.ALL_CATEGORIES
-import llc.bokadev.kompass.presentation.navigation.Route
-import llc.bokadev.kompass.core.util.AppPreferences
+import llc.bokadev.kompass.core.components.BottomTab
+import llc.bokadev.kompass.core.navigation.ALL_CATEGORIES
+import llc.bokadev.kompass.core.navigation.Screen
+import llc.bokadev.kompass.core.utils.AppPreferences
 import llc.bokadev.kompass.domain.model.SEARCH_LIMIT
 import llc.bokadev.kompass.domain.model.SEARCH_MIN_CHARS
 import llc.bokadev.kompass.domain.model.SearchHit
@@ -127,17 +127,17 @@ class SearchViewModel(
 }
 
 /** Where a result opens: its own detail, or the exact Essentials module. */
-internal fun routeFor(item: SearchIndexItem): Route = when (item.kind) {
-    SearchKind.PLACE -> Route.PlaceDetail(item.id)
-    SearchKind.ACTIVITY -> Route.ExperienceDetail(item.id)
-    SearchKind.STORY -> Route.LocalFindDetail(item.id)
-    SearchKind.ESSENTIAL -> Route.EssentialModule(item.id)
-    SearchKind.EVENT -> Route.EventDetail(item.id)
+internal fun routeFor(item: SearchIndexItem): Screen = when (item.kind) {
+    SearchKind.PLACE -> Screen.PlaceDetailScreen(item.id)
+    SearchKind.ACTIVITY -> Screen.ExperienceDetailScreen(item.id)
+    SearchKind.STORY -> Screen.LocalFindDetailScreen(item.id)
+    SearchKind.ESSENTIAL -> Screen.EssentialModuleScreen(item.id)
+    SearchKind.EVENT -> Screen.EventDetailScreen(item.id)
     // The map on that point's own category, with the exact point selected (by ID, never by name).
-    SearchKind.UTILITY -> Route.UtilityMap(
+    SearchKind.UTILITY -> Screen.UtilityMapScreen(
         item.utilityCategory?.name ?: ALL_CATEGORIES,
         item.id.takeUnless { item.pointCount != null }
     )
-    SearchKind.SERVICE -> Route.ServiceDetail(item.id)
-    SearchKind.NOTICE -> Route.InfoCenterDetail(item.id)
+    SearchKind.SERVICE -> Screen.ServiceDetailScreen(item.id)
+    SearchKind.NOTICE -> Screen.InfoCenterDetailScreen(item.id)
 }

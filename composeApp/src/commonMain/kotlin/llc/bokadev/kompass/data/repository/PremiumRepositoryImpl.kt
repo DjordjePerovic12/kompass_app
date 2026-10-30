@@ -1,6 +1,6 @@
 package llc.bokadev.kompass.data.repository
 
-import llc.bokadev.kompass.core.util.AppPreferences
+import llc.bokadev.kompass.core.utils.AppPreferences
 import llc.bokadev.kompass.domain.model.PremiumEntitlements
 import llc.bokadev.kompass.domain.repository.PremiumRepository
 

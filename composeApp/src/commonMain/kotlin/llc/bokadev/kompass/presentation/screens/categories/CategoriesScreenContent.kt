@@ -22,11 +22,11 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import llc.bokadev.kompass.core.util.AppStrings
-import llc.bokadev.kompass.core.util.buildPhotoUrl
-import llc.bokadev.kompass.core.util.currentAppLanguage
-import llc.bokadev.kompass.core.util.toDayOfMonth
-import llc.bokadev.kompass.core.util.toMonthAbbrev
+import llc.bokadev.kompass.core.utils.AppStrings
+import llc.bokadev.kompass.core.utils.buildPhotoUrl
+import llc.bokadev.kompass.core.utils.currentAppLanguage
+import llc.bokadev.kompass.core.utils.toDayOfMonth
+import llc.bokadev.kompass.core.utils.toMonthAbbrev
 import llc.bokadev.kompass.presentation.screens.categories.components.ExploreGlyph
 import llc.bokadev.kompass.presentation.screens.categories.components.ExploreGroupedList
 import llc.bokadev.kompass.presentation.screens.categories.components.ExploreHeroCard

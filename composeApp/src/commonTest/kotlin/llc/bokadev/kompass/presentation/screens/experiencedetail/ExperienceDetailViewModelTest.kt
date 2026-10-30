@@ -11,7 +11,7 @@ import kotlin.test.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.*
-import llc.bokadev.kompass.core.util.AppPreferences
+import llc.bokadev.kompass.core.utils.AppPreferences
 import llc.bokadev.kompass.domain.model.Experience
 import llc.bokadev.kompass.domain.repository.AudioGuideRepository
 import llc.bokadev.kompass.domain.repository.ExperienceRepository

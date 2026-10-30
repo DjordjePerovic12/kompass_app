@@ -3,7 +3,7 @@ package llc.bokadev.kompass.data.repository
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
-import llc.bokadev.kompass.core.util.AppPreferences
+import llc.bokadev.kompass.core.utils.AppPreferences
 import llc.bokadev.kompass.domain.repository.RecentSearchesRepository
 
 /** Up to 5 recent queries, most recent first, stored only on the device. */

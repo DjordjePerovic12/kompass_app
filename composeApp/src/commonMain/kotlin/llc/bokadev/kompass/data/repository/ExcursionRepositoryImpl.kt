@@ -7,7 +7,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
-import llc.bokadev.kompass.core.util.AppPreferences
+import llc.bokadev.kompass.core.utils.AppPreferences
 import llc.bokadev.kompass.data.mapper.toDomain
 import llc.bokadev.kompass.data.remote.dto.ExcursionDto
 import llc.bokadev.kompass.data.remote.dto.PlaceActivityDto

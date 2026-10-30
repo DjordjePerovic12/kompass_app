@@ -14,7 +14,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import llc.bokadev.kompass.BuildKonfig
 import llc.bokadev.kompass.getPlatform
-import llc.bokadev.kompass.core.util.AppPreferences
+import llc.bokadev.kompass.core.utils.AppPreferences
 import llc.bokadev.kompass.domain.model.AnalyticsEvent
 import llc.bokadev.kompass.domain.repository.AnalyticsRepository
 import kotlin.random.Random

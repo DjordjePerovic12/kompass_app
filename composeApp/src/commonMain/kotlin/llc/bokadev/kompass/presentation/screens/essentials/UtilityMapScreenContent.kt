@@ -42,8 +42,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import llc.bokadev.kompass.core.presentation.mvi.asString
-import llc.bokadev.kompass.core.util.EssentialsStrings
-import llc.bokadev.kompass.core.util.rememberAppStrings
+import llc.bokadev.kompass.core.utils.EssentialsStrings
+import llc.bokadev.kompass.core.utils.rememberAppStrings
 import llc.bokadev.kompass.domain.model.UtilityCategory
 import llc.bokadev.kompass.presentation.screens.home.components.ChevronLeftIcon
 import llc.bokadev.kompass.presentation.screens.placedetail.components.DetailGlyph

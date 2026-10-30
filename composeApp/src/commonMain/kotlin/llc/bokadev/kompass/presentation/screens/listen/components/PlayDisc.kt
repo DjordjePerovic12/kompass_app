@@ -15,10 +15,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import llc.bokadev.kompass.presentation.navigation.EqualizerBars
-import llc.bokadev.kompass.presentation.navigation.drawPause
-import llc.bokadev.kompass.presentation.navigation.drawPlay
-import llc.bokadev.kompass.presentation.navigation.drawRetry
+import llc.bokadev.kompass.core.components.EqualizerBars
+import llc.bokadev.kompass.core.components.drawPause
+import llc.bokadev.kompass.core.components.drawPlay
+import llc.bokadev.kompass.core.components.drawRetry
 import llc.bokadev.kompass.presentation.theme.LamplightTheme
 
 /** What a play control shows (Listen spec §3). */

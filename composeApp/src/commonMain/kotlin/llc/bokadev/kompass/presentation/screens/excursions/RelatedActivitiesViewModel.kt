@@ -9,7 +9,7 @@ import llc.bokadev.kompass.core.presentation.mvi.UiText
 import llc.bokadev.kompass.domain.model.FavoriteItemType
 import llc.bokadev.kompass.domain.repository.ExcursionRepository
 import llc.bokadev.kompass.domain.repository.FavoritesRepository
-import llc.bokadev.kompass.presentation.navigation.Route
+import llc.bokadev.kompass.core.navigation.Screen
 
 class RelatedActivitiesViewModel(
     private val repository: ExcursionRepository,
@@ -33,7 +33,7 @@ class RelatedActivitiesViewModel(
             is RelatedActivitiesAction.SetSaved ->
                 if (action.saved) favorites.save(FavoriteItemType.ACTIVITY, action.activityId)
                 else favorites.remove(FavoriteItemType.ACTIVITY, action.activityId)
-            is RelatedActivitiesAction.Open -> navigator.navigateTo(Route.ExperienceDetail(action.activityId))
+            is RelatedActivitiesAction.Open -> navigator.navigateTo(Screen.ExperienceDetailScreen(action.activityId))
         }
     }
 

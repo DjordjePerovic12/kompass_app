@@ -7,7 +7,7 @@ import kotlinx.coroutines.launch
 import llc.bokadev.kompass.core.presentation.mvi.BaseViewModel
 import llc.bokadev.kompass.core.presentation.mvi.Navigator
 import llc.bokadev.kompass.domain.repository.AnalyticsRepository
-import llc.bokadev.kompass.presentation.navigation.Route
+import llc.bokadev.kompass.core.navigation.Screen
 import llc.bokadev.kompass.presentation.screens.categorylist.CategoryListKind
 import llc.bokadev.kompass.presentation.shared.LanguageSheetHost
 import llc.bokadev.kompass.domain.model.window
@@ -37,7 +37,7 @@ class CategoriesViewModel(
     override fun onAction(action: CategoriesAction) {
         when (action) {
             CategoriesAction.Refresh -> loadAll()
-            CategoriesAction.OpenSearch -> navigator.navigateTo(Route.Search)
+            CategoriesAction.OpenSearch -> navigator.navigateTo(Screen.SearchScreen)
             CategoriesAction.OpenLanguage -> languageSheet.open()
             is CategoriesAction.Open -> open(action.destination)
         }
@@ -55,14 +55,14 @@ class CategoriesViewModel(
         categoryKey?.let { analytics.trackCategoryView(it, contentOrigin = "browse") }
         navigator.navigateTo(
             when (destination) {
-                ExploreDestination.PLACES -> Route.CategoryList(CategoryListKind.PLACES.name)
-                ExploreDestination.EAT_AND_DRINK -> Route.CategoryList(CategoryListKind.EAT_AND_DRINK.name)
-                ExploreDestination.ACTIVITIES -> Route.CategoryList(CategoryListKind.ACTIVITIES.name)
-                ExploreDestination.WORTH_THE_DRIVE -> Route.WorthTheDrive
-                ExploreDestination.STORIES -> Route.LocalFinds
-                ExploreDestination.EVENTS -> Route.Events
-                ExploreDestination.LOCAL_UPDATES -> Route.InfoCenter
-                ExploreDestination.SERVICES -> Route.Services
+                ExploreDestination.PLACES -> Screen.CategoryListScreen(CategoryListKind.PLACES.name)
+                ExploreDestination.EAT_AND_DRINK -> Screen.CategoryListScreen(CategoryListKind.EAT_AND_DRINK.name)
+                ExploreDestination.ACTIVITIES -> Screen.CategoryListScreen(CategoryListKind.ACTIVITIES.name)
+                ExploreDestination.WORTH_THE_DRIVE -> Screen.WorthTheDriveScreen
+                ExploreDestination.STORIES -> Screen.LocalFindsScreen
+                ExploreDestination.EVENTS -> Screen.EventsScreen
+                ExploreDestination.LOCAL_UPDATES -> Screen.InfoCenterScreen
+                ExploreDestination.SERVICES -> Screen.ServicesScreen
             }
         )
     }

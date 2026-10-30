@@ -13,7 +13,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import llc.bokadev.kompass.core.util.rememberAppStrings
+import llc.bokadev.kompass.core.utils.rememberAppStrings
 import llc.bokadev.kompass.domain.model.Excursion
 import llc.bokadev.kompass.presentation.screens.excursions.components.ExcursionRow
 import llc.bokadev.kompass.presentation.theme.LamplightTheme

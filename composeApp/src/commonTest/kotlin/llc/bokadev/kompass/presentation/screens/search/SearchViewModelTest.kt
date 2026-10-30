@@ -1,7 +1,7 @@
 package llc.bokadev.kompass.presentation.screens.search
 
 import llc.bokadev.kompass.core.presentation.mvi.NavigationCommand
-import llc.bokadev.kompass.presentation.navigation.BottomTab
+import llc.bokadev.kompass.core.components.BottomTab
 import llc.bokadev.kompass.testutil.RecordingNavigator
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
@@ -9,7 +9,7 @@ import kotlin.test.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.*
-import llc.bokadev.kompass.core.util.AppPreferences
+import llc.bokadev.kompass.core.utils.AppPreferences
 import llc.bokadev.kompass.domain.model.*
 import llc.bokadev.kompass.domain.repository.RecentSearchesRepository
 

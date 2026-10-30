@@ -21,7 +21,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.MarkerOptions
 import llc.bokadev.kompass.BuildKonfig
-import llc.bokadev.kompass.core.util.buildGuideMapHtml
+import llc.bokadev.kompass.core.utils.buildGuideMapHtml
 import llc.bokadev.kompass.domain.model.GeoPoint
 
 @Composable

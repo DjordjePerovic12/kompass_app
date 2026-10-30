@@ -5,7 +5,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import llc.bokadev.kompass.core.presentation.SnackbarBus
-import llc.bokadev.kompass.core.util.rememberAppStrings
+import llc.bokadev.kompass.core.utils.rememberAppStrings
 import llc.bokadev.kompass.domain.location.UserLocationProvider
 import llc.bokadev.kompass.presentation.shared.perform
 import llc.bokadev.kompass.presentation.shared.rememberExternalLauncher

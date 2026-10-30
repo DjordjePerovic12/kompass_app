@@ -21,7 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import llc.bokadev.kompass.core.util.buildMapsUrlForCoords
+import llc.bokadev.kompass.core.utils.buildMapsUrlForCoords
 import llc.bokadev.kompass.domain.location.UserLocationProvider
 import llc.bokadev.kompass.domain.model.GeoPoint
 import llc.bokadev.kompass.presentation.screens.home.components.ArrowRightIcon

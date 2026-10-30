@@ -40,9 +40,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import llc.bokadev.kompass.core.util.LanguageStrings
-import llc.bokadev.kompass.core.util.SUPPORTED_LANGUAGES
-import llc.bokadev.kompass.core.util.languageStringsFor
+import llc.bokadev.kompass.core.utils.LanguageStrings
+import llc.bokadev.kompass.core.utils.SUPPORTED_LANGUAGES
+import llc.bokadev.kompass.core.utils.languageStringsFor
 import llc.bokadev.kompass.presentation.screens.home.components.CheckIcon
 import llc.bokadev.kompass.presentation.screens.placedetail.components.DetailGlyph
 import llc.bokadev.kompass.presentation.screens.placedetail.components.DetailIcon

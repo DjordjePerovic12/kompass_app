@@ -24,11 +24,11 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
 import llc.bokadev.kompass.core.presentation.mvi.asString
-import llc.bokadev.kompass.core.util.AppStrings
-import llc.bokadev.kompass.core.util.currentAppLanguage
-import llc.bokadev.kompass.core.util.rememberAppStrings
-import llc.bokadev.kompass.core.util.toClockTime
-import llc.bokadev.kompass.core.util.toDayLabel
+import llc.bokadev.kompass.core.utils.AppStrings
+import llc.bokadev.kompass.core.utils.currentAppLanguage
+import llc.bokadev.kompass.core.utils.rememberAppStrings
+import llc.bokadev.kompass.core.utils.toClockTime
+import llc.bokadev.kompass.core.utils.toDayLabel
 import llc.bokadev.kompass.domain.model.Destination
 import llc.bokadev.kompass.domain.model.EventFilter
 import llc.bokadev.kompass.domain.model.groupedByListingDay

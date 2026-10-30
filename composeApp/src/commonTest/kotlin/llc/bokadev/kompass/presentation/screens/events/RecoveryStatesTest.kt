@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import kotlin.test.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.test.*
-import llc.bokadev.kompass.core.util.appStringsFor
+import llc.bokadev.kompass.core.utils.appStringsFor
 import llc.bokadev.kompass.domain.model.*
 import llc.bokadev.kompass.domain.repository.*
 import llc.bokadev.kompass.domain.usecase.*
@@ -60,7 +60,7 @@ class RecoveryStatesTest {
             runCurrent()
             vm.onAction(EventsAction.OpenEvent("concert"))
             vm.onAction(EventsAction.Back)
-            assertEquals(listOf<llc.bokadev.kompass.presentation.navigation.Route>(llc.bokadev.kompass.presentation.navigation.Route.EventDetail("concert")), navigator.routes)
+            assertEquals(listOf<llc.bokadev.kompass.core.navigation.Screen>(llc.bokadev.kompass.core.navigation.Screen.EventDetailScreen("concert")), navigator.routes)
             assertEquals(llc.bokadev.kompass.core.presentation.mvi.NavigationCommand.NavigateUp, navigator.recorded.last())
         } finally {
             vm.viewModelScope.cancel()

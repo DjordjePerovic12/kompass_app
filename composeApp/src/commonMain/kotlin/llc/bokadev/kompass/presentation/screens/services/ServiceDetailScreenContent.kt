@@ -19,8 +19,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import llc.bokadev.kompass.core.presentation.mvi.BaseContentView
-import llc.bokadev.kompass.core.util.currentAppLanguage
-import llc.bokadev.kompass.core.util.rememberAppStrings
+import llc.bokadev.kompass.core.utils.currentAppLanguage
+import llc.bokadev.kompass.core.utils.rememberAppStrings
 import llc.bokadev.kompass.domain.model.GeoPoint
 import llc.bokadev.kompass.domain.model.Service
 import llc.bokadev.kompass.presentation.screens.essentials.linkTitle

@@ -15,7 +15,7 @@ import kotlin.test.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.*
-import llc.bokadev.kompass.core.util.*
+import llc.bokadev.kompass.core.utils.*
 import llc.bokadev.kompass.domain.model.*
 import llc.bokadev.kompass.domain.repository.*
 import llc.bokadev.kompass.domain.usecase.*

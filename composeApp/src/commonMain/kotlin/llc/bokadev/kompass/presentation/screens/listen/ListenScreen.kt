@@ -16,9 +16,9 @@ import llc.bokadev.kompass.core.audio.AudioState
 import llc.bokadev.kompass.core.audio.NavAudioContext
 import llc.bokadev.kompass.core.audio.NavAudioHost
 import llc.bokadev.kompass.core.presentation.SnackbarBus
-import llc.bokadev.kompass.core.util.ConnectivityMonitor
-import llc.bokadev.kompass.core.util.currentAppLanguage
-import llc.bokadev.kompass.core.util.rememberAppStrings
+import llc.bokadev.kompass.core.utils.ConnectivityMonitor
+import llc.bokadev.kompass.core.utils.currentAppLanguage
+import llc.bokadev.kompass.core.utils.rememberAppStrings
 import llc.bokadev.kompass.presentation.shared.StatusBarIconsEffect
 import llc.bokadev.kompass.presentation.shared.rememberReduceMotion
 import org.koin.compose.koinInject

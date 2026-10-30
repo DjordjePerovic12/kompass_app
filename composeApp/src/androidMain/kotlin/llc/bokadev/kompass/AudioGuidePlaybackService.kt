@@ -30,7 +30,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import llc.bokadev.kompass.core.util.AudioGuidePlaybackState
+import llc.bokadev.kompass.core.utils.AudioGuidePlaybackState
 
 class AudioGuidePlaybackService : Service() {
 

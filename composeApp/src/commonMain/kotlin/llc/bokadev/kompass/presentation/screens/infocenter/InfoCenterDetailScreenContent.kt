@@ -18,10 +18,10 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import llc.bokadev.kompass.core.presentation.mvi.BaseContentView
-import llc.bokadev.kompass.core.util.currentAppLanguage
-import llc.bokadev.kompass.core.util.rememberAppStrings
-import llc.bokadev.kompass.core.util.toNoticeDate
-import llc.bokadev.kompass.core.util.uppercaseFor
+import llc.bokadev.kompass.core.utils.currentAppLanguage
+import llc.bokadev.kompass.core.utils.rememberAppStrings
+import llc.bokadev.kompass.core.utils.toNoticeDate
+import llc.bokadev.kompass.core.utils.uppercaseFor
 import llc.bokadev.kompass.presentation.screens.home.toNoticeLabel
 import llc.bokadev.kompass.presentation.screens.placedetail.components.DetailGlyph
 import llc.bokadev.kompass.presentation.screens.placedetail.components.DetailHero

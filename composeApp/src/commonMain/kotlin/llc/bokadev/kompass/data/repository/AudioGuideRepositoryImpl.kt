@@ -9,7 +9,7 @@ import io.ktor.client.request.get
 import io.ktor.http.isSuccess
 import kotlin.time.Duration.Companion.minutes
 import llc.bokadev.kompass.BuildKonfig
-import llc.bokadev.kompass.core.util.OfflineAudioStore
+import llc.bokadev.kompass.core.utils.OfflineAudioStore
 import llc.bokadev.kompass.domain.repository.AudioGuideRepository
 
 class AudioGuideRepositoryImpl(

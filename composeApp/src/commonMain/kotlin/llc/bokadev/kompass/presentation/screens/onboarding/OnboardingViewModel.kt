@@ -4,7 +4,7 @@ import llc.bokadev.kompass.core.presentation.mvi.BaseAction
 import llc.bokadev.kompass.core.presentation.mvi.BaseViewModel
 import llc.bokadev.kompass.core.presentation.mvi.BaseViewState
 import llc.bokadev.kompass.core.presentation.mvi.UiText
-import llc.bokadev.kompass.core.util.AppPreferences
+import llc.bokadev.kompass.core.utils.AppPreferences
 
 data class OnboardingState(
     /** False until the intro has been completed once on this device (existing preference key). */

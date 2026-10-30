@@ -7,8 +7,8 @@ import kotlin.test.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.*
-import llc.bokadev.kompass.core.util.AppPreferences
-import llc.bokadev.kompass.core.util.ConnectivityMonitor
+import llc.bokadev.kompass.core.utils.AppPreferences
+import llc.bokadev.kompass.core.utils.ConnectivityMonitor
 import llc.bokadev.kompass.domain.location.UserLocationProvider
 import llc.bokadev.kompass.domain.model.*
 import llc.bokadev.kompass.domain.repository.AudioGuideRepository
@@ -18,7 +18,7 @@ import llc.bokadev.kompass.domain.repository.PlaceRepository
 import llc.bokadev.kompass.domain.usecase.GetActivitiesUseCase
 import llc.bokadev.kompass.domain.usecase.GetAudioCatalogUseCase
 import llc.bokadev.kompass.domain.usecase.GetLocalFindsUseCase
-import llc.bokadev.kompass.presentation.navigation.Route
+import llc.bokadev.kompass.core.navigation.Screen
 import llc.bokadev.kompass.presentation.screens.home.HomeArea
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -82,7 +82,7 @@ class ListenViewModelTest {
         vm.onAction(ListenAction.Open(legend.entry.source, legend.entry.id))
         vm.onAction(ListenAction.Open(AudioSource.PLACE, "rocks"))
         assertEquals(
-            listOf(Route.ExperienceDetail("boat"), Route.LocalFindDetail("legend"), Route.PlaceDetail("rocks")),
+            listOf(Screen.ExperienceDetailScreen("boat"), Screen.LocalFindDetailScreen("legend"), Screen.PlaceDetailScreen("rocks")),
             navigator.routes
         )
     }

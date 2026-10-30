@@ -12,7 +12,7 @@ import llc.bokadev.kompass.domain.model.EventFilterKind
 import llc.bokadev.kompass.domain.repository.AnalyticsRepository
 import llc.bokadev.kompass.domain.usecase.GetEventFiltersUseCase
 import llc.bokadev.kompass.domain.usecase.GetEventsUseCase
-import llc.bokadev.kompass.presentation.navigation.Route
+import llc.bokadev.kompass.core.navigation.Screen
 
 class EventsViewModel(
     private val getEvents: GetEventsUseCase,
@@ -61,7 +61,7 @@ class EventsViewModel(
             }
             is EventsAction.OpenEvent -> {
                 analytics.trackEventView(action.id, contentOrigin = "events_screen")
-                navigator.navigateTo(Route.EventDetail(action.id))
+                navigator.navigateTo(Screen.EventDetailScreen(action.id))
             }
             EventsAction.Back -> navigator.navigateUp()
         }

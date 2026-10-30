@@ -5,9 +5,9 @@ import llc.bokadev.kompass.core.presentation.mvi.BaseViewModel
 import llc.bokadev.kompass.core.presentation.mvi.BaseViewState
 import llc.bokadev.kompass.core.presentation.mvi.Navigator
 import llc.bokadev.kompass.core.presentation.mvi.UiText
-import llc.bokadev.kompass.core.util.AppPreferences
-import llc.bokadev.kompass.core.util.supportedDeviceLanguage
-import llc.bokadev.kompass.presentation.navigation.Route
+import llc.bokadev.kompass.core.utils.AppPreferences
+import llc.bokadev.kompass.core.utils.supportedDeviceLanguage
+import llc.bokadev.kompass.core.navigation.Screen
 
 data class LanguagePickerState(
     override val isLoading: Boolean = false,
@@ -32,6 +32,6 @@ class LanguagePickerViewModel(
         }
         prefs.setSelectedLanguage(code)
         prefs.setFirstLaunch(false)
-        navigator.navigateTo(Route.Main, popUpToRoute = Route.LanguagePicker, popUpToInclusive = true)
+        navigator.navigateTo(Screen.MainScreen, popUpToRoute = Screen.LanguagePickerScreen, popUpToInclusive = true)
     }
 }
