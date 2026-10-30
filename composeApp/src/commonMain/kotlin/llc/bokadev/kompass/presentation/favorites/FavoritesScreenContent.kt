@@ -64,6 +64,8 @@ import llc.bokadev.kompass.ui.theme.pageGradientBackground
 import org.jetbrains.compose.resources.stringResource
 import llc.bokadev.kompass.presentation.shared.localizedTypeLabel
 import llc.bokadev.kompass.presentation.shared.shortLabel
+import androidx.compose.foundation.layout.Box
+import llc.bokadev.kompass.presentation.shared.StatusBarScrim
 
 /**
  * Lamplight Saved (Saved spec): favorites grouped by area, most recently saved first, with
@@ -84,81 +86,85 @@ fun FavoritesScreenContent(
     val colors = KompassTheme.colors
     val otherLabel = stringResource(Res.string.saved_group_other)
 
-    Column(modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
-        LamplightHeader(searchPlaceholder = null, onLanguageClick = onLanguageClick, onSearchClick = null) {
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(text = stringResource(Res.string.redesign_saved), style = KompassTheme.typography.gloockRegular40, color = colors.nightBlack, modifier = Modifier.semantics { heading() })
-                Text(
-                    text = stringResource(Res.string.redesign_saved_subtitle),
-                    style = KompassTheme.typography.geologicaMedium16.copy(fontSize = 15.sp, fontWeight = FontWeight.Medium),
-                    color = colors.nightBlack
-                )
-            }
-        }
-
-        Column(Modifier.padding(start = 20.dp, end = 20.dp, top = 18.dp)) {
-            if (!state.isLoading && state.groups.isEmpty()) {
-                SavedEmptyState(
-                    title = stringResource(Res.string.saved_empty_title),
-                    body = stringResource(Res.string.saved_empty_body),
-                    actionLabel = stringResource(Res.string.saved_explore_kotor),
-                    onExplore = onExploreKotorClick
-                )
-                return@Column
-            }
-            if (state.groups.isNotEmpty()) {
-                Text(
-                    text = stringResource(Res.string.saved_saved_count, state.savedCount.toString()),
-                    style = KompassTheme.typography.geologicaRegular14.copy(fontWeight = FontWeight.SemiBold),
-                    color = colors.boneWhite
-                )
-                if (!state.inRegion) {
-                    Text(text = stringResource(Res.string.saved_distances_in_bay), style = KompassTheme.typography.geologicaRegular14, color = KompassTheme.colors.white85)
+    val scroll = rememberScrollState()
+    Box(modifier.fillMaxSize()) {
+        Column(Modifier.fillMaxSize().verticalScroll(scroll)) {
+            LamplightHeader(searchPlaceholder = null, onLanguageClick = onLanguageClick, onSearchClick = null) {
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(text = stringResource(Res.string.redesign_saved), style = KompassTheme.typography.gloockRegular40, color = colors.nightBlack, modifier = Modifier.semantics { heading() })
+                    Text(
+                        text = stringResource(Res.string.redesign_saved_subtitle),
+                        style = KompassTheme.typography.geologicaMedium16.copy(fontSize = 15.sp, fontWeight = FontWeight.Medium),
+                        color = colors.nightBlack
+                    )
                 }
-                if (state.refreshFailed) {
-                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 8.dp)) {
-                        Text(
-                            text = stringResource(Res.string.saved_couldnt_refresh),
-                            style = KompassTheme.typography.geologicaRegular14,
-                            color = KompassTheme.colors.white85,
-                            modifier = Modifier.weight(1f)
-                        )
-                        Text(
-                            text = stringResource(Res.string.retry),
-                            style = KompassTheme.typography.geologicaRegular14.copy(fontWeight = FontWeight.SemiBold),
-                            color = colors.boneWhite,
-                            modifier = Modifier
-                                .heightIn(min = 44.dp)
-                                .clip(KompassShapes.pill)
-                                .clickable(role = Role.Button, onClick = onRetryClick)
-                                .padding(horizontal = 12.dp, vertical = 12.dp)
-                        )
+            }
+
+            Column(Modifier.padding(start = 20.dp, end = 20.dp, top = 18.dp)) {
+                if (!state.isLoading && state.groups.isEmpty()) {
+                    SavedEmptyState(
+                        title = stringResource(Res.string.saved_empty_title),
+                        body = stringResource(Res.string.saved_empty_body),
+                        actionLabel = stringResource(Res.string.saved_explore_kotor),
+                        onExplore = onExploreKotorClick
+                    )
+                    return@Column
+                }
+                if (state.groups.isNotEmpty()) {
+                    Text(
+                        text = stringResource(Res.string.saved_saved_count, state.savedCount.toString()),
+                        style = KompassTheme.typography.geologicaRegular14.copy(fontWeight = FontWeight.SemiBold),
+                        color = colors.boneWhite
+                    )
+                    if (!state.inRegion) {
+                        Text(text = stringResource(Res.string.saved_distances_in_bay), style = KompassTheme.typography.geologicaRegular14, color = KompassTheme.colors.white85)
+                    }
+                    if (state.refreshFailed) {
+                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 8.dp)) {
+                            Text(
+                                text = stringResource(Res.string.saved_couldnt_refresh),
+                                style = KompassTheme.typography.geologicaRegular14,
+                                color = KompassTheme.colors.white85,
+                                modifier = Modifier.weight(1f)
+                            )
+                            Text(
+                                text = stringResource(Res.string.retry),
+                                style = KompassTheme.typography.geologicaRegular14.copy(fontWeight = FontWeight.SemiBold),
+                                color = colors.boneWhite,
+                                modifier = Modifier
+                                    .heightIn(min = 44.dp)
+                                    .clip(KompassShapes.pill)
+                                    .clickable(role = Role.Button, onClick = onRetryClick)
+                                    .padding(horizontal = 12.dp, vertical = 12.dp)
+                            )
+                        }
+                    }
+                }
+                state.groups.forEach { group ->
+                    val area = group.key.groupLabel(otherLabel)
+                    val groupHeading = stringResource(Res.string.saved_group_heading, area, group.items.size.toString())
+                    Row(
+                        modifier = Modifier
+                            .padding(top = 26.dp, bottom = 10.dp)
+                            .clearAndSetSemantics {
+                                heading()
+                                contentDescription = groupHeading
+                            },
+                        verticalAlignment = Alignment.Bottom,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(text = area, style = KompassTheme.typography.gloockRegular26, color = colors.boneWhite)
+                        Text(text = group.items.size.toString(), style = KompassTheme.typography.geologicaRegular13, color = KompassTheme.colors.white85, modifier = Modifier.padding(bottom = 4.dp))
+                    }
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        group.items.forEach { item -> SavedItemRow(item, area, lang, onItemClick, onRemoveClick) }
                     }
                 }
             }
-            state.groups.forEach { group ->
-                val area = group.key.groupLabel(otherLabel)
-                val groupHeading = stringResource(Res.string.saved_group_heading, area, group.items.size.toString())
-                Row(
-                    modifier = Modifier
-                        .padding(top = 26.dp, bottom = 10.dp)
-                        .clearAndSetSemantics {
-                            heading()
-                            contentDescription = groupHeading
-                        },
-                    verticalAlignment = Alignment.Bottom,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Text(text = area, style = KompassTheme.typography.gloockRegular26, color = colors.boneWhite)
-                    Text(text = group.items.size.toString(), style = KompassTheme.typography.geologicaRegular13, color = KompassTheme.colors.white85, modifier = Modifier.padding(bottom = 4.dp))
-                }
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    group.items.forEach { item -> SavedItemRow(item, area, lang, onItemClick, onRemoveClick) }
-                }
-            }
+            // The shell already insets content above the floating bar; this is the spec's breathing room.
+            Spacer(Modifier.height(26.dp))
         }
-        // The shell already insets content above the floating bar; this is the spec's breathing room.
-        Spacer(Modifier.height(26.dp))
+        StatusBarScrim(visible = scroll.value > 0)
     }
 }
 

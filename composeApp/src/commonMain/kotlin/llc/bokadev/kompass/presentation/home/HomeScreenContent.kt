@@ -92,6 +92,7 @@ import org.jetbrains.compose.resources.stringResource
 import kotlin.time.ExperimentalTime
 import llc.bokadev.kompass.presentation.shared.label
 import llc.bokadev.kompass.presentation.shared.sectionTitle
+import llc.bokadev.kompass.presentation.shared.StatusBarScrim
 
 /**
  * The whole screen is one continuous light-purple-to-ink gradient (see
@@ -138,139 +139,141 @@ fun HomeScreenContent(
     val recentNewsTitle = stringResource(Res.string.recent_news)
     val upcomingEventsTitle = stringResource(Res.string.upcoming_events)
 
+    val pageScroll = rememberScrollState()
     Box(modifier) {
-    Column(
-        modifier = Modifier.fillMaxSize()
-            .pageGradientBackground()
-            .verticalScroll(rememberScrollState())
-    ) {
-        LamplightTopBar(
-            state = state,
-            onAreaClick = { showAreaSheet = true },
-            onLanguageClick = onLanguageClick,
-            onSearchClick = onSearchClick,
-            onUseMyLocationClick = { onAreaSelect(HomeArea.DEVICE) }
-        )
-        Spacer(Modifier.height(28.dp))
+        Column(
+            modifier = Modifier.fillMaxSize()
+                .pageGradientBackground()
+                .verticalScroll(pageScroll)
+        ) {
+            LamplightTopBar(
+                state = state,
+                onAreaClick = { showAreaSheet = true },
+                onLanguageClick = onLanguageClick,
+                onSearchClick = onSearchClick,
+                onUseMyLocationClick = { onAreaSelect(HomeArea.DEVICE) }
+            )
+            Spacer(Modifier.height(28.dp))
 
-        HomeSectionFrame(state, HomeSection.NEARBY, state.effectiveArea.sectionTitle(), onRetrySectionClick) {
-            NearbyYouSection(
-                state = state, lang = lang,
-                onPlaceClick = onPlaceOpen,
-                onListenClick = onListenClick,
-                favoriteKeySet = favoriteKeySet, onPlaceFavoriteToggle = onPlaceFavoriteToggle,
-                // Manual areas get "See all" too; the list opens filtered to the same area.
-                onSeeAll = onSeeAllNearbyClick,
-                title = state.effectiveArea.sectionTitle(),
-                emptyMessage = stringResource(Res.string.redesign_empty_area)
+            HomeSectionFrame(state, HomeSection.NEARBY, state.effectiveArea.sectionTitle(), onRetrySectionClick) {
+                NearbyYouSection(
+                    state = state, lang = lang,
+                    onPlaceClick = onPlaceOpen,
+                    onListenClick = onListenClick,
+                    favoriteKeySet = favoriteKeySet, onPlaceFavoriteToggle = onPlaceFavoriteToggle,
+                    // Manual areas get "See all" too; the list opens filtered to the same area.
+                    onSeeAll = onSeeAllNearbyClick,
+                    title = state.effectiveArea.sectionTitle(),
+                    emptyMessage = stringResource(Res.string.redesign_empty_area)
+                )
+            }
+            Spacer(Modifier.height(28.dp))
+
+            // Spec A4: an empty Must See hides entirely (no title, no placeholder) and has no "See all" in v1.
+            val hideMustSee = state.sections[HomeSection.HIGHLIGHTS] == SectionStatus.READY && state.mustSeePlaces.isEmpty()
+            if (!hideMustSee) {
+                HomeSectionFrame(state, HomeSection.HIGHLIGHTS, landmarksTitle, onRetrySectionClick, darkZone = true) {
+                    MustSeeSection(
+                        places = state.mustSeePlaces, lang = lang,
+                        onPlaceClick = onPlaceOpen, favoriteKeySet = favoriteKeySet,
+                        onPlaceFavoriteToggle = onPlaceFavoriteToggle,
+                        title = landmarksTitle
+                    )
+                }
+                Spacer(Modifier.height(28.dp))
+            }
+
+            // Successfully loaded but empty sections are hidden; loading and failure (with Retry) still show.
+            val hideNotices = state.sections[HomeSection.NOTICES] == SectionStatus.READY && state.infoCenterNotices.isEmpty()
+            if (!hideNotices) {
+                HomeSectionFrame(state, HomeSection.NOTICES, recentNewsTitle, onRetrySectionClick, darkZone = true) {
+                    InfoCenterPreviewSection(
+                        notices = state.infoCenterNotices, lang = lang,
+                        onNoticeClick = onNoticeClick,
+                        onSeeAll = onSeeAllInfoCenterClick, title = recentNewsTitle
+                    )
+                }
+                Spacer(Modifier.height(28.dp))
+            }
+
+            val hideEvents = state.sections[HomeSection.EVENTS] == SectionStatus.READY && state.upcomingEvents.isEmpty()
+            if (!hideEvents) {
+                HomeSectionFrame(state, HomeSection.EVENTS, upcomingEventsTitle, onRetrySectionClick, darkZone = true) {
+                    UpcomingEventsSection(
+                        events = state.upcomingEvents, lang = lang,
+                        onEventClick = onEventClick,
+                        onSeeAll = onSeeAllEventsClick,
+                        title = upcomingEventsTitle
+                    )
+                }
+                Spacer(Modifier.height(28.dp))
+            }
+        }
+
+        if (state.showLocationPrompt) {
+            AlertDialog(
+                onDismissRequest = onLocationPromptDismiss,
+                title = { Text(stringResource(Res.string.location_prompt_title)) },
+                text = { Text(stringResource(Res.string.location_prompt_body)) },
+                confirmButton = {
+                    TextButton(onClick = onLocationPromptContinueClick) {
+                        Text(stringResource(Res.string.continue_label))
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = onLocationPromptDismiss) {
+                        Text(stringResource(Res.string.not_now))
+                    }
+                }
             )
         }
-        Spacer(Modifier.height(28.dp))
 
-        // Spec A4: an empty Must See hides entirely (no title, no placeholder) and has no "See all" in v1.
-        val hideMustSee = state.sections[HomeSection.HIGHLIGHTS] == SectionStatus.READY && state.mustSeePlaces.isEmpty()
-        if (!hideMustSee) {
-            HomeSectionFrame(state, HomeSection.HIGHLIGHTS, landmarksTitle, onRetrySectionClick, darkZone = true) {
-                MustSeeSection(
-                    places = state.mustSeePlaces, lang = lang,
-                    onPlaceClick = onPlaceOpen, favoriteKeySet = favoriteKeySet,
-                    onPlaceFavoriteToggle = onPlaceFavoriteToggle,
-                    title = landmarksTitle
-                )
-            }
-            Spacer(Modifier.height(28.dp))
-        }
-
-        // Successfully loaded but empty sections are hidden; loading and failure (with Retry) still show.
-        val hideNotices = state.sections[HomeSection.NOTICES] == SectionStatus.READY && state.infoCenterNotices.isEmpty()
-        if (!hideNotices) {
-            HomeSectionFrame(state, HomeSection.NOTICES, recentNewsTitle, onRetrySectionClick, darkZone = true) {
-                InfoCenterPreviewSection(
-                    notices = state.infoCenterNotices, lang = lang,
-                    onNoticeClick = onNoticeClick,
-                    onSeeAll = onSeeAllInfoCenterClick, title = recentNewsTitle
-                )
-            }
-            Spacer(Modifier.height(28.dp))
-        }
-
-        val hideEvents = state.sections[HomeSection.EVENTS] == SectionStatus.READY && state.upcomingEvents.isEmpty()
-        if (!hideEvents) {
-            HomeSectionFrame(state, HomeSection.EVENTS, upcomingEventsTitle, onRetrySectionClick, darkZone = true) {
-                UpcomingEventsSection(
-                    events = state.upcomingEvents, lang = lang,
-                    onEventClick = onEventClick,
-                    onSeeAll = onSeeAllEventsClick,
-                    title = upcomingEventsTitle
-                )
-            }
-            Spacer(Modifier.height(28.dp))
-        }
-    }
-
-    if (state.showLocationPrompt) {
-        AlertDialog(
-            onDismissRequest = onLocationPromptDismiss,
-            title = { Text(stringResource(Res.string.location_prompt_title)) },
-            text = { Text(stringResource(Res.string.location_prompt_body)) },
-            confirmButton = {
-                TextButton(onClick = onLocationPromptContinueClick) {
-                    Text(stringResource(Res.string.continue_label))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = onLocationPromptDismiss) {
-                    Text(stringResource(Res.string.not_now))
-                }
-            }
-        )
-    }
-
-    if (showAreaSheet) {
-        ModalBottomSheet(
-            onDismissRequest = { showAreaSheet = false },
-            containerColor = KompassTheme.colors.white
-        ) {
-            Column(
-                Modifier.padding(horizontal = 20.dp, vertical = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+        if (showAreaSheet) {
+            ModalBottomSheet(
+                onDismissRequest = { showAreaSheet = false },
+                containerColor = KompassTheme.colors.white
             ) {
-                Text(
-                    text = stringResource(Res.string.redesign_choose_area),
-                    style = KompassTheme.typography.helveticaBold24.copy(fontSize = 22.sp, lineHeight = 28.sp),
-                    color = KompassTheme.colors.inkBlack,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-                HomeArea.entries.forEach { area ->
-                    val selected = state.area == area
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .heightIn(min = 48.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(if (selected) KompassTheme.colors.lavender else Color.Transparent)
-                            .clickable {
-                                showAreaSheet = false
-                                onAreaSelect(area)
+                Column(
+                    Modifier.padding(horizontal = 20.dp, vertical = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text(
+                        text = stringResource(Res.string.redesign_choose_area),
+                        style = KompassTheme.typography.helveticaBold24.copy(fontSize = 22.sp, lineHeight = 28.sp),
+                        color = KompassTheme.colors.inkBlack,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                    HomeArea.entries.forEach { area ->
+                        val selected = state.area == area
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(min = 48.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(if (selected) KompassTheme.colors.lavender else Color.Transparent)
+                                .clickable {
+                                    showAreaSheet = false
+                                    onAreaSelect(area)
+                                }
+                                .padding(horizontal = 14.dp, vertical = 12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text(
+                                text = area.label(),
+                                style = KompassTheme.typography.helveticaMedium16.copy(fontSize = 16.sp, lineHeight = 24.sp),
+                                color = KompassTheme.colors.inkBlack,
+                                modifier = Modifier.weight(1f)
+                            )
+                            if (selected) {
+                                CheckIcon(color = KompassTheme.colors.periwinkle, size = 16.dp)
                             }
-                            .padding(horizontal = 14.dp, vertical = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Text(
-                            text = area.label(),
-                            style = KompassTheme.typography.helveticaMedium16.copy(fontSize = 16.sp, lineHeight = 24.sp),
-                            color = KompassTheme.colors.inkBlack,
-                            modifier = Modifier.weight(1f)
-                        )
-                        if (selected) {
-                            CheckIcon(color = KompassTheme.colors.periwinkle, size = 16.dp)
                         }
                     }
                 }
             }
         }
-    }
+        StatusBarScrim(visible = pageScroll.value > 0)
     }
 }
 

@@ -63,7 +63,7 @@
     <string name="redesign_carousel_item_of">Élément %1$s sur %2$s</string>
     <string name="redesign_save_title">Enregistrer %1$s</string>
     <string name="redesign_remove_title_from_saved">Retirer %1$s des enregistrés</string>
-    <string name="redesign_must_see_save">Enregistrer pour plus tard</string>
+    <string name="redesign_must_see_save">Enregistrer</string>
     <string name="redesign_must_see_saved">Enregistré</string>
     <string name="redesign_not_saved">Non enregistré</string>
     <string name="redesign_save_action">Enregistrer</string>

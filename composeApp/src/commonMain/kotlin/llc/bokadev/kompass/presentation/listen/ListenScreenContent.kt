@@ -97,6 +97,8 @@ import llc.bokadev.kompass.presentation.shared.areaLabel
 import llc.bokadev.kompass.ui.theme.KompassTheme
 import llc.bokadev.kompass.ui.theme.pageGradientBackground
 import org.jetbrains.compose.resources.stringResource
+import llc.bokadev.kompass.presentation.shared.StatusBarScrim
+import androidx.compose.foundation.lazy.rememberLazyListState
 
 /**
  * Lamplight audio library ("Listen"): play in place, one active track, a Now playing card while
@@ -131,106 +133,111 @@ fun ListenScreenContent(
     // Language from the composition (AppEnvironment), not Koin, so the content stays previewable.
     val lang = LocalAppLocale.current.substringBefore('-')
     val l = listenLabels()
-    LazyColumn(
-        modifier = modifier.fillMaxSize().pageGradientBackground(),
-        contentPadding = PaddingValues(bottom = 26.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
-        item(key = "top") { TopBar(state.view, l, onBackClick, onViewSelect) }
-        nowPlaying?.trackOrNull?.let { track ->
-            item(key = "now") {
-                val s = nowPlaying
-                val disc = s.disc()
-                val position = (s as? AudioState.Playing)?.positionMs ?: (s as? AudioState.Paused)?.positionMs ?: 0L
-                val duration = (s as? AudioState.Playing)?.durationMs ?: (s as? AudioState.Paused)?.durationMs ?: knownDurations[track.id]
-                NowPlayingCard(
+    val listState = rememberLazyListState()
+    Box(modifier.fillMaxSize()) {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize().pageGradientBackground(),
+            state = listState,
+            contentPadding = PaddingValues(bottom = 26.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            item(key = "top") { TopBar(state.view, l, onBackClick, onViewSelect) }
+            nowPlaying?.trackOrNull?.let { track ->
+                item(key = "now") {
+                    val s = nowPlaying
+                    val disc = s.disc()
+                    val position = (s as? AudioState.Playing)?.positionMs ?: (s as? AudioState.Paused)?.positionMs ?: 0L
+                    val duration = (s as? AudioState.Playing)?.durationMs ?: (s as? AudioState.Paused)?.durationMs ?: knownDurations[track.id]
+                    NowPlayingCard(
+                        title = track.title,
+                        disc = disc,
+                        positionMs = position,
+                        durationMs = duration,
+                        labels = NowPlayingLabels(
+                            status = when (disc) {
+                                DiscState.Loading -> l.loading
+                                DiscState.Playing -> l.nowPlaying
+                                DiscState.Failed -> l.couldntPlay
+                                else -> l.paused
+                            },
+                            stop = l.stop, back15 = l.back15, forward15 = l.forward15,
+                            mainButton = playDescription(disc, track.title, position, duration, l),
+                            region = l.nowPlayingRegion, progressValue = l.progressValue, retry = l.retry
+                        ),
+                        reduceMotion = reduceMotion,
+                        formatTime = { it.toClockDuration() ?: "0:00" },
+                        onToggle = onToggleCurrentClick,
+                        onStop = onStopClick,
+                        onSeek = onSeek,
+                        onSkip = onSkip,
+                        onOpen = onNowPlayingClick,
+                        modifier = Modifier
+                            .animateItem(fadeInSpec = tween(240), fadeOutSpec = tween(240))
+                            .padding(horizontal = 20.dp)
+                            .padding(top = 6.dp)
+                    )
+                }
+            }
+            val tracks = state.visible
+            if (state.isIncomplete) {
+                item(key = "incomplete") {
+                    Text(
+                        l.incomplete,
+                        style = KompassTheme.typography.geologicaRegular14,
+                        color = KompassTheme.colors.stoneGray,
+                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
+                    )
+                }
+            }
+            val error = state.error
+            when {
+                error != null && state.tracks.isEmpty() -> item(key = "error") { Message(stringResource(error.messageRes), l.retry, onRetryClick) }
+                !state.isLoading && tracks.isEmpty() ->
+                    item(key = "empty") { Message(if (state.view == ListenView.DOWNLOADED) l.emptyDownloads else l.emptyAll, null, {}) }
+            }
+            items(tracks, key = { it.track.id }) { item ->
+                val track = item.track
+                val active = audio.trackOrNull?.id == track.id
+                val disc = if (active) audio.disc() else DiscState.Idle
+                val position = (audio as? AudioState.Playing)?.positionMs ?: (audio as? AudioState.Paused)?.positionMs ?: 0L
+                val duration = knownDurations[track.id]
+                val unavailable = !online && item.download != DownloadState.Downloaded && !active
+                val label = listOfNotNull(item.entry.typeLabel(l), item.areaKey.areaLabel().takeIf { it.isNotBlank() })
+                    .joinToString(" · ").uppercaseFor(lang)
+                val time = when {
+                    active -> "${position.toClockDuration() ?: "0:00"} / ${duration?.toClockDuration() ?: "–:––"}"
+                    else -> duration?.toClockDuration()
+                }
+                val availability = when (val d = item.download) {
+                    is DownloadState.Downloading -> l.downloading.replace("{n}", ((d.progress ?: 0f) * 100).toInt().toString())
+                    DownloadState.Downloaded -> l.downloaded
+                    DownloadState.NotDownloaded -> if (online) l.streamsOnline else l.needsInternet
+                }
+                val meta = listOfNotNull(time, availability, if (track.isEnglishFallback) "EN · ${l.englishAudio}" else null).joinToString(" · ")
+                ListenTrackRow(
+                    label = label,
                     title = track.title,
+                    meta = meta,
+                    photoUrl = item.entry.photo?.let(::buildPhotoUrl),
                     disc = disc,
-                    positionMs = position,
-                    durationMs = duration,
-                    labels = NowPlayingLabels(
-                        status = when (disc) {
-                            DiscState.Loading -> l.loading
-                            DiscState.Playing -> l.nowPlaying
-                            DiscState.Failed -> l.couldntPlay
-                            else -> l.paused
-                        },
-                        stop = l.stop, back15 = l.back15, forward15 = l.forward15,
-                        mainButton = playDescription(disc, track.title, position, duration, l),
-                        region = l.nowPlayingRegion, progressValue = l.progressValue, retry = l.retry
-                    ),
+                    active = active,
+                    unavailable = unavailable,
+                    playDescription = playDescription(disc, track.title, position, duration, l),
+                    download = item.download,
+                    downloadDescription = when (val d = item.download) {
+                        DownloadState.NotDownloaded -> l.downloadFor.replace("{title}", track.title)
+                        is DownloadState.Downloading -> l.downloadingTapToCancel.replace("{n}", ((d.progress ?: 0f) * 100).toInt().toString())
+                        DownloadState.Downloaded -> l.downloadedTapToRemove
+                    },
                     reduceMotion = reduceMotion,
-                    formatTime = { it.toClockDuration() ?: "0:00" },
-                    onToggle = onToggleCurrentClick,
-                    onStop = onStopClick,
-                    onSeek = onSeek,
-                    onSkip = onSkip,
-                    onOpen = onNowPlayingClick,
-                    modifier = Modifier
-                        .animateItem(fadeInSpec = tween(240), fadeOutSpec = tween(240))
-                        .padding(horizontal = 20.dp)
-                        .padding(top = 6.dp)
+                    onPlay = { onPlayClick(item) },
+                    onOpen = { onTrackClick(item) },
+                    onDownload = { onDownloadClick(item) },
+                    modifier = Modifier.animateItem().padding(horizontal = 20.dp)
                 )
             }
         }
-        val tracks = state.visible
-        if (state.isIncomplete) {
-            item(key = "incomplete") {
-                Text(
-                    l.incomplete,
-                    style = KompassTheme.typography.geologicaRegular14,
-                    color = KompassTheme.colors.stoneGray,
-                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
-                )
-            }
-        }
-        val error = state.error
-        when {
-            error != null && state.tracks.isEmpty() -> item(key = "error") { Message(stringResource(error.messageRes), l.retry, onRetryClick) }
-            !state.isLoading && tracks.isEmpty() ->
-                item(key = "empty") { Message(if (state.view == ListenView.DOWNLOADED) l.emptyDownloads else l.emptyAll, null, {}) }
-        }
-        items(tracks, key = { it.track.id }) { item ->
-            val track = item.track
-            val active = audio.trackOrNull?.id == track.id
-            val disc = if (active) audio.disc() else DiscState.Idle
-            val position = (audio as? AudioState.Playing)?.positionMs ?: (audio as? AudioState.Paused)?.positionMs ?: 0L
-            val duration = knownDurations[track.id]
-            val unavailable = !online && item.download != DownloadState.Downloaded && !active
-            val label = listOfNotNull(item.entry.typeLabel(l), item.areaKey.areaLabel().takeIf { it.isNotBlank() })
-                .joinToString(" · ").uppercaseFor(lang)
-            val time = when {
-                active -> "${position.toClockDuration() ?: "0:00"} / ${duration?.toClockDuration() ?: "–:––"}"
-                else -> duration?.toClockDuration()
-            }
-            val availability = when (val d = item.download) {
-                is DownloadState.Downloading -> l.downloading.replace("{n}", ((d.progress ?: 0f) * 100).toInt().toString())
-                DownloadState.Downloaded -> l.downloaded
-                DownloadState.NotDownloaded -> if (online) l.streamsOnline else l.needsInternet
-            }
-            val meta = listOfNotNull(time, availability, if (track.isEnglishFallback) "EN · ${l.englishAudio}" else null).joinToString(" · ")
-            ListenTrackRow(
-                label = label,
-                title = track.title,
-                meta = meta,
-                photoUrl = item.entry.photo?.let(::buildPhotoUrl),
-                disc = disc,
-                active = active,
-                unavailable = unavailable,
-                playDescription = playDescription(disc, track.title, position, duration, l),
-                download = item.download,
-                downloadDescription = when (val d = item.download) {
-                    DownloadState.NotDownloaded -> l.downloadFor.replace("{title}", track.title)
-                    is DownloadState.Downloading -> l.downloadingTapToCancel.replace("{n}", ((d.progress ?: 0f) * 100).toInt().toString())
-                    DownloadState.Downloaded -> l.downloadedTapToRemove
-                },
-                reduceMotion = reduceMotion,
-                onPlay = { onPlayClick(item) },
-                onOpen = { onTrackClick(item) },
-                onDownload = { onDownloadClick(item) },
-                modifier = Modifier.animateItem().padding(horizontal = 20.dp)
-            )
-        }
+        StatusBarScrim(visible = listState.firstVisibleItemIndex > 0 || listState.firstVisibleItemScrollOffset > 0)
     }
 
     removing?.let { item ->

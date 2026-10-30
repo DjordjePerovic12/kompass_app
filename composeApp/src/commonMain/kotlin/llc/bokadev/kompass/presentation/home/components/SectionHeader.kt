@@ -46,14 +46,17 @@ fun SectionHeader(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
+        // The title takes the room and wraps when it must; "See all" always stays on one line.
         Text(
             text = title,
+            modifier = Modifier.weight(1f),
             style = KompassTheme.typography.helveticaBold24.copy(fontSize = 22.sp, lineHeight = 28.sp),
             color = titleColor
         )
         if (onSeeAll != null) {
             Row(
                 modifier = Modifier
+                    .padding(start = 12.dp)
                     .heightIn(min = 32.dp)
                     .clip(RoundedCornerShape(8.dp))
                     .clickable(onClick = onSeeAll)
@@ -63,7 +66,9 @@ fun SectionHeader(
                 Text(
                     text = stringResource(Res.string.see_all),
                     style = KompassTheme.typography.helveticaMedium13,
-                    color = labelColor
+                    color = labelColor,
+                    maxLines = 1,
+                    softWrap = false
                 )
             }
         }

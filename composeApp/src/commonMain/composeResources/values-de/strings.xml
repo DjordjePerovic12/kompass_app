@@ -67,7 +67,7 @@
     <string name="redesign_carousel_item_of">Element %1$s von %2$s</string>
     <string name="redesign_save_title">%1$s speichern</string>
     <string name="redesign_remove_title_from_saved">%1$s aus Gespeichert entfernen</string>
-    <string name="redesign_must_see_save">Für später speichern</string>
+    <string name="redesign_must_see_save">Speichern</string>
     <string name="redesign_must_see_saved">Gespeichert</string>
     <string name="redesign_not_saved">Nicht gespeichert</string>
     <string name="redesign_save_action">Speichern</string>

@@ -121,6 +121,7 @@ import llc.bokadev.kompass.ui.theme.KompassShapes
 import llc.bokadev.kompass.ui.theme.KompassTheme
 import llc.bokadev.kompass.ui.theme.pageGradientBackground
 import org.jetbrains.compose.resources.stringResource
+import llc.bokadev.kompass.presentation.shared.StatusBarScrim
 
 /**
  * Lamplight Essentials (Essentials spec): answer a practical question in under ten seconds. Two
@@ -153,93 +154,97 @@ fun EssentialsScreenContent(
     val info = state.selectedTab == EssentialsTab.INFO
 
     var containerTop by remember { mutableStateOf(0f) }
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .pageGradientBackground()
-            .onGloballyPositioned { containerTop = it.positionInRoot().y }
-            .verticalScroll(if (info) infoScroll else utilityScroll)
-    ) {
-        LamplightHeader(
-            searchPlaceholder = null,
-            onLanguageClick = onLanguageClick,
-            onSearchClick = null,
-            footer = {
-                LamplightSegmentedControl(
-                    options = listOf(
-                        SegmentOption(stringResource(Res.string.essentials_essential_info)) { EssentialsIcon(EssentialsGlyph.Document, it, 18.dp) },
-                        SegmentOption(stringResource(Res.string.essentials_utilities)) { EssentialsIcon(EssentialsGlyph.Pin, it, 18.dp) }
-                    ),
-                    selectedIndex = if (info) 0 else 1,
-                    onSelect = { onTabSelect(if (it == 0) EssentialsTab.INFO else EssentialsTab.UTILITY) }
-                )
-            }
+    val activeScroll = if (info) infoScroll else utilityScroll
+    Box(modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .pageGradientBackground()
+                .onGloballyPositioned { containerTop = it.positionInRoot().y }
+                .verticalScroll(if (info) infoScroll else utilityScroll)
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                if (state.focusModuleId != null) {
-                    Row(
-                        modifier = Modifier
-                            .heightIn(min = 48.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .clickable(role = Role.Button, onClick = onBackClick)
-                            .padding(end = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        ChevronLeftIcon(color = colors.nightBlack, size = 16.dp)
-                        Text(
-                            text = stringResource(Res.string.detail_back),
-                            style = KompassTheme.typography.geologicaMedium16.copy(fontSize = 15.sp, fontWeight = FontWeight.SemiBold),
-                            color = colors.nightBlack
-                        )
-                    }
+            LamplightHeader(
+                searchPlaceholder = null,
+                onLanguageClick = onLanguageClick,
+                onSearchClick = null,
+                footer = {
+                    LamplightSegmentedControl(
+                        options = listOf(
+                            SegmentOption(stringResource(Res.string.essentials_essential_info)) { EssentialsIcon(EssentialsGlyph.Document, it, 18.dp) },
+                            SegmentOption(stringResource(Res.string.essentials_utilities)) { EssentialsIcon(EssentialsGlyph.Pin, it, 18.dp) }
+                        ),
+                        selectedIndex = if (info) 0 else 1,
+                        onSelect = { onTabSelect(if (it == 0) EssentialsTab.INFO else EssentialsTab.UTILITY) }
+                    )
                 }
+            ) {
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    if (state.focusModuleId != null) {
+                        Row(
+                            modifier = Modifier
+                                .heightIn(min = 48.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .clickable(role = Role.Button, onClick = onBackClick)
+                                .padding(end = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            ChevronLeftIcon(color = colors.nightBlack, size = 16.dp)
+                            Text(
+                                text = stringResource(Res.string.detail_back),
+                                style = KompassTheme.typography.geologicaMedium16.copy(fontSize = 15.sp, fontWeight = FontWeight.SemiBold),
+                                color = colors.nightBlack
+                            )
+                        }
+                    }
+                    Text(
+                        text = stringResource(Res.string.bottom_essentials),
+                        style = KompassTheme.typography.gloockRegular40,
+                        color = colors.nightBlack,
+                        modifier = Modifier.semantics { heading() }
+                    )
+                    Text(
+                        text = stringResource(Res.string.essentials_subtitle),
+                        style = KompassTheme.typography.geologicaMedium16.copy(fontSize = 15.sp, fontWeight = FontWeight.Medium),
+                        color = colors.nightBlack
+                    )
+                }
+            }
+            if (offline && info && !state.essentialsFailed) {
                 Text(
-                    text = stringResource(Res.string.bottom_essentials),
-                    style = KompassTheme.typography.gloockRegular40,
-                    color = colors.nightBlack,
-                    modifier = Modifier.semantics { heading() }
-                )
-                Text(
-                    text = stringResource(Res.string.essentials_subtitle),
-                    style = KompassTheme.typography.geologicaMedium16.copy(fontSize = 15.sp, fontWeight = FontWeight.Medium),
-                    color = colors.nightBlack
+                    text = stringResource(Res.string.essentials_offline_note),
+                    style = KompassTheme.typography.geologicaRegular13,
+                    color = KompassTheme.colors.white85,
+                    modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 12.dp)
                 )
             }
+            if (info) {
+                InfoView(
+                    state = state,
+                    lang = lang,
+                    scroll = infoScroll,
+                    focusModuleId = state.focusModuleId,
+                    containerTop = { containerTop },
+                    onItemToggle = onItemToggle,
+                    onItemExpand = onItemExpand,
+                    onHideReminderClick = onHideReminderClick,
+                    onRetryClick = onRetryClick,
+                    onDialClick = onDialClick,
+                    onLocationClick = onLocationClick,
+                    onLinkClick = onLinkClick
+                )
+            } else {
+                UtilitiesView(
+                    state = state,
+                    onRetryClick = onRetryClick,
+                    onUtilityMapClick = onUtilityMapClick,
+                    onTurnOnLocationClick = onTurnOnLocationClick
+                )
+            }
+            // The shell already insets content above the floating bar; this is the spec's breathing room.
+            Spacer(Modifier.height(26.dp))
         }
-        if (offline && info && !state.essentialsFailed) {
-            Text(
-                text = stringResource(Res.string.essentials_offline_note),
-                style = KompassTheme.typography.geologicaRegular13,
-                color = KompassTheme.colors.white85,
-                modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 12.dp)
-            )
-        }
-        if (info) {
-            InfoView(
-                state = state,
-                lang = lang,
-                scroll = infoScroll,
-                focusModuleId = state.focusModuleId,
-                containerTop = { containerTop },
-                onItemToggle = onItemToggle,
-                onItemExpand = onItemExpand,
-                onHideReminderClick = onHideReminderClick,
-                onRetryClick = onRetryClick,
-                onDialClick = onDialClick,
-                onLocationClick = onLocationClick,
-                onLinkClick = onLinkClick
-            )
-        } else {
-            UtilitiesView(
-                state = state,
-                onRetryClick = onRetryClick,
-                onUtilityMapClick = onUtilityMapClick,
-                onTurnOnLocationClick = onTurnOnLocationClick
-            )
-        }
-        // The shell already insets content above the floating bar; this is the spec's breathing room.
-        Spacer(Modifier.height(26.dp))
+        StatusBarScrim(visible = activeScroll.value > 0)
     }
 }
 

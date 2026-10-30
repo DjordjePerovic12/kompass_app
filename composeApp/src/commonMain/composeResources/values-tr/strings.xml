@@ -68,7 +68,7 @@
     <string name="redesign_carousel_item_of">Öğe %1$s / %2$s</string>
     <string name="redesign_save_title">%1$s kaydet</string>
     <string name="redesign_remove_title_from_saved">%1$s kaydedilenlerden kaldır</string>
-    <string name="redesign_must_see_save">Sonrası için kaydet</string>
+    <string name="redesign_must_see_save">Kaydet</string>
     <string name="redesign_must_see_saved">Kaydedildi</string>
     <string name="redesign_not_saved">Kaydedilmedi</string>
     <string name="redesign_save_action">Kaydet</string>

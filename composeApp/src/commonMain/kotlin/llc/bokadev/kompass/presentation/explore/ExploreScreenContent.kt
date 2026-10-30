@@ -65,6 +65,8 @@ import llc.bokadev.kompass.presentation.shared.LamplightHeader
 import llc.bokadev.kompass.ui.theme.KompassTheme
 import llc.bokadev.kompass.ui.theme.pageGradientBackground
 import org.jetbrains.compose.resources.stringResource
+import androidx.compose.foundation.layout.Box
+import llc.bokadev.kompass.presentation.shared.StatusBarScrim
 
 /**
  * Lamplight Explore (Explore spec): a grouped discovery hub where each group has a deliberately
@@ -85,78 +87,82 @@ fun ExploreScreenContent(
     val lang = LocalAppLocale.current.substringBefore('-')
     val stackTiles = LocalDensity.current.fontScale >= 1.3f
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .pageGradientBackground()
-            .verticalScroll(rememberScrollState())
-    ) {
-        LamplightHeader(
-            searchPlaceholder = stringResource(Res.string.search_placeholder),
-            onLanguageClick = onLanguageClick,
-            onSearchClick = onSearchClick
-        ) {
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(
-                    text = stringResource(Res.string.redesign_explore),
-                    style = KompassTheme.typography.gloockRegular40,
-                    color = colors.nightBlack,
-                    modifier = Modifier.semantics { heading() }
-                )
-                Text(
-                    text = stringResource(Res.string.redesign_explore_subtitle),
-                    style = KompassTheme.typography.geologicaMedium16.copy(fontSize = 15.sp, fontWeight = FontWeight.Medium),
-                    color = colors.nightBlack
-                )
-            }
-        }
-
+    val scroll = rememberScrollState()
+    Box(modifier.fillMaxSize()) {
         Column(
-            modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            modifier = Modifier
+                .fillMaxSize()
+                .pageGradientBackground()
+                .verticalScroll(scroll)
         ) {
-            ExploreHeroCard(
-                title = stringResource(Res.string.redesign_places),
-                subtitle = stringResource(Res.string.redesign_places_subtitle),
-                imageUrl = state.heroPhoto?.let(::buildPhotoUrl),
-                onClick = open(ExploreDestination.PLACES)
-            )
-            DiscoveryTiles(stackTiles, ::open)
-            if (state.hasWorthTheDrive) {
-                ExploreWideArchCard(
-                    label = stringResource(Res.string.explore_further_out),
-                    title = stringResource(Res.string.redesign_worth_drive),
-                    subtitle = stringResource(Res.string.redesign_worth_drive_subtitle),
-                    imageUrl = state.worthTheDrivePhoto?.let(::buildPhotoUrl),
-                    onClick = open(ExploreDestination.WORTH_THE_DRIVE)
+            LamplightHeader(
+                searchPlaceholder = stringResource(Res.string.search_placeholder),
+                onLanguageClick = onLanguageClick,
+                onSearchClick = onSearchClick
+            ) {
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(
+                        text = stringResource(Res.string.redesign_explore),
+                        style = KompassTheme.typography.gloockRegular40,
+                        color = colors.nightBlack,
+                        modifier = Modifier.semantics { heading() }
+                    )
+                    Text(
+                        text = stringResource(Res.string.redesign_explore_subtitle),
+                        style = KompassTheme.typography.geologicaMedium16.copy(fontSize = 15.sp, fontWeight = FontWeight.Medium),
+                        color = colors.nightBlack
+                    )
+                }
+            }
+
+            Column(
+                modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 24.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                ExploreHeroCard(
+                    title = stringResource(Res.string.redesign_places),
+                    subtitle = stringResource(Res.string.redesign_places_subtitle),
+                    imageUrl = state.heroPhoto?.let(::buildPhotoUrl),
+                    onClick = open(ExploreDestination.PLACES)
+                )
+                DiscoveryTiles(stackTiles, ::open)
+                if (state.hasWorthTheDrive) {
+                    ExploreWideArchCard(
+                        label = stringResource(Res.string.explore_further_out),
+                        title = stringResource(Res.string.redesign_worth_drive),
+                        subtitle = stringResource(Res.string.redesign_worth_drive_subtitle),
+                        imageUrl = state.worthTheDrivePhoto?.let(::buildPhotoUrl),
+                        onClick = open(ExploreDestination.WORTH_THE_DRIVE)
+                    )
+                }
+            }
+
+            if (state.hasStories) {
+                ExploreStoryCard(
+                    label = stringResource(if (state.storiesHaveAudio) Res.string.explore_read_listen else Res.string.explore_read),
+                    title = stringResource(Res.string.redesign_local_stories),
+                    subtitle = stringResource(Res.string.explore_stories_subtitle),
+                    onClick = open(ExploreDestination.STORIES),
+                    modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 30.dp)
                 )
             }
-        }
 
-        if (state.hasStories) {
-            ExploreStoryCard(
-                label = stringResource(if (state.storiesHaveAudio) Res.string.explore_read_listen else Res.string.explore_read),
-                title = stringResource(Res.string.redesign_local_stories),
-                subtitle = stringResource(Res.string.explore_stories_subtitle),
-                onClick = open(ExploreDestination.STORIES),
-                modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 30.dp)
+            Text(
+                text = stringResource(Res.string.explore_whats_on),
+                style = KompassTheme.typography.gloockRegular26,
+                color = colors.boneWhite,
+                modifier = Modifier
+                    .padding(start = 20.dp, end = 20.dp, top = 30.dp, bottom = 12.dp)
+                    .semantics { heading() }
             )
+            ExploreGroupedList(
+                rows = whatsOnRows(state, lang, ::open),
+                modifier = Modifier.padding(horizontal = 20.dp)
+            )
+            // The shell already insets content above the floating bar; this is the spec's breathing room.
+            Spacer(Modifier.height(26.dp))
         }
-
-        Text(
-            text = stringResource(Res.string.explore_whats_on),
-            style = KompassTheme.typography.gloockRegular26,
-            color = colors.boneWhite,
-            modifier = Modifier
-                .padding(start = 20.dp, end = 20.dp, top = 30.dp, bottom = 12.dp)
-                .semantics { heading() }
-        )
-        ExploreGroupedList(
-            rows = whatsOnRows(state, lang, ::open),
-            modifier = Modifier.padding(horizontal = 20.dp)
-        )
-        // The shell already insets content above the floating bar; this is the spec's breathing room.
-        Spacer(Modifier.height(26.dp))
+        StatusBarScrim(visible = scroll.value > 0)
     }
 }
 

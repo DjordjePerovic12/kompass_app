@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -185,15 +186,21 @@ fun MustSeeCard(
                     role = Role.Button
                     contentDescription = saveButtonDescription
                     stateDescription = if (isSaved) savedLabel else notSavedLabel
-                },
+                }
+                .padding(horizontal = 12.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
             verticalAlignment = Alignment.CenterVertically
         ) {
             val contentColor = if (isSaved) colors.chalkWhite else colors.nightBlack
+            // One line that shrinks before it ellipsizes, so long translations never push out the icon.
             Text(
                 text = if (isSaved) savedLabel else saveLabel,
+                modifier = Modifier.weight(1f, fill = false),
                 style = KompassTheme.typography.geologicaMedium16.copy(fontSize = 15.sp, fontWeight = FontWeight.SemiBold),
-                color = contentColor
+                color = contentColor,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                autoSize = TextAutoSize.StepBased(minFontSize = 12.sp, maxFontSize = 15.sp)
             )
             if (isSaved) BookmarkIcon(filled = true, color = contentColor, size = 16.dp)
             else PlusIcon(color = contentColor, size = 16.dp)

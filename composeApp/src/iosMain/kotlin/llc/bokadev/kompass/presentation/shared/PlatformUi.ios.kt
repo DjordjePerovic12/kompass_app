@@ -1,6 +1,7 @@
 package llc.bokadev.kompass.presentation.shared
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
 import platform.Foundation.NSCharacterSet
 import platform.Foundation.NSString
@@ -10,12 +11,26 @@ import platform.Foundation.stringByAddingPercentEncodingWithAllowedCharacters
 import platform.UIKit.UIAccessibilityIsReduceMotionEnabled
 import platform.UIKit.UIApplication
 import platform.UIKit.UIApplicationOpenSettingsURLString
+import platform.UIKit.UIStatusBarStyleDarkContent
+import platform.UIKit.UIStatusBarStyleLightContent
+import platform.UIKit.setStatusBarStyle
+import platform.UIKit.statusBarStyle
 
 @Composable
 actual fun rememberReduceMotion(): Boolean = remember { UIAccessibilityIsReduceMotionEnabled() }
 
+/** App-wide style; Info.plist sets UIViewControllerBasedStatusBarAppearance to false for this. */
 @Composable
-actual fun StatusBarIconsEffect(lightIcons: Boolean) = Unit
+actual fun StatusBarIconsEffect(lightIcons: Boolean) {
+    DisposableEffect(lightIcons) {
+        val app = UIApplication.sharedApplication
+        val previous = app.statusBarStyle
+        @Suppress("DEPRECATION")
+        app.setStatusBarStyle(if (lightIcons) UIStatusBarStyleLightContent else UIStatusBarStyleDarkContent, animated = true)
+        @Suppress("DEPRECATION")
+        onDispose { app.setStatusBarStyle(previous, animated = true) }
+    }
+}
 
 @Composable
 actual fun rememberExternalLauncher(): ExternalLauncher = remember { IosExternalLauncher() }
