@@ -22,34 +22,6 @@ class AudioGuideRepositoryImpl(
     private val offlineAudioStore: OfflineAudioStore
 ) : AudioGuideRepository {
 
-    override suspend fun getSignedAudioUrl(path: String): Resource<String, NetworkError, String?> = safeSupabaseCall {
-        val normalizedPath = normalizeAudioPath(path)
-        val cacheKey = buildCacheKey(normalizedPath)
-
-        cachedUri(normalizedPath)?.let { cachedUri ->
-            return@safeSupabaseCall cachedUri
-        }
-
-        val remoteUrl = if (normalizedPath.startsWith("http://") || normalizedPath.startsWith("https://")) {
-            normalizedPath
-        } else {
-            safeSupabaseCall {
-                supabase.storage
-                    .from("audio")
-                    .createSignedUrl(path = normalizedPath, expiresIn = 30.minutes)
-            }.getOrNull() ?: "${BuildKonfig.SUPABASE_URL}/storage/v1/object/public/audio/$normalizedPath"
-        }
-
-        val downloadedBytes = safeSupabaseCall { httpClient.get(remoteUrl).body<ByteArray>() }.getOrNull()
-        if (downloadedBytes != null) {
-            offlineAudioStore.persist(cacheKey, downloadedBytes).getOrNull()?.let { localUri ->
-                return@safeSupabaseCall localUri
-            }
-        }
-
-        remoteUrl
-    }
-
     override suspend fun streamUrl(path: String): Resource<String, NetworkError, String?> = safeSupabaseCall {
         val normalizedPath = normalizeAudioPath(path)
         cachedUri(normalizedPath) ?: remoteUrl(normalizedPath)

@@ -74,17 +74,6 @@ class AnalyticsRepositoryImpl(
         )
     }
 
-    override fun trackActivityView(activityId: String, cityId: String?, zone: String?, contentOrigin: String?) {
-        sendEvent(
-            baseEvent("activity_view").copy(
-                cityId = cityId,
-                activityId = activityId,
-                zone = zone,
-                contentOrigin = contentOrigin
-            )
-        )
-    }
-
     override fun trackEventView(eventId: String, contentOrigin: String?) {
         sendEvent(
             baseEvent("event_view").copy(
@@ -100,43 +89,6 @@ class AnalyticsRepositoryImpl(
                 cityId = cityId,
                 infoNoticeId = noticeId,
                 contentOrigin = contentOrigin
-            )
-        )
-    }
-
-    override fun trackNearbyView(zone: String?) {
-        sendEvent(
-            baseEvent("nearby_view").copy(
-                zone = zone,
-                contentOrigin = "nearby"
-            )
-        )
-    }
-
-    override fun trackGuideOpen(activityId: String, cityId: String?) {
-        sendEvent(
-            baseEvent("guide_open").copy(
-                cityId = cityId,
-                activityId = activityId,
-                contentOrigin = "guide"
-            )
-        )
-    }
-
-    override fun trackAudioPlay(activityId: String, cityId: String?) {
-        sendEvent(
-            baseEvent("audio_play").copy(
-                cityId = cityId,
-                activityId = activityId,
-                contentOrigin = "guide_audio"
-            )
-        )
-    }
-
-    override fun trackPremiumBundleOpen(contentOrigin: String?) {
-        sendEvent(
-            baseEvent("premium_bundle_open").copy(
-                contentOrigin = contentOrigin ?: "premium"
             )
         )
     }

@@ -81,7 +81,6 @@ class ExploreViewModelTest {
             val placeRepo = object : PlaceRepository {
                 override suspend fun getActivePlaces() = result(places)
                 override suspend fun getMustSeePlaces() = result(places)
-                override suspend fun getPlacesByCategory(category: PlaceCategory) = result(places)
                 override suspend fun getPlaceById(id: String) = result(places.first())
             }
             vm = ExploreViewModel(

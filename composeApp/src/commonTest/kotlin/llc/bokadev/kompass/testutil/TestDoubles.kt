@@ -33,11 +33,6 @@ class NoOpAnalytics : AnalyticsRepository {
     override fun trackScreenView(screenName: String) = Unit
     override fun trackCategoryView(categoryKey: String, contentOrigin: String) = Unit
     override fun trackPlaceView(placeId: String, cityId: String?, zone: String?, placeCategory: String?, contentOrigin: String?) = Unit
-    override fun trackActivityView(activityId: String, cityId: String?, zone: String?, contentOrigin: String?) = Unit
     override fun trackEventView(eventId: String, contentOrigin: String?) = Unit
     override fun trackInfoNoticeView(noticeId: String, cityId: String?, contentOrigin: String?) = Unit
-    override fun trackNearbyView(zone: String?) = Unit
-    override fun trackGuideOpen(activityId: String, cityId: String?) = Unit
-    override fun trackAudioPlay(activityId: String, cityId: String?) = Unit
-    override fun trackPremiumBundleOpen(contentOrigin: String?) = Unit
 }

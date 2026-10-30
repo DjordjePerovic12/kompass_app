@@ -1,18 +1,5 @@
 package llc.bokadev.kompass.core.utils
 
-data class LanguageOption(
-    val code: String,
-    val label: String
-)
-
-val supportedLanguages = listOf(
-    LanguageOption("en", "English"),
-    LanguageOption("fr", "Français"),
-    LanguageOption("tr", "Türkçe"),
-    LanguageOption("es", "Español"),
-    LanguageOption("de", "Deutsch")
-)
-
 /** The app's languages, each with its own name (endonym), in display order. */
 val SUPPORTED_LANGUAGES: List<Pair<String, String>> = listOf(
     "en" to "English",

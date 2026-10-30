@@ -101,7 +101,6 @@ class SearchCoverageTest {
                 place("kotor", "Kotor", PlaceCategory.SEE_AND_VISIT, "destination_overview")
             ))
             override suspend fun getMustSeePlaces() = r(emptyList<Place>())
-            override suspend fun getPlacesByCategory(category: PlaceCategory) = r(emptyList<Place>())
             override suspend fun getPlaceById(id: String): Resource<Place, NetworkError, String?> = Resource.Error(NetworkError.UNKNOWN, "Not implemented")
         }
         val experiences = object : ExperienceRepository {

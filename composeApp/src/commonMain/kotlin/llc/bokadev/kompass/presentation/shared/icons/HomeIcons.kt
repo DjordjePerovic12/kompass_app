@@ -124,28 +124,6 @@ fun PlayIcon(color: Color, size: Dp = 16.dp, modifier: Modifier = Modifier) {
     }
 }
 
-/** A plain two-bar pause glyph. */
-@Composable
-fun PauseIcon(color: Color, size: Dp = 16.dp, modifier: Modifier = Modifier) {
-    Canvas(modifier = modifier.size(size)) {
-        val w = this.size.width
-        val h = this.size.height
-        val barWidth = w * 0.22f
-        drawRoundRect(
-            color = color,
-            topLeft = Offset(w * 0.2f, h * 0.16f),
-            size = Size(barWidth, h * 0.68f),
-            cornerRadius = CornerRadius(barWidth * 0.3f, barWidth * 0.3f)
-        )
-        drawRoundRect(
-            color = color,
-            topLeft = Offset(w * 0.58f, h * 0.16f),
-            size = Size(barWidth, h * 0.68f),
-            cornerRadius = CornerRadius(barWidth * 0.3f, barWidth * 0.3f)
-        )
-    }
-}
-
 /** A globe — circle + one vertical meridian ellipse + one horizontal latitude line. */
 @Composable
 fun GlobeIcon(color: Color, size: Dp = 18.dp, modifier: Modifier = Modifier) {

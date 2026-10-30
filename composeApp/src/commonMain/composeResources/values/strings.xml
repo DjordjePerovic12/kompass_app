@@ -26,7 +26,6 @@
     <string name="redesign_saved">Saved</string>
     <string name="redesign_explore_subtitle">Places, tastes and experiences around the bay.</string>
     <string name="redesign_saved_subtitle">Your places and activities, ready for later.</string>
-    <string name="redesign_empty_saved">Nothing saved yet.</string>
     <string name="redesign_places">Places</string>
     <string name="redesign_places_subtitle">Heritage and viewpoints</string>
     <string name="redesign_food">Eat &amp; Drink</string>
@@ -35,7 +34,6 @@
     <string name="redesign_worth_drive">Worth the Drive</string>
     <string name="redesign_worth_drive_subtitle">Further into the region</string>
     <string name="redesign_local_stories">Legends &amp; Localisms</string>
-    <string name="redesign_local_stories_subtitle">Local stories and traditions</string>
     <string name="redesign_choose_area">Choose an area</string>
     <string name="redesign_device_location">Device location</string>
     <string name="redesign_old_town">Kotor / Old Town</string>
@@ -45,11 +43,6 @@
     <string name="redesign_fallback">Location unavailable. Showing Old Town suggestions.</string>
     <string name="redesign_section_error">This section could not be loaded.</string>
     <string name="redesign_empty_area">No places in this area yet.</string>
-    <string name="redesign_audio">Audio</string>
-    <string name="redesign_empty_section">Nothing to show right now.</string>
-    <string name="redesign_previous_place">Previous place</string>
-    <string name="redesign_next_place">Next place</string>
-    <string name="redesign_missing_photo">Photo unavailable</string>
     <string name="redesign_category_eat_and_drink">Eat &amp; Drink</string>
     <string name="redesign_category_see_and_visit">See &amp; Visit</string>
     <string name="redesign_category_activities">Activities</string>
@@ -108,17 +101,13 @@
     <string name="detail_couldnt_open_maps">Couldn't open Maps on this device</string>
     <string name="detail_couldnt_open_browser">Couldn't open the browser on this device</string>
     <string name="detail_couldnt_open_dialer">Couldn't open the dialer on this device</string>
-    <string name="detail_place_unavailable">This place is no longer available</string>
     <string name="detail_place_load_error">Couldn't load this place.</string>
     <string name="detail_activity_load_error">Couldn't load this activity.</string>
     <string name="detail_duration">Duration</string>
     <string name="detail_how_to_get_there">How to get there</string>
     <string name="detail_visit_website">Visit website</string>
     <string name="detail_activity">Activity</string>
-    <string name="detail_audio_library">Audio library</string>
     <string name="detail_open_audio_library">Open audio library</string>
-    <!-- args: name, duration -->
-    <string name="detail_play_audio_for">Play audio for %1$s, %2$s</string>
     <string name="detail_loading_audio">Loading audio</string>
     <!-- args: elapsed, total -->
     <string name="detail_pause_audio">Pause audio, %1$s of %2$s</string>
@@ -128,10 +117,6 @@
     <string name="detail_audio_unavailable_offline">Audio not available offline</string>
     <string name="detail_couldnt_play_audio">Couldn't play audio. Tap to try again.</string>
     <string name="detail_audio_not_downloaded">This audio isn't downloaded. Connect to the internet to listen.</string>
-    <!-- args: duration -->
-    <string name="detail_audio_hint">Audio for this place · %1$s</string>
-    <string name="detail_audio_hint_no_duration">Audio for this place</string>
-    <string name="detail_audio_hint_announcement">Audio available for this place. Use the play button in the bottom bar.</string>
     <string name="detail_english_audio">English audio</string>
     <string name="detail_listen_audio_guide">Listen to the audio guide</string>
     <!-- args: d -->
@@ -196,15 +181,10 @@
     <string name="essentials_map_preview_description">Map of the %1$s nearest %2$s. Opens full map.</string>
     <!-- args: category -->
     <string name="essentials_couldnt_load">Couldn't load %1$s</string>
-    <string name="essentials_no_maps_app">No maps app found</string>
-    <string name="essentials_map_subtitle">Nearby support</string>
-    <string name="essentials_map_intro">Choose a point, then open Maps for that location only.</string>
-    <string name="essentials_nearby_locations">Nearby locations</string>
     <string name="essentials_navigate">Navigate</string>
     <!-- args: name -->
     <string name="essentials_navigate_to">Navigate to %1$s</string>
     <string name="essentials_you_are_here">You</string>
-    <string name="essentials_nearby">Nearby</string>
     <string name="essentials_selection_gone">The location you selected is no longer listed.</string>
     <string name="essentials_couldnt_load_utilities">Couldn't load nearby utilities</string>
     <string name="essentials_no_utilities_found">No nearby locations found</string>
@@ -352,8 +332,6 @@
     <!-- args: n -->
     <string name="stories_min_read">%1$s min read</string>
     <string name="stories_listen">Listen</string>
-    <!-- args: d -->
-    <string name="stories_listen_duration">Listen %1$s</string>
     <string name="stories_empty_legends">No legends yet.</string>
     <string name="stories_empty_localisms">No localisms yet.</string>
     <string name="stories_empty_all">No stories yet.</string>
@@ -408,81 +386,28 @@
     <string name="onboarding_point_stories">Stories and audio for selected places</string>
     <string name="onboarding_start">Start exploring</string>
     <string name="bottom_home">Home</string>
-    <string name="bottom_browse">Browse</string>
-    <string name="bottom_activities">Activities</string>
     <string name="bottom_essentials">Essentials</string>
-    <string name="choose_language">Choose your language</string>
-    <string name="choose_language_subtitle">Switch anytime while you explore.</string>
-    <string name="change_language">Change language</string>
-    <string name="browse_title">Browse</string>
-    <string name="browse_slug">What are you looking for</string>
     <string name="activities_title">Activities</string>
-    <string name="activities_slug">Go beyond the old town</string>
     <string name="events_title">Events</string>
-    <string name="events_slug">What’s on in Kotor</string>
     <string name="events_subtitle">What is happening today, this week, and this month</string>
     <string name="info_center_title">Local updates</string>
     <string name="info_center_subtitle">Town notices, disruptions, and practical updates</string>
     <string name="services_title">Services</string>
     <string name="services_subtitle">Rent-a-car, boat rentals &amp; more</string>
-    <string name="essentials_title">City Essentials</string>
-    <string name="essentials_slug">Kotor</string>
     <string name="could_not_load_categories">Could not load categories</string>
     <string name="retry">Retry</string>
-    <string name="hero_location">Kotor, Montenegro</string>
-    <string name="hero_title">Experience the town</string>
     <string name="search_placeholder">Search Kotor and the bay</string>
-    <string name="must_see">Must See</string>
     <string name="nearby_you">Nearby You</string>
-    <string name="nearby_unavailable">Location unavailable, showing closest curated spots around Old Town.</string>
-    <string name="nearby_empty">No nearby places available right now.</string>
     <string name="upcoming_events">Upcoming Events</string>
     <string name="recent_news">Local updates</string>
     <string name="see_all">See all</string>
-    <string name="loading_kotor">Loading Kotor for you…</string>
     <string name="loading_label">Loading</string>
     <string name="location_prompt_title">See what’s closest right now</string>
     <string name="location_prompt_body">Allow location to show walkable places nearby and better local recommendations while you explore Kotor.</string>
     <string name="continue_label">Continue</string>
     <string name="not_now">Not now</string>
-    <string name="activities_intro">Find hikes, UNESCO trails, medieval fortresses, village detours, and sunset ideas that move visitors outside the usual Kotor core.</string>
-    <string name="all">All</string>
-    <string name="no_activities">No activities available yet.</string>
-    <string name="no_activities_for_category">No activities match this category.</string>
-    <string name="premium_extras_available">Premium extras available</string>
-    <string name="best_morning">Best in morning</string>
-    <string name="best_afternoon">Best in afternoon</string>
-    <string name="best_evening">Best in evening</string>
-    <string name="any_time">Any time</string>
     <string name="no_events_for_filters">No events match these filters</string>
     <string name="no_events_yet">No events added yet</string>
-    <string name="my_guides_title">My Guides</string>
-    <string name="my_guides_slug">Premium quick access</string>
-    <string name="unlocked_audio_guides">Unlocked audio guides</string>
-    <string name="no_audio_guides_title">No audio guides unlocked yet</string>
-    <string name="no_audio_guides_body">Premium audio-ready activities will appear here for quick return.</string>
-    <string name="premium_activities">Premium activities</string>
-    <string name="no_premium_activities_title">No premium activities available</string>
-    <string name="no_premium_activities_body">Activities with deeper route context and guide access will appear here.</string>
-    <string name="itineraries">Itineraries</string>
-    <string name="custom_itineraries">Custom itineraries</string>
-    <string name="custom_itineraries_body">Trip-building and structured route planning will live here once the itinerary flow is ready.</string>
-    <string name="open_placeholder">Open placeholder</string>
-    <string name="open_guide">Open guide</string>
-    <string name="view_activity">View activity</string>
-    <string name="premium_title">Premium</string>
-    <string name="premium_slug">Unlock richer stories and planning</string>
-    <string name="open_audio_guide_now">OPEN AUDIO GUIDE NOW</string>
-    <string name="premium_intro">Premium turns this into more than a free browse app. It unlocks guided storytelling and deeper trip planning designed for people who want more than the obvious Kotor route.</string>
-    <string name="unlocked">UNLOCKED</string>
-    <string name="processing_checkout">PROCESSING CHECKOUT...</string>
-    <string name="unlock_price_prefix">UNLOCK</string>
-    <string name="info_center_slug">Town notices and practical updates</string>
-    <string name="town_notices_slug">Info Center</string>
-    <string name="important_town_information">Important town information</string>
-    <string name="affected_area">Affected area</string>
-    <string name="open_source_link">Open source link</string>
-    <string name="visit_source">Visit source</string>
     <string name="save_action">Save</string>
     <string name="remove_from_saved_action">Remove from Saved</string>
 </resources>

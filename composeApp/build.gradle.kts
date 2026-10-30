@@ -57,7 +57,6 @@ kotlin {
             implementation(libs.compose.runtime)
             implementation(libs.compose.foundation)
             implementation(libs.compose.material3)
-            implementation(compose.materialIconsExtended)
             implementation(libs.compose.ui)
             implementation(libs.compose.components.resources)
             implementation(libs.compose.uiToolingPreview)
@@ -103,14 +102,8 @@ buildkonfig {
         buildConfigField(BOOLEAN, "USE_LOCAL_SUPABASE", localProps.getProperty("USE_LOCAL_SUPABASE", "false"))
         buildConfigField(STRING, "SUPABASE_ANON_KEY_LOCAL", localProps.getProperty("SUPABASE_ANON_KEY_LOCAL", ""))
         buildConfigField(STRING, "SUPABASE_LOCAL_HOST", "localhost")
-        buildConfigField(STRING, "PAYMENT_BACKEND_BASE_URL", localProps.getProperty("PAYMENT_BACKEND_BASE_URL", ""))
-        buildConfigField(STRING, "PAYMENT_RETURN_URL_BASE", localProps.getProperty("PAYMENT_RETURN_URL_BASE", "https://kompass.app/payments"))
         buildConfigField(STRING, "ANALYTICS_BACKEND_BASE_URL", localProps.getProperty("ANALYTICS_BACKEND_BASE_URL", ""))
         buildConfigField(STRING, "GOOGLE_MAPS_API_KEY", localProps.getProperty("GOOGLE_MAPS_API_KEY", ""))
-        buildConfigField(STRING, "REVENUECAT_ANDROID_API_KEY", localProps.getProperty("REVENUECAT_ANDROID_API_KEY", ""))
-        buildConfigField(STRING, "REVENUECAT_IOS_API_KEY", localProps.getProperty("REVENUECAT_IOS_API_KEY", ""))
-        buildConfigField(STRING, "REVENUECAT_DEEP_ENTITLEMENT_ID", localProps.getProperty("REVENUECAT_DEEP_ENTITLEMENT_ID", "deep"))
-        buildConfigField(STRING, "REVENUECAT_DEEP_OFFERING_ID", localProps.getProperty("REVENUECAT_DEEP_OFFERING_ID", ""))
         buildConfigField(STRING, "APP_VERSION", "1.0")
     }
 

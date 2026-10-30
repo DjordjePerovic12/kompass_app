@@ -255,13 +255,8 @@ class HomeViewModelTest {
         override fun trackScreenView(screenName: String) = Unit
         override fun trackCategoryView(categoryKey: String, contentOrigin: String) = Unit
         override fun trackPlaceView(placeId: String, cityId: String?, zone: String?, placeCategory: String?, contentOrigin: String?) = Unit
-        override fun trackActivityView(activityId: String, cityId: String?, zone: String?, contentOrigin: String?) = Unit
         override fun trackEventView(eventId: String, contentOrigin: String?) = Unit
         override fun trackInfoNoticeView(noticeId: String, cityId: String?, contentOrigin: String?) = Unit
-        override fun trackNearbyView(zone: String?) = Unit
-        override fun trackGuideOpen(activityId: String, cityId: String?) = Unit
-        override fun trackAudioPlay(activityId: String, cityId: String?) = Unit
-        override fun trackPremiumBundleOpen(contentOrigin: String?) = Unit
     }
 
     private class TestFavorites : FavoritesRepository {
@@ -271,7 +266,6 @@ class HomeViewModelTest {
         override fun save(type: FavoriteItemType, id: String) = FavoriteEntry(type, id, 0)
         override fun remove(type: FavoriteItemType, id: String): FavoriteEntry? = null
         override fun restore(entry: FavoriteEntry) = Unit
-        override fun getFavoriteKeySet(): Set<FavoriteKey> = emptySet()
     }
 
     private class TestLocation(val permission: Boolean = true, val fail: Boolean = false) : UserLocationProvider {
@@ -296,7 +290,6 @@ class HomeViewModelTest {
         )
         override suspend fun getActivePlaces(): Resource<List<Place>, NetworkError, String?> { activeCalls++; return Resource.Success(items) }
         override suspend fun getMustSeePlaces() = Resource.Success(items.take(1))
-        override suspend fun getPlacesByCategory(category: PlaceCategory) = Resource.Success(items.filter { it.category == category })
         override suspend fun getPlaceById(id: String) = Resource.Success(items.first { it.id == id })
     }
 
@@ -322,12 +315,6 @@ class HomeViewModelTest {
         override fun setFirstLaunch(value: Boolean) = Unit
         override fun hasSeenLocationEducationPrompt() = true
         override fun setSeenLocationEducationPrompt(value: Boolean) = Unit
-        override fun hasAudioPass() = false
-        override fun setAudioPass(value: Boolean) = Unit
-        override fun hasExplorerPass() = false
-        override fun setExplorerPass(value: Boolean) = Unit
-        override fun hasPerksPass() = false
-        override fun setPerksPass(value: Boolean) = Unit
     }
 
     companion object {

@@ -151,7 +151,6 @@ class ListenViewModelTest {
                 object : PlaceRepository {
                     override suspend fun getActivePlaces() = Resource.Success(listOf(cathedral, nicholas, rocks, silent))
                     override suspend fun getMustSeePlaces() = Resource.Success(emptyList<Place>())
-                    override suspend fun getPlacesByCategory(category: PlaceCategory) = Resource.Success(emptyList<Place>())
                     override suspend fun getPlaceById(id: String): Resource<Place, NetworkError, String?> = error("unused")
                 },
                 GetActivitiesUseCase(object : ExperienceRepository {
@@ -198,7 +197,6 @@ class ListenViewModelTest {
 
     class FakeAudio(val stored: MutableSet<String>) : AudioGuideRepository {
         val gate = CompletableDeferred<Unit>()
-        override suspend fun getSignedAudioUrl(path: String) = Resource.Success("url:$path")
         override suspend fun streamUrl(path: String) = Resource.Success("url:$path")
         override suspend fun download(path: String, onProgress: (Float?) -> Unit): Resource<Unit, NetworkError, String?> {
             onProgress(0.5f)
@@ -231,11 +229,5 @@ class ListenViewModelTest {
         override fun setFirstLaunch(value: Boolean) = Unit
         override fun hasSeenLocationEducationPrompt() = true
         override fun setSeenLocationEducationPrompt(value: Boolean) = Unit
-        override fun hasAudioPass() = false
-        override fun setAudioPass(value: Boolean) = Unit
-        override fun hasExplorerPass() = false
-        override fun setExplorerPass(value: Boolean) = Unit
-        override fun hasPerksPass() = false
-        override fun setPerksPass(value: Boolean) = Unit
     }
 }

@@ -21,28 +21,10 @@ enum class BestTime {
     ANYTIME
 }
 
-enum class EventCategory {
-    MUSIC,
-    FESTIVAL,
-    SPORT,
-    THEATER,
-    CULTURAL,
-    OTHER
-}
-
 enum class EssentialCategory {
     TRANSPORT,
     CUSTOMS,
     EMERGENCY,
     TIPS,
     PRACTICAL
-}
-
-enum class ExperienceCategory {
-    TOURS,
-    WATER_SPORTS,
-    FOOD_AND_DRINK,
-    CULTURAL,
-    ADVENTURE,
-    OTHER
 }

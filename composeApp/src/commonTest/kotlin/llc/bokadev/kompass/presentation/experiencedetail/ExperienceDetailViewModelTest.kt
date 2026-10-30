@@ -90,7 +90,6 @@ class ExperienceDetailViewModelTest {
                 override suspend fun getActivityById(id: String) = onCall()
             }),
             audioGuideRepository = object : AudioGuideRepository {
-                override suspend fun getSignedAudioUrl(path: String) = Resource.Success(path)
                 override suspend fun streamUrl(path: String) = Resource.Success(path)
                 override suspend fun download(path: String, onProgress: (Float?) -> Unit) = Resource.Success(Unit)
                 override fun removeDownload(path: String) = true
@@ -129,11 +128,5 @@ class ExperienceDetailViewModelTest {
         override fun setFirstLaunch(value: Boolean) = Unit
         override fun hasSeenLocationEducationPrompt() = true
         override fun setSeenLocationEducationPrompt(value: Boolean) = Unit
-        override fun hasAudioPass() = false
-        override fun setAudioPass(value: Boolean) = Unit
-        override fun hasExplorerPass() = false
-        override fun setExplorerPass(value: Boolean) = Unit
-        override fun hasPerksPass() = false
-        override fun setPerksPass(value: Boolean) = Unit
     }
 }

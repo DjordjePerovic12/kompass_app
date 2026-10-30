@@ -14,10 +14,4 @@ interface AppPreferences {
     fun setFirstLaunch(value: Boolean)
     fun hasSeenLocationEducationPrompt(): Boolean
     fun setSeenLocationEducationPrompt(value: Boolean)
-    fun hasAudioPass(): Boolean
-    fun setAudioPass(value: Boolean)
-    fun hasExplorerPass(): Boolean
-    fun setExplorerPass(value: Boolean)
-    fun hasPerksPass(): Boolean
-    fun setPerksPass(value: Boolean)
 }

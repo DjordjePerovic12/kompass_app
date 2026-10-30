@@ -187,7 +187,6 @@ class PlaceDetailViewModelTest {
     private class FakePlaceRepository(private val audio: Map<String, String>?, private var failFirst: Boolean = false) : PlaceRepository {
         override suspend fun getActivePlaces(): Resource<List<Place>, NetworkError, String?> = Resource.Success(emptyList())
         override suspend fun getMustSeePlaces(): Resource<List<Place>, NetworkError, String?> = Resource.Success(emptyList())
-        override suspend fun getPlacesByCategory(category: PlaceCategory): Resource<List<Place>, NetworkError, String?> = Resource.Success(emptyList())
         override suspend fun getPlaceById(id: String): Resource<Place, NetworkError, String?> {
             if (failFirst) {
                 failFirst = false
@@ -211,9 +210,8 @@ class PlaceDetailViewModelTest {
     }
 
     private class FakeAudioRepository(private val offline: Set<String>) : AudioGuideRepository {
-        override suspend fun getSignedAudioUrl(path: String): Resource<String, NetworkError, String?> = Resource.Success("https://signed/$path")
         override fun isAvailableOffline(path: String): Boolean = path in offline
-        override suspend fun streamUrl(path: String): Resource<String, NetworkError, String?> = getSignedAudioUrl(path)
+        override suspend fun streamUrl(path: String): Resource<String, NetworkError, String?> = Resource.Success("https://signed/$path")
         override suspend fun download(path: String, onProgress: (Float?) -> Unit): Resource<Unit, NetworkError, String?> = Resource.Success(Unit)
         override fun removeDownload(path: String): Boolean = true
     }
@@ -231,11 +229,5 @@ class PlaceDetailViewModelTest {
         override fun setFirstLaunch(value: Boolean) = Unit
         override fun hasSeenLocationEducationPrompt() = true
         override fun setSeenLocationEducationPrompt(value: Boolean) = Unit
-        override fun hasAudioPass() = false
-        override fun setAudioPass(value: Boolean) = Unit
-        override fun hasExplorerPass() = false
-        override fun setExplorerPass(value: Boolean) = Unit
-        override fun hasPerksPass() = false
-        override fun setPerksPass(value: Boolean) = Unit
     }
 }

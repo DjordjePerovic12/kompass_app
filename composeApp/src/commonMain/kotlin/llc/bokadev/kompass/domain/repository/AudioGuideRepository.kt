@@ -5,9 +5,6 @@ import llc.bokadev.kompass.core.utils.networking.Resource
 
 
 interface AudioGuideRepository {
-    /** Legacy guide screens: downloads and caches the whole file, then returns the local URI. */
-    suspend fun getSignedAudioUrl(path: String): Resource<String, NetworkError, String?>
-
     /** The downloaded file if there is one, else a streaming URL. Never downloads. */
     suspend fun streamUrl(path: String): Resource<String, NetworkError, String?>
 

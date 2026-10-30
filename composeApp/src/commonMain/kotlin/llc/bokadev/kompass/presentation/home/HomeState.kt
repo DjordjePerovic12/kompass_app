@@ -26,7 +26,6 @@ data class HomeState(
     /** The browsing area's destination overview (editorial entry), shown apart from nearby attractions. */
     val areaOverview: Place? = null,
     val isUsingCurrentLocation: Boolean = false,
-    val hasPremiumAccess: Boolean = false,
     /** Saved items, so the cards show their saved state. */
     val favoriteKeys: Set<FavoriteKey> = emptySet(),
     /** Business-driven, not pure UI: depends on permission status + whether already dismissed. */

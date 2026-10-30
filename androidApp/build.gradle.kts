@@ -13,9 +13,7 @@ val localProps = Properties().apply {
 dependencies {
     implementation(projects.composeApp)
     implementation(libs.androidx.activity.compose)
-    implementation(libs.compose.uiToolingPreview)
     implementation(libs.koin.android)
-    implementation(libs.kermit)
     debugImplementation(libs.compose.uiTooling)
 }
 
@@ -46,10 +44,6 @@ android {
                 "proguard-rules.pro"
             )
         }
-    }
-
-    buildFeatures {
-        buildConfig = true
     }
 
     compileOptions {

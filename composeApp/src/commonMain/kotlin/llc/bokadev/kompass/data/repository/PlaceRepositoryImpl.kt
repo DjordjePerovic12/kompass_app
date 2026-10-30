@@ -14,7 +14,6 @@ import llc.bokadev.kompass.data.mapper.toDomain
 import llc.bokadev.kompass.data.remote.dto.PlaceDto
 import llc.bokadev.kompass.core.utils.AppPreferences
 import llc.bokadev.kompass.domain.model.Place
-import llc.bokadev.kompass.domain.model.PlaceCategory
 import llc.bokadev.kompass.domain.repository.PlaceRepository
 
 class PlaceRepositoryImpl(
@@ -65,13 +64,6 @@ class PlaceRepositoryImpl(
         getActivePlaces().mapCatching { places ->
             places
                 .filter { it.isMarkedMustSee() }
-                .sortedBy { it.sortOrder }
-        }
-
-    override suspend fun getPlacesByCategory(category: PlaceCategory): Resource<List<Place>, NetworkError, String?> =
-        getActivePlaces().mapCatching { places ->
-            places
-                .filter { it.category == category }
                 .sortedBy { it.sortOrder }
         }
 

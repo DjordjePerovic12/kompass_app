@@ -54,25 +54,4 @@ class AndroidAppPreferences(private val context: Context) : AppPreferences {
     override fun setSeenLocationEducationPrompt(value: Boolean) {
         prefs.edit().putBoolean("has_seen_location_education_prompt", value).apply()
     }
-
-    override fun hasAudioPass(): Boolean =
-        prefs.getBoolean("has_audio_pass", false)
-
-    override fun setAudioPass(value: Boolean) {
-        prefs.edit().putBoolean("has_audio_pass", value).apply()
-    }
-
-    override fun hasExplorerPass(): Boolean =
-        prefs.getBoolean("has_explorer_pass", false)
-
-    override fun setExplorerPass(value: Boolean) {
-        prefs.edit().putBoolean("has_explorer_pass", value).apply()
-    }
-
-    override fun hasPerksPass(): Boolean =
-        prefs.getBoolean("has_perks_pass", false)
-
-    override fun setPerksPass(value: Boolean) {
-        prefs.edit().putBoolean("has_perks_pass", value).apply()
-    }
 }

@@ -39,7 +39,6 @@ val appModule = module {
         excursionModule,
         languagePickerModule,
         homeModule,
-        categoriesModule,
         eventsModule,
         infoCenterModule,
         experiencesModule,
@@ -50,7 +49,7 @@ val appModule = module {
         searchModule,
         placeDetailModule,
         categoryModule,
-        premiumModule,
+        listenModule,
         localFindsModule
     )
 }

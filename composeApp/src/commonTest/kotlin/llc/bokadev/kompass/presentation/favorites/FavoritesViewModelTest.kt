@@ -155,7 +155,6 @@ class FavoritesViewModelTest {
                     return places?.let { Resource.Success(it) } ?: Resource.Error(NetworkError.UNKNOWN, "offline")
                 }
                 override suspend fun getMustSeePlaces() = Resource.Success(emptyList<Place>())
-                override suspend fun getPlacesByCategory(category: PlaceCategory) = Resource.Success(emptyList<Place>())
                 override suspend fun getPlaceById(id: String): Resource<Place, NetworkError, String?> = error("unused")
             },
             getActivities = GetActivitiesUseCase(object : ExperienceRepository {

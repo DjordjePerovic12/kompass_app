@@ -8,7 +8,6 @@ import kotlinx.serialization.json.Json
 import llc.bokadev.kompass.core.utils.AppPreferences
 import llc.bokadev.kompass.domain.model.FavoriteEntry
 import llc.bokadev.kompass.domain.model.FavoriteItemType
-import llc.bokadev.kompass.domain.model.FavoriteKey
 import llc.bokadev.kompass.domain.repository.FavoritesRepository
 import kotlin.time.ExperimentalTime
 import kotlin.time.Clock
@@ -49,10 +48,6 @@ class FavoritesRepositoryImpl(
     private fun update(favorites: List<FavoriteEntry>) {
         persistFavorites(favorites)
         _favoritesFlow.value = favorites
-    }
-
-    override fun getFavoriteKeySet(): Set<FavoriteKey> {
-        return _favoritesFlow.value.map { FavoriteKey(it.type, it.id) }.toSet()
     }
 
     private fun loadFavorites(): List<FavoriteEntry> {

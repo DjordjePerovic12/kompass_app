@@ -125,11 +125,5 @@ class EventDetailViewModelTest {
         override fun setFirstLaunch(value: Boolean) = Unit
         override fun hasSeenLocationEducationPrompt() = true
         override fun setSeenLocationEducationPrompt(value: Boolean) = Unit
-        override fun hasAudioPass() = false
-        override fun setAudioPass(value: Boolean) = Unit
-        override fun hasExplorerPass() = false
-        override fun setExplorerPass(value: Boolean) = Unit
-        override fun hasPerksPass() = false
-        override fun setPerksPass(value: Boolean) = Unit
     }
 }
