@@ -6,6 +6,7 @@ import llc.bokadev.kompass.domain.model.Event
 import llc.bokadev.kompass.domain.model.InfoNotice
 import llc.bokadev.kompass.domain.model.NearbyPlace
 import llc.bokadev.kompass.domain.model.Place
+import llc.bokadev.kompass.domain.model.HomeArea
 
 data class HomeState(
     val area: HomeArea = HomeArea.DEVICE,

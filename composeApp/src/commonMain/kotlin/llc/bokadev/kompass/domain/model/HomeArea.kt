@@ -1,4 +1,4 @@
-package llc.bokadev.kompass.presentation.screens.home
+package llc.bokadev.kompass.domain.model
 
 import llc.bokadev.kompass.core.utils.AppStrings
 

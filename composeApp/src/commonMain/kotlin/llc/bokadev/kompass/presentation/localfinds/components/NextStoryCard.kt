@@ -23,7 +23,7 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import llc.bokadev.kompass.presentation.screens.home.components.ArrowRightIcon
+import llc.bokadev.kompass.presentation.shared.icons.ArrowRightIcon
 import llc.bokadev.kompass.ui.theme.KompassTheme
 
 /** `limestone` card: NEXT STORY · title · a `night` circle with a `lamp` arrow. */

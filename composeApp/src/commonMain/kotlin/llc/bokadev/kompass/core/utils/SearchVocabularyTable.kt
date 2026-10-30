@@ -5,8 +5,8 @@ import llc.bokadev.kompass.domain.model.PlaceCategory
 import llc.bokadev.kompass.domain.model.SearchTag
 import llc.bokadev.kompass.domain.model.SearchVocabulary
 import llc.bokadev.kompass.domain.model.UtilityCategory
-import llc.bokadev.kompass.presentation.screens.essentials.cardTitle
-import llc.bokadev.kompass.presentation.screens.essentials.tileLabel
+import llc.bokadev.kompass.presentation.shared.cardTitle
+import llc.bokadev.kompass.presentation.shared.tileLabel
 
 /**
  * The reviewed search vocabulary: what a visitor might type for a category or CMS subtype, and a

@@ -1,4 +1,4 @@
-package llc.bokadev.kompass.presentation.screens.placedetail.components
+package llc.bokadev.kompass.presentation.shared.detail
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,6 +22,7 @@ import llc.bokadev.kompass.domain.model.GeoPoint
 import llc.bokadev.kompass.domain.model.distanceKmTo
 import llc.bokadev.kompass.presentation.shared.NativeDetailMapView
 import llc.bokadev.kompass.ui.theme.KompassTheme
+import llc.bokadev.kompass.presentation.shared.icons.DetailGlyph
 
 /**
  * "Where it is": a pannable map with the user's dot for quick orientation (owner's call, over

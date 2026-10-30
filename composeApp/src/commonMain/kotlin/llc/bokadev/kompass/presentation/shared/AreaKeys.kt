@@ -1,6 +1,6 @@
 package llc.bokadev.kompass.presentation.shared
 
-import llc.bokadev.kompass.presentation.screens.home.HomeArea
+import llc.bokadev.kompass.domain.model.HomeArea
 
 /** "In the bay": within this distance of Kotor Old Town, distances are shown; outside, never. */
 internal const val REGION_RADIUS_KM = 30.0

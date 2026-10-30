@@ -89,8 +89,8 @@ import llc.bokadev.kompass.presentation.listen.components.DiscState
 import llc.bokadev.kompass.presentation.listen.components.ListenTrackRow
 import llc.bokadev.kompass.presentation.listen.components.NowPlayingCard
 import llc.bokadev.kompass.presentation.listen.components.NowPlayingLabels
-import llc.bokadev.kompass.presentation.screens.home.components.ChevronLeftIcon
-import llc.bokadev.kompass.presentation.screens.home.components.HeadphonesIcon
+import llc.bokadev.kompass.presentation.shared.icons.ChevronLeftIcon
+import llc.bokadev.kompass.presentation.shared.icons.HeadphonesIcon
 import llc.bokadev.kompass.presentation.shared.LamplightSegmentedControl
 import llc.bokadev.kompass.presentation.shared.SegmentOption
 import llc.bokadev.kompass.presentation.shared.areaLabel

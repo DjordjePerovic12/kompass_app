@@ -27,7 +27,7 @@ import llc.bokadev.kompass.domain.repository.PlaceRepository
 import llc.bokadev.kompass.domain.repository.SavedSnapshotRepository
 import llc.bokadev.kompass.domain.usecase.GetActivitiesUseCase
 import llc.bokadev.kompass.presentation.base.BaseViewModel
-import llc.bokadev.kompass.presentation.screens.home.HomeArea
+import llc.bokadev.kompass.domain.model.HomeArea
 import llc.bokadev.kompass.presentation.shared.GROUP_OTHER
 import llc.bokadev.kompass.presentation.shared.LanguageSheetHost
 import llc.bokadev.kompass.presentation.shared.REGION_RADIUS_KM

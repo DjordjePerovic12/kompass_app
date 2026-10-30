@@ -79,10 +79,10 @@ import llc.bokadev.kompass.presentation.localfinds.utils.storyArea
 import llc.bokadev.kompass.presentation.localfinds.utils.storyKind
 import llc.bokadev.kompass.presentation.localfinds.utils.storyParagraphs
 import llc.bokadev.kompass.presentation.localfinds.utils.storyPlaceName
-import llc.bokadev.kompass.presentation.screens.essentials.components.EssentialsGlyph
-import llc.bokadev.kompass.presentation.screens.essentials.components.EssentialsIcon
-import llc.bokadev.kompass.presentation.screens.home.components.ChevronLeftIcon
-import llc.bokadev.kompass.presentation.screens.placedetail.components.DetailCompactBar
+import llc.bokadev.kompass.presentation.shared.icons.EssentialsGlyph
+import llc.bokadev.kompass.presentation.shared.icons.EssentialsIcon
+import llc.bokadev.kompass.presentation.shared.icons.ChevronLeftIcon
+import llc.bokadev.kompass.presentation.shared.detail.DetailCompactBar
 import llc.bokadev.kompass.presentation.search.components.SearchGlyph
 import llc.bokadev.kompass.presentation.search.components.SearchGlyphIcon
 import llc.bokadev.kompass.presentation.shared.ListenPill

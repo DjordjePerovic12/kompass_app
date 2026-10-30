@@ -1,4 +1,4 @@
-package llc.bokadev.kompass.presentation.screens.placedetail.components
+package llc.bokadev.kompass.presentation.shared.detail
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -40,10 +40,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
-import llc.bokadev.kompass.presentation.screens.home.components.BookmarkIcon
-import llc.bokadev.kompass.presentation.screens.home.components.ChevronLeftIcon
+import llc.bokadev.kompass.presentation.shared.icons.BookmarkIcon
+import llc.bokadev.kompass.presentation.shared.icons.ChevronLeftIcon
 import llc.bokadev.kompass.presentation.shared.PagerDots
 import llc.bokadev.kompass.ui.theme.KompassTheme
+import llc.bokadev.kompass.presentation.shared.icons.DetailGlyph
+import llc.bokadev.kompass.presentation.shared.icons.DetailIcon
 
 /**
  * Full-bleed photo carousel at the top of the place detail screen (spec §1.2): swipeable ordered

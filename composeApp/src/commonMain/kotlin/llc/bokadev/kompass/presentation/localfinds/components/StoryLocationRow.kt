@@ -20,8 +20,8 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import llc.bokadev.kompass.presentation.screens.essentials.components.EssentialsGlyph
-import llc.bokadev.kompass.presentation.screens.essentials.components.EssentialsIcon
+import llc.bokadev.kompass.presentation.shared.icons.EssentialsGlyph
+import llc.bokadev.kompass.presentation.shared.icons.EssentialsIcon
 import llc.bokadev.kompass.ui.theme.KompassTheme
 
 /** A location with coordinates: pin · name · Map (opens external maps at that point, like Essentials). */

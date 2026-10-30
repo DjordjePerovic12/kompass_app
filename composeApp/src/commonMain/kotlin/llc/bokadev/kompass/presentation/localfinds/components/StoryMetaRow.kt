@@ -9,7 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import llc.bokadev.kompass.presentation.screens.home.components.HeadphonesIcon
+import llc.bokadev.kompass.presentation.shared.icons.HeadphonesIcon
 import llc.bokadev.kompass.presentation.search.components.SearchGlyph
 import llc.bokadev.kompass.presentation.search.components.SearchGlyphIcon
 import llc.bokadev.kompass.ui.theme.KompassTheme

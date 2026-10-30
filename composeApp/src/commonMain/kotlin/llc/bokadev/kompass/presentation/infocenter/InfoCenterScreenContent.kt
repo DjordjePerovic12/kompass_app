@@ -23,9 +23,9 @@ import kompass.composeapp.generated.resources.states_no_updates
 import llc.bokadev.kompass.core.utils.LocalAppLocale
 import llc.bokadev.kompass.core.utils.appStringsFor
 import llc.bokadev.kompass.domain.model.InfoNotice
-import llc.bokadev.kompass.presentation.screens.home.components.NoticeItem
-import llc.bokadev.kompass.presentation.screens.home.toNoticeLabel
-import llc.bokadev.kompass.presentation.screens.home.toNoticeLevel
+import llc.bokadev.kompass.presentation.shared.NoticeItem
+import llc.bokadev.kompass.presentation.shared.toNoticeLabel
+import llc.bokadev.kompass.presentation.shared.toNoticeLevel
 import llc.bokadev.kompass.presentation.shared.LamplightCompactHeader
 import llc.bokadev.kompass.presentation.shared.StateMessage
 import llc.bokadev.kompass.ui.theme.KompassTheme

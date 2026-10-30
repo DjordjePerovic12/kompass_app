@@ -37,10 +37,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
-import llc.bokadev.kompass.presentation.screens.home.components.BookmarkIcon
-import llc.bokadev.kompass.presentation.screens.home.components.PlayIcon
-import llc.bokadev.kompass.presentation.screens.placedetail.components.DetailGlyph
-import llc.bokadev.kompass.presentation.screens.placedetail.components.DetailIcon
+import llc.bokadev.kompass.presentation.shared.icons.BookmarkIcon
+import llc.bokadev.kompass.presentation.shared.icons.PlayIcon
+import llc.bokadev.kompass.presentation.shared.icons.DetailGlyph
+import llc.bokadev.kompass.presentation.shared.icons.DetailIcon
 import llc.bokadev.kompass.ui.theme.KompassTheme
 
 private val CardShape = RoundedCornerShape(22.dp)

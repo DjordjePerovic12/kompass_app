@@ -22,6 +22,7 @@ import llc.bokadev.kompass.domain.repository.SavedSnapshotRepository
 import llc.bokadev.kompass.domain.usecase.GetPlaceByIdUseCase
 import llc.bokadev.kompass.presentation.shared.areaKeyFor
 import llc.bokadev.kompass.presentation.shared.ExternalLaunch
+import llc.bokadev.kompass.presentation.shared.detail.prettyLabel
 
 class PlaceDetailViewModel(
     private val id: String,

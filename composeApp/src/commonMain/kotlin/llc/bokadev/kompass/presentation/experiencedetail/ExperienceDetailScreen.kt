@@ -22,7 +22,7 @@ import llc.bokadev.kompass.core.utils.appStringsFor
 import llc.bokadev.kompass.core.utils.observeWithLifecycle
 import llc.bokadev.kompass.domain.location.UserLocationProvider
 import llc.bokadev.kompass.presentation.base.BaseContentView
-import llc.bokadev.kompass.presentation.screens.placedetail.components.DetailLoadState
+import llc.bokadev.kompass.presentation.shared.detail.DetailLoadState
 import llc.bokadev.kompass.presentation.shared.StatusBarIconsEffect
 import llc.bokadev.kompass.presentation.shared.perform
 import llc.bokadev.kompass.presentation.shared.rememberExternalLauncher

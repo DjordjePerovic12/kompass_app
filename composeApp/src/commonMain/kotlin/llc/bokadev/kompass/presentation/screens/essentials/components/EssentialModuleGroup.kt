@@ -37,6 +37,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import llc.bokadev.kompass.ui.theme.KompassTheme
+import llc.bokadev.kompass.presentation.shared.icons.EssentialsGlyph
+import llc.bokadev.kompass.presentation.shared.icons.EssentialsIcon
+import llc.bokadev.kompass.presentation.shared.icons.glyph
 
 /** One action under an expanded module: an exact-coordinate map handoff or an external link. */
 data class ModuleAction(val glyph: EssentialsGlyph, val title: String, val actionLabel: String, val onClick: () -> Unit)

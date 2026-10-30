@@ -22,7 +22,7 @@ import kompass.composeapp.generated.resources.states_couldnt_refresh
 import kompass.composeapp.generated.resources.states_no_services
 import llc.bokadev.kompass.core.utils.LocalAppLocale
 import llc.bokadev.kompass.domain.model.Service
-import llc.bokadev.kompass.presentation.screens.essentials.linkTitle
+import llc.bokadev.kompass.presentation.shared.linkTitle
 import llc.bokadev.kompass.presentation.services.components.ServiceRow
 import llc.bokadev.kompass.presentation.shared.LamplightCompactHeader
 import llc.bokadev.kompass.presentation.shared.StateMessage

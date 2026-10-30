@@ -1,4 +1,4 @@
-package llc.bokadev.kompass.presentation.screens.placedetail.components
+package llc.bokadev.kompass.presentation.shared.detail
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -29,6 +29,8 @@ import androidx.compose.ui.unit.sp
 import llc.bokadev.kompass.core.utils.DetailStrings
 import llc.bokadev.kompass.core.utils.detailStringsFor
 import llc.bokadev.kompass.ui.theme.KompassTheme
+import llc.bokadev.kompass.presentation.shared.icons.DetailGlyph
+import llc.bokadev.kompass.presentation.shared.icons.DetailIcon
 
 /**
  * Body text on a detail page, collapsed after [collapsedLines] with Read more / Show less

@@ -1,4 +1,4 @@
-package llc.bokadev.kompass.presentation.screens.home.components
+package llc.bokadev.kompass.presentation.shared.icons
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.size

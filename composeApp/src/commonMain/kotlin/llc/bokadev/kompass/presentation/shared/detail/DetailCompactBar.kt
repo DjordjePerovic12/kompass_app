@@ -1,4 +1,4 @@
-package llc.bokadev.kompass.presentation.screens.placedetail.components
+package llc.bokadev.kompass.presentation.shared.detail
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -26,8 +26,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import llc.bokadev.kompass.presentation.screens.home.components.BookmarkIcon
-import llc.bokadev.kompass.presentation.screens.home.components.ChevronLeftIcon
+import llc.bokadev.kompass.presentation.shared.icons.BookmarkIcon
+import llc.bokadev.kompass.presentation.shared.icons.ChevronLeftIcon
 import llc.bokadev.kompass.ui.theme.KompassTheme
 
 /**

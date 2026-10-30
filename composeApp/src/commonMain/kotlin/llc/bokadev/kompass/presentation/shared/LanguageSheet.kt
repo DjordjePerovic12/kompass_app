@@ -43,9 +43,9 @@ import androidx.compose.ui.unit.sp
 import llc.bokadev.kompass.core.utils.LanguageStrings
 import llc.bokadev.kompass.core.utils.SUPPORTED_LANGUAGES
 import llc.bokadev.kompass.core.utils.languageStringsFor
-import llc.bokadev.kompass.presentation.screens.home.components.CheckIcon
-import llc.bokadev.kompass.presentation.screens.placedetail.components.DetailGlyph
-import llc.bokadev.kompass.presentation.screens.placedetail.components.DetailIcon
+import llc.bokadev.kompass.presentation.shared.icons.CheckIcon
+import llc.bokadev.kompass.presentation.shared.icons.DetailGlyph
+import llc.bokadev.kompass.presentation.shared.icons.DetailIcon
 import llc.bokadev.kompass.ui.theme.KompassTheme
 import llc.bokadev.kompass.ui.theme.pageGradientBackground
 

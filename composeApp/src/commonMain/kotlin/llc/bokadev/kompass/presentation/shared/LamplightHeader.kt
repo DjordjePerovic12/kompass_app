@@ -31,8 +31,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import llc.bokadev.kompass.core.utils.currentAppLanguage
-import llc.bokadev.kompass.presentation.screens.home.components.GlobeIcon
-import llc.bokadev.kompass.presentation.screens.home.components.SearchIcon
+import llc.bokadev.kompass.presentation.shared.icons.GlobeIcon
+import llc.bokadev.kompass.presentation.shared.icons.SearchIcon
 import llc.bokadev.kompass.ui.theme.KompassTheme
 import llc.bokadev.kompass.ui.theme.KompassShapes
 import llc.bokadev.kompass.ui.theme.KompassDimens

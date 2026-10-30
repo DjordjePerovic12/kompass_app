@@ -25,6 +25,7 @@ import llc.bokadev.kompass.core.navigation.Screen
 import llc.bokadev.kompass.domain.model.CategoryListKind
 import llc.bokadev.kompass.presentation.shared.LanguageSheetHost
 import androidx.lifecycle.viewModelScope
+import llc.bokadev.kompass.domain.model.HomeArea
 
 private const val NEARBY_RADIUS_KM = 3.5
 private const val NEARBY_LIMIT = 4

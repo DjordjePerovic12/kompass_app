@@ -66,8 +66,8 @@ import llc.bokadev.kompass.core.utils.localizedTypeLabel
 import llc.bokadev.kompass.core.utils.uppercaseFor
 import llc.bokadev.kompass.domain.model.CategoryListKind
 import llc.bokadev.kompass.presentation.categorylist.components.CategoryListCard
-import llc.bokadev.kompass.presentation.screens.essentials.formatDistance
-import llc.bokadev.kompass.presentation.screens.home.components.ChevronDownIcon
+import llc.bokadev.kompass.presentation.shared.formatDistance
+import llc.bokadev.kompass.presentation.shared.icons.ChevronDownIcon
 import llc.bokadev.kompass.presentation.shared.LamplightCompactHeader
 import llc.bokadev.kompass.presentation.shared.areaLabel
 import llc.bokadev.kompass.ui.theme.KompassShapes

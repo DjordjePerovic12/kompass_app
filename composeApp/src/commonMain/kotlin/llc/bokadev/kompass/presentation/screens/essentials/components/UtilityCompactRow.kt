@@ -25,6 +25,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import llc.bokadev.kompass.ui.theme.KompassTheme
+import llc.bokadev.kompass.presentation.shared.icons.EssentialsGlyph
+import llc.bokadev.kompass.presentation.shared.icons.EssentialsIcon
+import llc.bokadev.kompass.presentation.shared.icons.glyph
 
 /** A secondary utility category (spec §3.5): icon, name, "{n} nearby", closest distance, chevron. */
 @Composable

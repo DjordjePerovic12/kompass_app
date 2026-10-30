@@ -2,6 +2,7 @@ package llc.bokadev.kompass.presentation.screens.essentials
 
 import llc.bokadev.kompass.core.presentation.mvi.BaseAction
 import llc.bokadev.kompass.domain.model.UtilityCategory
+import llc.bokadev.kompass.presentation.shared.title
 
 sealed interface EssentialsAction : BaseAction {
     data class SelectTab(val tab: EssentialsTab) : EssentialsAction

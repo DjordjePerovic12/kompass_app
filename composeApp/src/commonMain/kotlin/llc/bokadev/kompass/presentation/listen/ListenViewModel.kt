@@ -33,7 +33,7 @@ import llc.bokadev.kompass.presentation.base.BaseError
 import llc.bokadev.kompass.presentation.base.BaseViewModel
 import llc.bokadev.kompass.presentation.shared.GROUP_OTHER
 import llc.bokadev.kompass.presentation.shared.areaKeyFor
-import llc.bokadev.kompass.presentation.screens.home.HomeArea
+import llc.bokadev.kompass.domain.model.HomeArea
 
 class ListenViewModel(
     private val getCatalog: GetAudioCatalogUseCase,

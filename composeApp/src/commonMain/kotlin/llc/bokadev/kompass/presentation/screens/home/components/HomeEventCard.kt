@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import llc.bokadev.kompass.ui.theme.KompassTheme
 import llc.bokadev.kompass.ui.theme.KompassShapes
+import llc.bokadev.kompass.presentation.shared.icons.ArrowRightIcon
 
 /**
  * "Lamplight" event card (spec §3.5). Home-exclusive — not a restyle of the shared

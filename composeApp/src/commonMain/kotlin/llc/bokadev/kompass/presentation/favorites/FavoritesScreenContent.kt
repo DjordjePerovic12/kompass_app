@@ -56,9 +56,9 @@ import llc.bokadev.kompass.domain.model.SavedSnapshot
 import llc.bokadev.kompass.presentation.favorites.components.SavedCard
 import llc.bokadev.kompass.presentation.favorites.components.SavedEmptyState
 import llc.bokadev.kompass.presentation.favorites.components.UnavailableSavedCard
-import llc.bokadev.kompass.presentation.screens.essentials.formatDistance
-import llc.bokadev.kompass.presentation.screens.home.HomeArea
-import llc.bokadev.kompass.presentation.screens.placedetail.toVisitLength
+import llc.bokadev.kompass.presentation.shared.formatDistance
+import llc.bokadev.kompass.domain.model.HomeArea
+import llc.bokadev.kompass.presentation.shared.detail.toVisitLength
 import llc.bokadev.kompass.presentation.shared.GROUP_OTHER
 import llc.bokadev.kompass.presentation.shared.LamplightHeader
 import llc.bokadev.kompass.ui.theme.KompassShapes

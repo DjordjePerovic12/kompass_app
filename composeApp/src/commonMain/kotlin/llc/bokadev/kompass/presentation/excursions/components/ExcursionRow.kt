@@ -39,7 +39,7 @@ import llc.bokadev.kompass.domain.model.BestTime
 import llc.bokadev.kompass.domain.model.Excursion
 import llc.bokadev.kompass.domain.model.Place
 import llc.bokadev.kompass.domain.model.PlaceCategory
-import llc.bokadev.kompass.presentation.screens.home.components.BookmarkIcon
+import llc.bokadev.kompass.presentation.shared.icons.BookmarkIcon
 import llc.bokadev.kompass.ui.theme.KompassTheme
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource

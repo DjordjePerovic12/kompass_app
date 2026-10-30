@@ -42,6 +42,9 @@ import llc.bokadev.kompass.core.utils.RedesignStrings
 import llc.bokadev.kompass.core.utils.redesignStringsFor
 import llc.bokadev.kompass.ui.theme.KompassTheme
 import llc.bokadev.kompass.ui.theme.KompassShapes
+import llc.bokadev.kompass.presentation.shared.icons.ArrowRightIcon
+import llc.bokadev.kompass.presentation.shared.icons.BookmarkIcon
+import llc.bokadev.kompass.presentation.shared.icons.HeadphonesIcon
 
 /** Card geometry (cut-out spec B2, 390dp reference). Mirrored by `CardSpec` in `tools/cutout/make_cutout.py`. */
 private val cardHeight = 410.dp

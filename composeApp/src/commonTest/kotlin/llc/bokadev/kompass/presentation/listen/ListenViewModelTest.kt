@@ -23,7 +23,7 @@ import llc.bokadev.kompass.domain.usecase.GetLocalFindsUseCase
 import llc.bokadev.kompass.core.navigation.Screen
 import llc.bokadev.kompass.core.navigation.utils.NavType
 import kotlinx.coroutines.flow.toList
-import llc.bokadev.kompass.presentation.screens.home.HomeArea
+import llc.bokadev.kompass.domain.model.HomeArea
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ListenViewModelTest {

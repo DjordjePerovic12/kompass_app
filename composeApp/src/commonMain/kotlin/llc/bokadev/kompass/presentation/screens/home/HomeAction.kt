@@ -1,6 +1,7 @@
 package llc.bokadev.kompass.presentation.screens.home
 
 import llc.bokadev.kompass.core.presentation.mvi.BaseAction
+import llc.bokadev.kompass.domain.model.HomeArea
 
 sealed interface HomeAction : BaseAction {
     data object LoadHomeData : HomeAction

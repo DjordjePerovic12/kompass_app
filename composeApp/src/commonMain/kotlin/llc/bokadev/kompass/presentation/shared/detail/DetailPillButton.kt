@@ -1,4 +1,4 @@
-package llc.bokadev.kompass.presentation.screens.placedetail.components
+package llc.bokadev.kompass.presentation.shared.detail
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -23,6 +23,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import llc.bokadev.kompass.ui.theme.KompassTheme
 import llc.bokadev.kompass.ui.theme.KompassShapes
+import llc.bokadev.kompass.presentation.shared.icons.DetailGlyph
+import llc.bokadev.kompass.presentation.shared.icons.DetailIcon
 
 /** The detail pages' pill action: filled `lamp` (primary) or a `lamp` outline (secondary). */
 @Composable

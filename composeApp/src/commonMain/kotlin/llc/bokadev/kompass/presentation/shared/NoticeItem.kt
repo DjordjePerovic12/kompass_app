@@ -1,4 +1,4 @@
-package llc.bokadev.kompass.presentation.screens.home.components
+package llc.bokadev.kompass.presentation.shared
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -21,6 +21,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import llc.bokadev.kompass.ui.theme.KompassTheme
 import llc.bokadev.kompass.ui.theme.KompassShapes
+import llc.bokadev.kompass.presentation.shared.icons.InfoCircleIcon
+import llc.bokadev.kompass.presentation.shared.icons.WarningTriangleIcon
 
 enum class NoticeLevel { URGENT, IMPORTANT, GENERAL }
 

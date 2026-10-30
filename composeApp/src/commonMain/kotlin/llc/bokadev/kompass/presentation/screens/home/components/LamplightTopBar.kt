@@ -22,13 +22,14 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import llc.bokadev.kompass.core.utils.AppStrings
-import llc.bokadev.kompass.presentation.screens.home.HomeArea
+import llc.bokadev.kompass.domain.model.HomeArea
 import llc.bokadev.kompass.presentation.screens.home.HomeSection
 import llc.bokadev.kompass.presentation.screens.home.HomeState
 import llc.bokadev.kompass.presentation.screens.home.SectionStatus
 import llc.bokadev.kompass.presentation.shared.LamplightHeader
 import llc.bokadev.kompass.ui.theme.KompassTheme
 import llc.bokadev.kompass.ui.theme.KompassDimens
+import llc.bokadev.kompass.presentation.shared.icons.ChevronDownIcon
 
 /**
  * "Lamplight" top bar (spec §3.1): the shared [LamplightHeader] with Home's "Around {area}" title

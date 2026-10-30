@@ -65,23 +65,25 @@ import llc.bokadev.kompass.core.utils.uppercaseFor
 import llc.bokadev.kompass.domain.model.GeoPoint
 import llc.bokadev.kompass.domain.model.Place
 import llc.bokadev.kompass.domain.model.PlaceCategory
-import llc.bokadev.kompass.presentation.screens.home.components.BookmarkIcon
-import llc.bokadev.kompass.presentation.screens.home.components.ChevronLeftIcon
-import llc.bokadev.kompass.presentation.screens.placedetail.components.DetailGlyph
-import llc.bokadev.kompass.presentation.screens.placedetail.components.DetailHero
-import llc.bokadev.kompass.presentation.screens.placedetail.components.DetailCompactBar
-import llc.bokadev.kompass.presentation.screens.placedetail.components.DetailIcon
-import llc.bokadev.kompass.presentation.screens.placedetail.components.DetailLoadState
-import llc.bokadev.kompass.presentation.screens.placedetail.components.DetailPillButton
-import llc.bokadev.kompass.presentation.screens.placedetail.components.DetailPracticalRow
-import llc.bokadev.kompass.presentation.screens.placedetail.components.DetailPracticalRows
-import llc.bokadev.kompass.presentation.screens.placedetail.components.DetailTextSection
-import llc.bokadev.kompass.presentation.screens.placedetail.components.DetailWhereItIs
+import llc.bokadev.kompass.presentation.shared.icons.BookmarkIcon
+import llc.bokadev.kompass.presentation.shared.icons.ChevronLeftIcon
+import llc.bokadev.kompass.presentation.shared.icons.DetailGlyph
+import llc.bokadev.kompass.presentation.shared.detail.DetailHero
+import llc.bokadev.kompass.presentation.shared.detail.DetailCompactBar
+import llc.bokadev.kompass.presentation.shared.icons.DetailIcon
+import llc.bokadev.kompass.presentation.shared.detail.DetailLoadState
+import llc.bokadev.kompass.presentation.shared.detail.DetailPillButton
+import llc.bokadev.kompass.presentation.shared.detail.DetailPracticalRow
+import llc.bokadev.kompass.presentation.shared.detail.DetailPracticalRows
+import llc.bokadev.kompass.presentation.shared.detail.DetailTextSection
+import llc.bokadev.kompass.presentation.shared.detail.DetailWhereItIs
 import llc.bokadev.kompass.presentation.shared.NativeDetailMapView
 import llc.bokadev.kompass.presentation.shared.StatusBarIconsEffect
 import llc.bokadev.kompass.presentation.shared.rememberReduceMotion
 import llc.bokadev.kompass.ui.theme.KompassTheme
 import llc.bokadev.kompass.ui.theme.pageGradientBackground
+import llc.bokadev.kompass.presentation.shared.detail.toDetailLabel
+import llc.bokadev.kompass.presentation.shared.detail.toVisitLength
 
 /**
  * Lamplight place detail (place detail spec Part 1). One template for every category: each

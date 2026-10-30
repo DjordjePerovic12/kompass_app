@@ -45,14 +45,16 @@ import llc.bokadev.kompass.core.presentation.mvi.asString
 import llc.bokadev.kompass.core.utils.EssentialsStrings
 import llc.bokadev.kompass.core.utils.rememberAppStrings
 import llc.bokadev.kompass.domain.model.UtilityCategory
-import llc.bokadev.kompass.presentation.screens.home.components.ChevronLeftIcon
-import llc.bokadev.kompass.presentation.screens.placedetail.components.DetailGlyph
-import llc.bokadev.kompass.presentation.screens.placedetail.components.DetailPillButton
+import llc.bokadev.kompass.presentation.shared.icons.ChevronLeftIcon
+import llc.bokadev.kompass.presentation.shared.icons.DetailGlyph
+import llc.bokadev.kompass.presentation.shared.detail.DetailPillButton
 import llc.bokadev.kompass.presentation.shared.NativeUtilityDetailMapView
 import llc.bokadev.kompass.presentation.shared.StateMessage
 import llc.bokadev.kompass.presentation.shared.UtilityMapPin
 import llc.bokadev.kompass.ui.theme.KompassTheme
 import llc.bokadev.kompass.ui.theme.KompassShapes
+import llc.bokadev.kompass.presentation.shared.formatDistance
+import llc.bokadev.kompass.presentation.shared.title
 
 /**
  * The expanded utility map: the map fills the screen; a compact sheet holds the selected point

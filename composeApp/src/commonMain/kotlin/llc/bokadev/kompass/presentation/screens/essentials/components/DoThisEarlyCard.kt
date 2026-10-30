@@ -25,6 +25,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import llc.bokadev.kompass.ui.theme.KompassTheme
 import llc.bokadev.kompass.ui.theme.KompassShapes
+import llc.bokadev.kompass.presentation.shared.icons.EssentialsGlyph
+import llc.bokadev.kompass.presentation.shared.icons.EssentialsIcon
 
 /**
  * "Do this early" (Essentials spec §2.2): a calm limestone card for the one formality visitors

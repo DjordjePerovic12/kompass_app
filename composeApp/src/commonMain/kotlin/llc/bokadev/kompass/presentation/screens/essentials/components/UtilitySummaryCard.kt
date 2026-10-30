@@ -35,6 +35,8 @@ import llc.bokadev.kompass.presentation.shared.NativeUtilityPreviewMapView
 import llc.bokadev.kompass.presentation.shared.UtilityMapPin
 import llc.bokadev.kompass.ui.theme.KompassTheme
 import llc.bokadev.kompass.ui.theme.KompassShapes
+import llc.bokadev.kompass.presentation.shared.icons.EssentialsGlyph
+import llc.bokadev.kompass.presentation.shared.icons.EssentialsIcon
 
 /** One numbered "nearest" row. [distance] is null when location is off (never fake "closest"). */
 data class NearestRow(val id: String, val name: String, val distance: String?)

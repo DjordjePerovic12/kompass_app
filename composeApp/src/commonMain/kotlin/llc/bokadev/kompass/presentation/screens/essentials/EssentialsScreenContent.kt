@@ -33,7 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.semantics.Role
-import llc.bokadev.kompass.presentation.screens.home.components.ChevronLeftIcon
+import llc.bokadev.kompass.presentation.shared.icons.ChevronLeftIcon
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
@@ -55,8 +55,8 @@ import llc.bokadev.kompass.presentation.screens.essentials.components.DialEntry
 import llc.bokadev.kompass.presentation.screens.essentials.components.DoThisEarlyCard
 import llc.bokadev.kompass.presentation.screens.essentials.components.EmergencyCard
 import llc.bokadev.kompass.presentation.screens.essentials.components.EssentialModuleGroup
-import llc.bokadev.kompass.presentation.screens.essentials.components.EssentialsGlyph
-import llc.bokadev.kompass.presentation.screens.essentials.components.EssentialsIcon
+import llc.bokadev.kompass.presentation.shared.icons.EssentialsGlyph
+import llc.bokadev.kompass.presentation.shared.icons.EssentialsIcon
 import llc.bokadev.kompass.presentation.screens.essentials.components.ModuleAction
 import llc.bokadev.kompass.presentation.screens.essentials.components.ModuleItem
 import llc.bokadev.kompass.presentation.screens.essentials.components.ModuleLabels
@@ -67,7 +67,7 @@ import llc.bokadev.kompass.presentation.screens.essentials.components.UtilityCat
 import llc.bokadev.kompass.presentation.screens.essentials.components.UtilityCompactRow
 import llc.bokadev.kompass.presentation.screens.essentials.components.UtilitySummaryCard
 import llc.bokadev.kompass.presentation.screens.essentials.components.UtilityTile
-import llc.bokadev.kompass.presentation.screens.essentials.components.glyph
+import llc.bokadev.kompass.presentation.shared.icons.glyph
 import llc.bokadev.kompass.presentation.shared.LamplightHeader
 import llc.bokadev.kompass.presentation.shared.LamplightSegmentedControl
 import llc.bokadev.kompass.presentation.shared.SegmentOption
@@ -76,6 +76,12 @@ import llc.bokadev.kompass.presentation.shared.rememberReduceMotion
 import llc.bokadev.kompass.ui.theme.KompassTheme
 import llc.bokadev.kompass.ui.theme.KompassShapes
 import llc.bokadev.kompass.ui.theme.pageGradientBackground
+import llc.bokadev.kompass.presentation.shared.EssentialGroupKind
+import llc.bokadev.kompass.presentation.shared.cardTitle
+import llc.bokadev.kompass.presentation.shared.formatDistance
+import llc.bokadev.kompass.presentation.shared.linkTitle
+import llc.bokadev.kompass.presentation.shared.tileLabel
+import llc.bokadev.kompass.presentation.shared.title
 
 /** Everything Essentials hands off: dialer, exact-coordinate maps, links, the utility map, settings. */
 /**

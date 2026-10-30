@@ -61,20 +61,23 @@ import llc.bokadev.kompass.domain.model.FavoriteItemType
 import llc.bokadev.kompass.domain.model.FavoriteKey
 import llc.bokadev.kompass.domain.model.InfoNotice
 import llc.bokadev.kompass.domain.model.Place
-import llc.bokadev.kompass.presentation.screens.home.components.ArrowRightIcon
-import llc.bokadev.kompass.presentation.screens.home.components.CheckIcon
+import llc.bokadev.kompass.presentation.shared.icons.ArrowRightIcon
+import llc.bokadev.kompass.presentation.shared.icons.CheckIcon
 import llc.bokadev.kompass.presentation.screens.home.components.HomeEventCard
 import llc.bokadev.kompass.presentation.screens.home.components.LamplightTopBar
 import llc.bokadev.kompass.presentation.screens.home.components.MustSeeCard
 import llc.bokadev.kompass.presentation.screens.home.components.NearbyCardUi
 import llc.bokadev.kompass.presentation.screens.home.components.NearbyStackCarousel
-import llc.bokadev.kompass.presentation.screens.home.components.NoticeItem
+import llc.bokadev.kompass.presentation.shared.NoticeItem
 import llc.bokadev.kompass.presentation.screens.home.components.SectionHeader
 import kotlin.time.ExperimentalTime
 import llc.bokadev.kompass.ui.theme.KompassTheme
 import llc.bokadev.kompass.ui.theme.KompassDimens
 import llc.bokadev.kompass.ui.theme.pageGradientBackground
 import llc.bokadev.kompass.ui.theme.pageGradientStops
+import llc.bokadev.kompass.domain.model.HomeArea
+import llc.bokadev.kompass.presentation.shared.toNoticeLabel
+import llc.bokadev.kompass.presentation.shared.toNoticeLevel
 
 /**
  * The whole screen is one continuous light-purple-to-ink gradient (see

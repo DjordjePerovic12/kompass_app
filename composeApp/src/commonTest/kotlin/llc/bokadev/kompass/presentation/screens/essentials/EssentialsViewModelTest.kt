@@ -1,5 +1,6 @@
 package llc.bokadev.kompass.presentation.screens.essentials
 
+import llc.bokadev.kompass.presentation.shared.linkTitle
 import llc.bokadev.kompass.core.utils.networking.NetworkError
 import llc.bokadev.kompass.core.utils.networking.Resource
 import llc.bokadev.kompass.presentation.shared.LanguageSheetHost
@@ -16,6 +17,9 @@ import llc.bokadev.kompass.domain.location.UserLocationProvider
 import llc.bokadev.kompass.domain.model.*
 import llc.bokadev.kompass.domain.repository.*
 import llc.bokadev.kompass.domain.usecase.*
+import llc.bokadev.kompass.presentation.shared.EssentialGroupKind
+import llc.bokadev.kompass.presentation.shared.formatDistance
+import llc.bokadev.kompass.presentation.shared.title
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class EssentialsViewModelTest {

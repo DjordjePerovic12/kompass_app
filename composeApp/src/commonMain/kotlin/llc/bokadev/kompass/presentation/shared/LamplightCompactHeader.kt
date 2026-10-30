@@ -29,8 +29,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import llc.bokadev.kompass.presentation.screens.home.components.ChevronLeftIcon
-import llc.bokadev.kompass.presentation.screens.home.components.SearchIcon
+import llc.bokadev.kompass.presentation.shared.icons.ChevronLeftIcon
+import llc.bokadev.kompass.presentation.shared.icons.SearchIcon
 import llc.bokadev.kompass.ui.theme.KompassTheme
 
 /**

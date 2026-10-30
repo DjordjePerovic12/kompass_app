@@ -59,7 +59,7 @@ import llc.bokadev.kompass.presentation.localfinds.components.StoryFeatureCard
 import llc.bokadev.kompass.presentation.localfinds.components.StoryQuoteCard
 import llc.bokadev.kompass.presentation.localfinds.utils.StoryCardLayout
 import llc.bokadev.kompass.presentation.localfinds.utils.StoryKind
-import llc.bokadev.kompass.presentation.screens.home.components.ChevronLeftIcon
+import llc.bokadev.kompass.presentation.shared.icons.ChevronLeftIcon
 import llc.bokadev.kompass.presentation.shared.LamplightSegmentedControl
 import llc.bokadev.kompass.presentation.shared.SegmentOption
 import llc.bokadev.kompass.ui.theme.KompassTheme

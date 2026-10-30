@@ -6,7 +6,7 @@ import kompass.composeapp.generated.resources.redesign_device_location
 import kompass.composeapp.generated.resources.redesign_old_town_short
 import kompass.composeapp.generated.resources.saved_group_other
 import llc.bokadev.kompass.core.utils.toTitleCaseLabel
-import llc.bokadev.kompass.presentation.screens.home.HomeArea
+import llc.bokadev.kompass.domain.model.HomeArea
 import org.jetbrains.compose.resources.stringResource
 
 /** The short visitor-facing name of an area key ("old_town" → "Old Town"); unknown keys are title-cased. */

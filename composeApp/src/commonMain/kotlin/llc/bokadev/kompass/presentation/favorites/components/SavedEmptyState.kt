@@ -28,8 +28,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import llc.bokadev.kompass.presentation.screens.home.components.ArrowRightIcon
-import llc.bokadev.kompass.presentation.screens.home.components.BookmarkIcon
+import llc.bokadev.kompass.presentation.shared.icons.ArrowRightIcon
+import llc.bokadev.kompass.presentation.shared.icons.BookmarkIcon
 import llc.bokadev.kompass.ui.theme.KompassTheme
 import llc.bokadev.kompass.ui.theme.KompassShapes
 

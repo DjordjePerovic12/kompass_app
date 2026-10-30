@@ -24,6 +24,8 @@ import llc.bokadev.kompass.domain.model.GeoPoint
 import llc.bokadev.kompass.domain.model.Utility
 import llc.bokadev.kompass.domain.usecase.GetEssentialsUseCase
 import llc.bokadev.kompass.domain.usecase.GetUtilitiesUseCase
+import llc.bokadev.kompass.presentation.shared.EssentialGroupKind
+import llc.bokadev.kompass.presentation.shared.title
 
 class EssentialsViewModel(
     private val getEssentials: GetEssentialsUseCase,
