@@ -9,7 +9,7 @@ import llc.bokadev.kompass.domain.usecase.GetActivityByIdUseCase
 import llc.bokadev.kompass.domain.usecase.GetSignedAudioUrlUseCase
 import llc.bokadev.kompass.presentation.screens.experiencedetail.ExperienceDetailViewModel
 import org.koin.core.qualifier.named
-import org.koin.core.module.dsl.viewModel
+import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
 val experiencesModule = module {
@@ -18,5 +18,5 @@ val experiencesModule = module {
     factory { GetActivitiesUseCase(get()) }
     factory { GetActivityByIdUseCase(get()) }
     factory { GetSignedAudioUrlUseCase(get()) }
-    viewModel { (id: String) -> ExperienceDetailViewModel(id, get(), get(), get(), get(), get(), get(), get()) }
+    viewModelOf(::ExperienceDetailViewModel)
 }

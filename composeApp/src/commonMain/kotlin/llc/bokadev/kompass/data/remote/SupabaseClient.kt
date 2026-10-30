@@ -1,6 +1,6 @@
 package llc.bokadev.kompass.data.remote
 
-import io.github.aakira.napier.Napier
+import co.touchlab.kermit.Logger as KermitLogger
 import io.github.jan.supabase.annotations.SupabaseInternal
 import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.createSupabaseClient
@@ -41,7 +41,7 @@ fun createKompassSupabaseClient(
         install(Logging) {
             logger = object : Logger {
                 override fun log(message: String) {
-                    Napier.d(message, tag = "KompassAPI")
+                    KermitLogger.d(tag = "KompassAPI") { message }
                 }
             }
             level = LogLevel.ALL

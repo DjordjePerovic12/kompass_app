@@ -8,7 +8,7 @@ import llc.bokadev.kompass.domain.usecase.GetEssentialsUseCase
 import llc.bokadev.kompass.domain.usecase.GetUtilitiesUseCase
 import llc.bokadev.kompass.presentation.screens.essentials.EssentialsViewModel
 import llc.bokadev.kompass.presentation.screens.essentials.UtilityMapViewModel
-import org.koin.core.module.dsl.viewModel
+import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
 val essentialsModule = module {
@@ -16,6 +16,6 @@ val essentialsModule = module {
     single<UtilityRepository> { UtilityRepositoryImpl(get(), get()) }
     factory { GetEssentialsUseCase(get()) }
     factory { GetUtilitiesUseCase(get()) }
-    viewModel { EssentialsViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
-    viewModel { UtilityMapViewModel(get(), get(), get(), get(), get()) }
+    viewModelOf(::EssentialsViewModel)
+    viewModelOf(::UtilityMapViewModel)
 }

@@ -8,7 +8,7 @@ import llc.bokadev.kompass.domain.usecase.GetEventsUseCase
 import llc.bokadev.kompass.domain.usecase.GetUpcomingEventsUseCase
 import llc.bokadev.kompass.presentation.screens.eventdetail.EventDetailViewModel
 import llc.bokadev.kompass.presentation.screens.events.EventsViewModel
-import org.koin.core.module.dsl.viewModel
+import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
 val eventsModule = module {
@@ -17,6 +17,6 @@ val eventsModule = module {
     factory { GetEventFiltersUseCase(get()) }
     factory { GetUpcomingEventsUseCase(get()) }
     factory { GetEventByIdUseCase(get()) }
-    viewModel { EventsViewModel(get(), get(), get(), get(), get()) }
-    viewModel { (id: String) -> EventDetailViewModel(id, get(), get(), get()) }
+    viewModelOf(::EventsViewModel)
+    viewModelOf(::EventDetailViewModel)
 }

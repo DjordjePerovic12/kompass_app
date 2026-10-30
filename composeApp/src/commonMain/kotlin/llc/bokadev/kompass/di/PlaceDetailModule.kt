@@ -1,9 +1,9 @@
 package llc.bokadev.kompass.di
 
 import llc.bokadev.kompass.presentation.screens.placedetail.PlaceDetailViewModel
-import org.koin.core.module.dsl.viewModel
+import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
 val placeDetailModule = module {
-    viewModel { (id: String) -> PlaceDetailViewModel(id, get(), get(), get(), get(), get(), get(), get()) }
+    viewModelOf(::PlaceDetailViewModel)
 }

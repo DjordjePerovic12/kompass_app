@@ -4,8 +4,8 @@ Pocket tourist guide app for Kotor, Montenegro. All recommendations curated by l
 
 ## Tech Stack
 
-- **Platform:** Kotlin Multiplatform + Compose Multiplatform 1.10.3 (shared UI)
-- **Kotlin:** 2.2.20
+- **Platform:** Kotlin Multiplatform + Compose Multiplatform 1.12.2 (shared UI)
+- **Kotlin:** 2.4.21 (AGP 9.3.1, Gradle 9.7.0 — Kotlin 2.4.21 supports AGP ≤ 9.3.1)
 - **Package:** `llc.bokadev.kompass`
 - **Backend:** Supabase (Postgres, Auth, Storage, REST)
 - **DI:** Koin 4.x (KMP)
@@ -14,7 +14,7 @@ Pocket tourist guide app for Kotor, Montenegro. All recommendations curated by l
 - **Navigation:** Official Compose Navigation Multiplatform
 - **Serialization:** kotlinx.serialization
 - **Architecture:** Clean Architecture + MVI
-- **Target SDK:** Android 35, iOS 17+
+- **Target SDK:** Android 37 (compileSdk 37), iOS 17+
 
 ## Architecture
 
@@ -49,7 +49,7 @@ composeApp/
         di/             # Koin modules per feature + root appModule
     androidMain/        # Android Application class, expect/actual implementations
     iosMain/            # iOS entry point, expect/actual implementations
-androidApp/             # Android manifest, launcher
+androidApp/             # com.android.application: KompassApplication, MainActivity, app manifest, launcher icons
 iosApp/                 # Xcode project, SwiftUI entry
 ```
 
@@ -172,8 +172,8 @@ Top-level: Eat & Drink, See & Visit, Activities, Hidden Gems, Practical. Sub-fil
 
 ```bash
 ./gradlew build
-./gradlew :composeApp:installDebug          # Android
-./gradlew :composeApp:testDebugUnitTest     # Tests
+./gradlew :androidApp:installDebug           # Android
+./gradlew :composeApp:testAndroidHostTest   # Tests (JVM); :composeApp:allTests also runs iOS (needs Xcode 26)
 ./gradlew :composeApp:dependencies          # Deps
 ```
 
@@ -197,7 +197,7 @@ Top-level: Eat & Drink, See & Visit, Activities, Hidden Gems, Practical. Sub-fil
 - Coil 3 KMP: use AsyncImage, configure ImageLoader per platform via expect/actual
 - Supabase Kotlin SDK has KMP support — use it, don't write raw REST calls
 - translations jsonb: always fall back to "en" if current locale missing
-- CMP 1.10.3 requires Kotlin 2.2.20 — don't downgrade
+- Kotlin 2.4.21 caps AGP at 9.3.1 — check the KMP compatibility table before bumping AGP
 - Use @Preview (org.jetbrains.compose.ui.tooling.preview.Preview) — unified annotation
 - Never import raw color vals (colorNavy, colorAmber, etc.) in UI files — always use KompassTheme.colors.X
 

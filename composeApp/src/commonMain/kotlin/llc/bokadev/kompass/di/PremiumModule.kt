@@ -12,7 +12,7 @@ import llc.bokadev.kompass.domain.usecase.StartPremiumCheckoutUseCase
 import llc.bokadev.kompass.domain.usecase.VerifyPremiumCheckoutUseCase
 import llc.bokadev.kompass.domain.usecase.GetAudioCatalogUseCase
 import llc.bokadev.kompass.presentation.screens.listen.ListenViewModel
-import org.koin.core.module.dsl.viewModel
+import org.koin.core.module.dsl.viewModelOf
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
@@ -25,5 +25,5 @@ val premiumModule = module {
     factory { StartPremiumCheckoutUseCase(get()) }
     factory { VerifyPremiumCheckoutUseCase(get()) }
     factory { GetAudioCatalogUseCase(get(), get(), get()) }
-    viewModel { ListenViewModel(get(), get(), get(), get(), get(), get(), get()) }
+    viewModelOf(::ListenViewModel)
 }

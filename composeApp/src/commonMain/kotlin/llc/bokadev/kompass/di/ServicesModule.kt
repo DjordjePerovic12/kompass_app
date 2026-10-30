@@ -6,13 +6,13 @@ import llc.bokadev.kompass.domain.usecase.GetServiceByIdUseCase
 import llc.bokadev.kompass.domain.usecase.GetServicesUseCase
 import llc.bokadev.kompass.presentation.screens.services.ServiceDetailViewModel
 import llc.bokadev.kompass.presentation.screens.services.ServicesViewModel
-import org.koin.core.module.dsl.viewModel
+import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
 val servicesModule = module {
     single<ServiceRepository> { ServiceRepositoryImpl(get()) }
     factory { GetServicesUseCase(get()) }
     factory { GetServiceByIdUseCase(get()) }
-    viewModel { ServicesViewModel(get(), get(), get()) }
-    viewModel { (id: String) -> ServiceDetailViewModel(id, get(), get(), get()) }
+    viewModelOf(::ServicesViewModel)
+    viewModelOf(::ServiceDetailViewModel)
 }
