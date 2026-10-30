@@ -6,7 +6,6 @@ import kompass.composeapp.generated.resources.redesign_device_location
 import kompass.composeapp.generated.resources.redesign_old_town_short
 import kompass.composeapp.generated.resources.saved_group_other
 import llc.bokadev.kompass.core.utils.toTitleCaseLabel
-import llc.bokadev.kompass.presentation.screens.favorites.GROUP_OTHER
 import llc.bokadev.kompass.presentation.screens.home.HomeArea
 import org.jetbrains.compose.resources.stringResource
 

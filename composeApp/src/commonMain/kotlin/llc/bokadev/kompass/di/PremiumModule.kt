@@ -11,7 +11,7 @@ import llc.bokadev.kompass.domain.usecase.HasPremiumAccessUseCase
 import llc.bokadev.kompass.domain.usecase.StartPremiumCheckoutUseCase
 import llc.bokadev.kompass.domain.usecase.VerifyPremiumCheckoutUseCase
 import llc.bokadev.kompass.domain.usecase.GetAudioCatalogUseCase
-import llc.bokadev.kompass.presentation.screens.listen.ListenViewModel
+import llc.bokadev.kompass.presentation.listen.ListenViewModel
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.core.qualifier.named
 import org.koin.dsl.module

@@ -4,8 +4,8 @@ import llc.bokadev.kompass.data.repository.LocalFindRepositoryImpl
 import llc.bokadev.kompass.domain.repository.LocalFindRepository
 import llc.bokadev.kompass.domain.usecase.GetLocalFindByIdUseCase
 import llc.bokadev.kompass.domain.usecase.GetLocalFindsUseCase
-import llc.bokadev.kompass.presentation.screens.localfinds.LocalFindDetailViewModel
-import llc.bokadev.kompass.presentation.screens.localfinds.LocalFindsViewModel
+import llc.bokadev.kompass.presentation.localfinds.detail.LocalFindDetailViewModel
+import llc.bokadev.kompass.presentation.localfinds.LocalFindsViewModel
 import org.koin.core.module.dsl.viewModel
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module

@@ -20,7 +20,7 @@ import llc.bokadev.kompass.domain.repository.AudioGuideRepository
 import llc.bokadev.kompass.domain.repository.FavoritesRepository
 import llc.bokadev.kompass.domain.repository.SavedSnapshotRepository
 import llc.bokadev.kompass.domain.usecase.GetPlaceByIdUseCase
-import llc.bokadev.kompass.presentation.screens.favorites.areaKeyFor
+import llc.bokadev.kompass.presentation.shared.areaKeyFor
 import llc.bokadev.kompass.presentation.shared.ExternalLaunch
 
 class PlaceDetailViewModel(

@@ -11,7 +11,7 @@ import llc.bokadev.kompass.domain.model.FavoriteKey
 import llc.bokadev.kompass.domain.model.SavedSnapshot
 import llc.bokadev.kompass.domain.repository.FavoritesRepository
 import llc.bokadev.kompass.domain.repository.SavedSnapshotRepository
-import llc.bokadev.kompass.presentation.screens.favorites.FavoritesViewModelTest
+import llc.bokadev.kompass.testutil.FakeFavorites
 import llc.bokadev.kompass.testutil.RecordingNavigator
 import kotlin.test.*
 import kotlinx.coroutines.*
@@ -87,7 +87,7 @@ class PlaceDetailViewModelTest {
     @Test fun savingIsExplicitAndRemembersASnapshot() = runTest {
         Dispatchers.setMain(StandardTestDispatcher(testScheduler))
         try {
-            val favorites = FavoritesViewModelTest.FakeFavorites(emptyList())
+            val favorites = FakeFavorites(emptyList())
             val store = mutableMapOf<FavoriteKey, SavedSnapshot>()
             val navigator = RecordingNavigator()
             val vm = model(GetPlaceByIdUseCase(FakePlaceRepository(null)), FakeAudioRepository(emptySet()), FakeAppPreferences("en"), favorites, store, navigator)
@@ -110,7 +110,7 @@ class PlaceDetailViewModelTest {
         getPlaceById: GetPlaceByIdUseCase,
         audio: AudioGuideRepository,
         prefs: AppPreferences,
-        favorites: FavoritesRepository = FavoritesViewModelTest.FakeFavorites(emptyList()),
+        favorites: FavoritesRepository = FakeFavorites(emptyList()),
         store: MutableMap<FavoriteKey, SavedSnapshot> = mutableMapOf(),
         navigator: RecordingNavigator = RecordingNavigator()
     ) = PlaceDetailViewModel(

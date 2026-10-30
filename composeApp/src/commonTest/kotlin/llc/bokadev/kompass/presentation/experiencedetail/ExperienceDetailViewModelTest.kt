@@ -6,7 +6,7 @@ import llc.bokadev.kompass.core.utils.networking.Resource
 import llc.bokadev.kompass.domain.model.FavoriteKey
 import llc.bokadev.kompass.domain.model.SavedSnapshot
 import llc.bokadev.kompass.domain.repository.SavedSnapshotRepository
-import llc.bokadev.kompass.presentation.screens.favorites.FavoritesViewModelTest
+import llc.bokadev.kompass.testutil.FakeFavorites
 import llc.bokadev.kompass.core.navigation.utils.NavType
 import llc.bokadev.kompass.presentation.shared.ExternalLaunch
 import llc.bokadev.kompass.testutil.FakeNavigator
@@ -97,7 +97,7 @@ class ExperienceDetailViewModelTest {
                 override fun isAvailableOffline(path: String) = path in offline
             },
             appPreferences = Prefs(lang),
-            favorites = FavoritesViewModelTest.FakeFavorites(emptyList()),
+            favorites = FakeFavorites(emptyList()),
             snapshots = object : SavedSnapshotRepository {
                 override fun get(key: FavoriteKey): SavedSnapshot? = null
                 override fun putAll(snapshots: Map<FavoriteKey, SavedSnapshot>) = Unit

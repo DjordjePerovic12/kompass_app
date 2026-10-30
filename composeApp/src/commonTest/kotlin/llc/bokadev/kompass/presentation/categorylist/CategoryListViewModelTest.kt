@@ -15,7 +15,7 @@ import llc.bokadev.kompass.domain.location.UserLocationProvider
 import llc.bokadev.kompass.domain.model.*
 import llc.bokadev.kompass.domain.repository.*
 import llc.bokadev.kompass.domain.usecase.*
-import llc.bokadev.kompass.presentation.screens.favorites.FavoritesViewModelTest
+import llc.bokadev.kompass.testutil.FakeFavorites
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class CategoryListViewModelTest {
@@ -111,10 +111,10 @@ class CategoryListViewModelTest {
 
     private fun withVm(
         initial: List<FavoriteEntry>,
-        assertions: TestScope.(CategoryListViewModel, FavoritesViewModelTest.FakeFavorites, List<CategoryListEvent>, Map<FavoriteKey, SavedSnapshot>) -> Unit
+        assertions: TestScope.(CategoryListViewModel, FakeFavorites, List<CategoryListEvent>, Map<FavoriteKey, SavedSnapshot>) -> Unit
     ) = runTest {
         Dispatchers.setMain(StandardTestDispatcher(testScheduler))
-        val favorites = FavoritesViewModelTest.FakeFavorites(initial)
+        val favorites = FakeFavorites(initial)
         val snapshotStore = mutableMapOf<FavoriteKey, SavedSnapshot>()
         val navigator = FakeNavigator().also { lastNavigator = it }
         val vm = CategoryListViewModel(

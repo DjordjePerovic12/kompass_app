@@ -26,7 +26,7 @@ import llc.bokadev.kompass.domain.repository.SavedSnapshotRepository
 import llc.bokadev.kompass.domain.usecase.GetActivityByIdUseCase
 import llc.bokadev.kompass.presentation.base.BaseError
 import llc.bokadev.kompass.presentation.base.BaseViewModel
-import llc.bokadev.kompass.presentation.screens.favorites.areaKeyFor
+import llc.bokadev.kompass.presentation.shared.areaKeyFor
 import llc.bokadev.kompass.presentation.shared.ExternalLaunch
 
 class ExperienceDetailViewModel(

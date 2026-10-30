@@ -29,7 +29,7 @@ import llc.bokadev.kompass.domain.repository.ExcursionRepository
 import llc.bokadev.kompass.presentation.base.BaseError
 import llc.bokadev.kompass.presentation.excursions.related_activities.RelatedActivitiesEvent
 import llc.bokadev.kompass.presentation.excursions.related_activities.RelatedActivitiesViewModel
-import llc.bokadev.kompass.presentation.screens.favorites.FavoritesViewModelTest
+import llc.bokadev.kompass.testutil.FakeFavorites
 import llc.bokadev.kompass.testutil.FakeNavigator
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -84,10 +84,10 @@ class ExcursionsViewModelTest {
         Dispatchers.setMain(StandardTestDispatcher(testScheduler))
         val saved = SavedStateHandle()
         val repo = fake(Resource.Success(ExcursionResult(listOf(entry()), true)))
-        val first = ExcursionsViewModel(repo, saved, FavoritesViewModelTest.FakeFavorites(emptyList()), FakeNavigator())
+        val first = ExcursionsViewModel(repo, saved, FakeFavorites(emptyList()), FakeNavigator())
         val filter = ExcursionFilter(setOf("culture", "water"), "half_day", "arrange_ahead")
         first.onEvent(ExcursionsEvent.OnFilterChange(filter))
-        val restored = ExcursionsViewModel(repo, saved, FavoritesViewModelTest.FakeFavorites(emptyList()), FakeNavigator())
+        val restored = ExcursionsViewModel(repo, saved, FakeFavorites(emptyList()), FakeNavigator())
         try {
             restored.excursionsState.test {
                 advanceUntilIdle()
@@ -113,7 +113,7 @@ class ExcursionsViewModelTest {
             override suspend fun getCollection() = if (fail) Resource.Error(NetworkError.UNKNOWN, "offline") else Resource.Success(ExcursionResult(listOf(entry())))
             override suspend fun getRelatedActivities(placeId: String) = Resource.Success(ExcursionResult<Experience>(emptyList()))
         }
-        val vm = ExcursionsViewModel(repo, SavedStateHandle(), FavoritesViewModelTest.FakeFavorites(emptyList()), FakeNavigator())
+        val vm = ExcursionsViewModel(repo, SavedStateHandle(), FakeFavorites(emptyList()), FakeNavigator())
         try {
             vm.excursionsState.test {
                 advanceUntilIdle()
@@ -137,7 +137,7 @@ class ExcursionsViewModelTest {
     @Test fun backSaveAndOpenGoThroughTheNavigatorAndFavorites() = runTest {
         Dispatchers.setMain(StandardTestDispatcher(testScheduler))
         val navigator = FakeNavigator()
-        val vm = ExcursionsViewModel(fake(Resource.Success(ExcursionResult(listOf(entry())))), SavedStateHandle(), FavoritesViewModelTest.FakeFavorites(emptyList()), navigator)
+        val vm = ExcursionsViewModel(fake(Resource.Success(ExcursionResult(listOf(entry())))), SavedStateHandle(), FakeFavorites(emptyList()), navigator)
         try {
             vm.excursionsState.test {
                 vm.onEvent(ExcursionsEvent.OnSaveClick(FavoriteItemType.ACTIVITY, "islands", saved = true))
@@ -174,7 +174,7 @@ class ExcursionsViewModelTest {
                 else Resource.Success(ExcursionResult(listOf(entry().activity!!), isCached = true))
             }
         }
-        val vm = RelatedActivitiesViewModel("lovcen", repo, FavoritesViewModelTest.FakeFavorites(emptyList()), FakeNavigator())
+        val vm = RelatedActivitiesViewModel("lovcen", repo, FakeFavorites(emptyList()), FakeNavigator())
         try {
             vm.relatedActivitiesState.test {
                 advanceUntilIdle()
@@ -200,7 +200,7 @@ class ExcursionsViewModelTest {
     @Test fun relatedActivitiesSaveAndOpenTheActivity() = runTest {
         Dispatchers.setMain(StandardTestDispatcher(testScheduler))
         val navigator = FakeNavigator()
-        val favorites = FavoritesViewModelTest.FakeFavorites(emptyList())
+        val favorites = FakeFavorites(emptyList())
         val repo = fake(Resource.Success(ExcursionResult(emptyList())))
         val vm = RelatedActivitiesViewModel("lovcen", repo, favorites, navigator)
         try {

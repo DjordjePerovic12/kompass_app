@@ -33,8 +33,8 @@ import llc.bokadev.kompass.domain.repository.SavedSnapshotRepository
 import llc.bokadev.kompass.domain.usecase.GetActivitiesUseCase
 import llc.bokadev.kompass.presentation.base.BaseError
 import llc.bokadev.kompass.presentation.base.BaseViewModel
-import llc.bokadev.kompass.presentation.screens.favorites.REGION_RADIUS_KM
-import llc.bokadev.kompass.presentation.screens.favorites.areaKeyFor
+import llc.bokadev.kompass.presentation.shared.REGION_RADIUS_KM
+import llc.bokadev.kompass.presentation.shared.areaKeyFor
 
 class CategoryListViewModel(
     private val placeRepository: PlaceRepository,

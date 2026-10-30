@@ -20,8 +20,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import llc.bokadev.kompass.core.audio.NavAudioMode
-import llc.bokadev.kompass.presentation.screens.listen.components.DiscState
-import llc.bokadev.kompass.presentation.screens.listen.components.PlayDisc
+import llc.bokadev.kompass.presentation.listen.components.DiscState
+import llc.bokadev.kompass.presentation.listen.components.PlayDisc
 import llc.bokadev.kompass.ui.theme.KompassTheme
 import llc.bokadev.kompass.ui.theme.KompassShapes
 

@@ -37,8 +37,9 @@ import llc.bokadev.kompass.presentation.shared.LanguageSheetHost
 import llc.bokadev.kompass.core.utils.AppPreferences
 import llc.bokadev.kompass.core.utils.AudioGuidePlayer
 import llc.bokadev.kompass.core.utils.PlaybackRequestGuard
-import llc.bokadev.kompass.presentation.screens.onboarding.OnboardingScreen
-import llc.bokadev.kompass.presentation.screens.onboarding.OnboardingViewModel
+import llc.bokadev.kompass.presentation.onboarding.OnboardingScreen
+import llc.bokadev.kompass.presentation.onboarding.OnboardingViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.compose.koinInject
 import llc.bokadev.kompass.core.components.BottomTab
@@ -55,9 +56,9 @@ fun MainShell() {
     val preferences = koinInject<AppPreferences>()
     // First-run intro gate: its ViewModel owns the stored "seen" flag.
     val onboardingVm: OnboardingViewModel = koinViewModel()
-    val onboarding by onboardingVm.state.collectAsState()
+    val onboarding by onboardingVm.onboardingState.collectAsStateWithLifecycle()
     if (!onboarding.completed) {
-        OnboardingScreen(onAction = onboardingVm::onAction)
+        OnboardingScreen(viewModel = onboardingVm, showSnackBar = koinInject<SnackbarBus>()::show)
         return
     }
     var selected by rememberSaveable { mutableStateOf(BottomTab.Home) }
