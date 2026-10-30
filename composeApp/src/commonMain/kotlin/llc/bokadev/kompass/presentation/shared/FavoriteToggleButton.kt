@@ -16,8 +16,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import llc.bokadev.kompass.core.util.rememberAppStrings
 import llc.bokadev.kompass.presentation.theme.KompassTheme
 
 @Composable
@@ -28,6 +31,8 @@ fun FavoriteToggleButton(
     size: Dp = 38.dp
 ) {
     val colors = KompassTheme.colors
+    val strings = rememberAppStrings()
+    val description = if (isFavorited) strings.removeFromSavedAction else strings.saveAction
     val iconColor = if (isFavorited) Color(0xFFE53935) else colors.colorNavy.copy(alpha = 0.48f)
     Box(
         modifier = modifier
@@ -41,6 +46,7 @@ fun FavoriteToggleButton(
             .clip(CircleShape)
             .background(colors.colorWhite)
             .border(1.dp, colors.colorNavy.copy(alpha = 0.08f), CircleShape)
+            .semantics { contentDescription = description }
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {

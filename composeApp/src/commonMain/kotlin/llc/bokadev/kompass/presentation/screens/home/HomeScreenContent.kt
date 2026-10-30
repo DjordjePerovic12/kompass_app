@@ -1,6 +1,5 @@
 package llc.bokadev.kompass.presentation.screens.home
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -11,601 +10,370 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.ColorMatrix
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.util.lerp
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.layout.SubcomposeLayout
+import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.zIndex
-import coil3.compose.AsyncImage
+import llc.bokadev.kompass.core.util.AppStrings
 import llc.bokadev.kompass.core.util.rememberAppStrings
 import llc.bokadev.kompass.core.util.buildPhotoUrl
 import llc.bokadev.kompass.core.util.currentAppLanguage
+import llc.bokadev.kompass.core.util.toDateTag
+import llc.bokadev.kompass.core.util.uppercaseFor
 import llc.bokadev.kompass.domain.model.Event
 import llc.bokadev.kompass.domain.model.FavoriteItemType
 import llc.bokadev.kompass.domain.model.FavoriteKey
 import llc.bokadev.kompass.domain.model.InfoNotice
-import llc.bokadev.kompass.domain.model.NearbyPlace
 import llc.bokadev.kompass.domain.model.Place
-import llc.bokadev.kompass.domain.model.PlaceCategory
-import llc.bokadev.kompass.domain.model.favoriteNearbyFirst
-import llc.bokadev.kompass.domain.model.favoritePlacesFirst
-import llc.bokadev.kompass.presentation.screens.home.components.CompactPlaceCard
-import llc.bokadev.kompass.presentation.screens.home.components.EventCard
-import llc.bokadev.kompass.presentation.screens.home.components.FeaturedPlaceCard
-import llc.bokadev.kompass.presentation.screens.home.components.NearbyDiscoveryCard
+import llc.bokadev.kompass.presentation.screens.home.components.ArrowRightIcon
+import llc.bokadev.kompass.presentation.screens.home.components.CheckIcon
+import llc.bokadev.kompass.presentation.screens.home.components.HomeEventCard
+import llc.bokadev.kompass.presentation.screens.home.components.LamplightTopBar
+import llc.bokadev.kompass.presentation.screens.home.components.MustSeeCard
+import llc.bokadev.kompass.presentation.screens.home.components.NearbyCardUi
+import llc.bokadev.kompass.presentation.screens.home.components.NearbyStackCarousel
+import llc.bokadev.kompass.presentation.screens.home.components.NoticeItem
 import llc.bokadev.kompass.presentation.screens.home.components.SectionHeader
-import llc.bokadev.kompass.presentation.theme.KompassTheme
-import llc.bokadev.kompass.presentation.theme.colorDustySage
-import llc.bokadev.kompass.presentation.theme.colorRoseClay
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
+import llc.bokadev.kompass.presentation.theme.HomePalette
+import llc.bokadev.kompass.presentation.theme.pageGradientBackground
+import llc.bokadev.kompass.presentation.theme.LamplightDimens
+import llc.bokadev.kompass.presentation.theme.LamplightTheme
+import llc.bokadev.kompass.presentation.theme.LamplightType
+import llc.bokadev.kompass.presentation.theme.helveticaBold24
 import llc.bokadev.kompass.presentation.theme.helveticaBold44
-import llc.bokadev.kompass.presentation.theme.helveticaBold48
-import llc.bokadev.kompass.presentation.theme.helveticaMedium11
+import llc.bokadev.kompass.presentation.theme.helveticaMedium13
 import llc.bokadev.kompass.presentation.theme.helveticaMedium16
-import llc.bokadev.kompass.presentation.theme.helveticaRegular11
-import llc.bokadev.kompass.presentation.theme.stomic48
-import kotlin.math.roundToInt
-import kotlin.math.absoluteValue
+import llc.bokadev.kompass.presentation.theme.helveticaRegular14
 import kotlin.time.ExperimentalTime
-import kotlin.time.Instant
 
+/**
+ * The whole screen is one continuous light-purple-to-ink gradient (see
+ * [HomePalette.pageGradientStops]) — sections don't carry their own background blocks. Early
+ * sections (masthead, area control, Nearby) land on the light part of the gradient and use
+ * dark ink text; later sections (Must See, Notices, Events) land on the dark part and use
+ * light surface-based text. Nearby's own white cards read fine against either.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreenContent(
     state: HomeState,
     favoriteKeySet: Set<FavoriteKey>,
-    showOrientationLayer: Boolean,
-    onboardingContext: String,
-    onPlaceClick: (String) -> Unit,
-    onEventClick: (String) -> Unit,
-    onNoticeClick: (String) -> Unit,
-    onEventsSeeAll: () -> Unit,
-    onMustSeeSeeAll: () -> Unit,
-    onNearbySeeAll: () -> Unit,
-    onInfoCenterSeeAll: () -> Unit,
-    onMyGuidesClick: () -> Unit,
-    onSearchClick: () -> Unit,
-    onChangeLanguageClick: () -> Unit,
-    onPlaceFavoriteToggle: (String) -> Unit,
-    onIntent: (HomeEvent) -> Unit
+    onAction: (HomeAction) -> Unit
 ) {
-    val colors = KompassTheme.colors
     val lang = currentAppLanguage()
     val strings = rememberAppStrings()
-
-    if (state.isLoading &&
-        state.mustSeePlaces.isEmpty() &&
-        state.upcomingEvents.isEmpty() &&
-        state.infoCenterNotices.isEmpty() &&
-        state.nearbyPlaces.isEmpty()
-    ) {
-        HomeSplashLoader(strings.loadingKotor)
-        return
+    val onPlaceClick: (String) -> Unit = { id ->
+        val origin = if (state.mustSeePlaces.any { it.id == id }) "must_see" else "nearby"
+        onAction(HomeAction.PlaceClicked(id, origin))
     }
+    // The bookmark's rendered state decides the action, so a repeated tap event can't flip it back.
+    val onPlaceFavoriteToggle: (String) -> Unit = { id ->
+        onAction(HomeAction.SetFavorite(id, saved = FavoriteKey(FavoriteItemType.PLACE, id) !in favoriteKeySet))
+    }
+    // Purely presentational: which sheet is open, not business state — HomeState owns
+    // showLocationPrompt instead, since that visibility depends on permission/preference reads.
+    var showAreaSheet by remember { mutableStateOf(false) }
 
+    Box {
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(colors.colorWhite)
+        modifier = Modifier.fillMaxSize()
+            .pageGradientBackground()
             .verticalScroll(rememberScrollState())
     ) {
-        HeroHeader(
-            showMyGuides = true,
-            onMyGuidesClick = onMyGuidesClick,
-            onSearchClick = onSearchClick,
-            onChangeLanguageClick = onChangeLanguageClick,
-            strings = strings
+        LamplightTopBar(
+            state = state,
+            strings = strings,
+            onAreaClick = { showAreaSheet = true },
+            onLanguageClick = { onAction(HomeAction.OpenLanguagePicker) },
+            onSearchClick = { onAction(HomeAction.OpenSearch) },
+            onUseMyLocationClick = { onAction(HomeAction.SelectArea(HomeArea.DEVICE)) }
         )
-//        if (showOrientationLayer) {
-//            OrientationLayer(
-//                context = onboardingContext
-//            )
-//        }
-        MustSeeSection(
-            places = state.mustSeePlaces.favoritePlacesFirst(favoriteKeySet),
-            isLoading = state.isLoading,
-            lang = lang,
-            onPlaceClick = onPlaceClick,
-            favoriteKeySet = favoriteKeySet,
-            onPlaceFavoriteToggle = onPlaceFavoriteToggle,
-            onSeeAll = onMustSeeSeeAll,
-            title = strings.mustSee,
-            loadingLabel = strings.loadingLabel
-        )
-        if (state.nearbyPlaces.isNotEmpty()) {
+        Spacer(Modifier.height(28.dp))
+
+        HomeSectionFrame(state, HomeSection.NEARBY, state.effectiveArea.sectionTitle(strings), onAction) {
             NearbyYouSection(
-                nearbyPlaces = state.nearbyPlaces.favoriteNearbyFirst(favoriteKeySet),
-                isLoading = state.isLoading,
-                lang = lang,
+                state = state, lang = lang, strings = strings,
                 onPlaceClick = onPlaceClick,
-                favoriteKeySet = favoriteKeySet,
-                onPlaceFavoriteToggle = onPlaceFavoriteToggle,
-                onSeeAll = onNearbySeeAll,
-                title = if (state.isUsingCurrentLocation) strings.nearbyYou else "Around Old Town",
-                emptyMessage = strings.nearbyEmpty,
-                loadingLabel = strings.loadingLabel
+                onListenClick = { id -> onAction(HomeAction.ListenClicked(id)) },
+                favoriteKeySet = favoriteKeySet, onPlaceFavoriteToggle = onPlaceFavoriteToggle,
+                // Manual areas get "See all" too; the list opens filtered to the same area.
+                onSeeAll = { onAction(HomeAction.SeeAllNearby) },
+                title = state.effectiveArea.sectionTitle(strings),
+                emptyMessage = strings.redesign.emptyArea
             )
         }
-        if (state.infoCenterNotices.isNotEmpty()) {
-            InfoCenterPreviewSection(
-                notices = state.infoCenterNotices,
-                lang = lang,
-                onNoticeClick = onNoticeClick,
-                onSeeAll = onInfoCenterSeeAll,
-                title = strings.recentNews
-            )
-        }
-        UpcomingEventsSection(
-            events = state.upcomingEvents,
-            isLoading = state.isLoading,
-            lang = lang,
-            onEventClick = onEventClick,
-            onSeeAll = onEventsSeeAll,
-            title = strings.upcomingEvents,
-            loadingLabel = strings.loadingLabel
-        )
-        Spacer(
-            Modifier
-                .fillMaxWidth()
-                .height(90.dp)
-                .background(colors.colorWhite)
-        )
-    }
-}
+        Spacer(Modifier.height(28.dp))
 
-@Composable
-private fun OrientationLayer(
-    context: String
-) {
-    val colors = KompassTheme.colors
-    val nearbyLine = if (context == "already_here") {
-        "Places around you shift as you move through the bay."
-    } else {
-        "Save your rhythm now, then let places around you rearrange themselves once you arrive."
-    }
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 18.dp)
-            .clip(RoundedCornerShape(28.dp))
-            .background(colors.colorWhite)
-            .border(1.dp, colors.colorSurfaceMid.copy(alpha = 0.72f), RoundedCornerShape(28.dp))
-            .padding(horizontal = 18.dp, vertical = 18.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        Text(
-            text = "A quiet orientation",
-            style = helveticaMedium11(),
-            color = colors.colorNavy.copy(alpha = 0.54f),
-            letterSpacing = 1.8.sp
-        )
-
-        OrientationCallout(
-            title = "Nearby exploration",
-            body = nearbyLine,
-            accent = colors.colorOrangeMain
-        )
-        OrientationCallout(
-            title = "Saved places",
-            body = "Save places quietly for later — before arriving or while wandering.",
-            accent = colorDustySage
-        )
-        OrientationCallout(
-            title = "Audio moments",
-            body = "Some places include optional audio moments designed for slower exploration.",
-            accent = colorRoseClay
-        )
-    }
-}
-
-@Composable
-private fun OrientationCallout(
-    title: String,
-    body: String,
-    accent: Color
-) {
-    val colors = KompassTheme.colors
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-        verticalAlignment = Alignment.Top
-    ) {
-        Box(
-            modifier = Modifier
-                .padding(top = 6.dp)
-                .size(10.dp)
-                .clip(CircleShape)
-                .background(accent)
-        )
-
-        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium.copy(
-                    letterSpacing = (-0.2).sp
-                ),
-                color = colors.colorNavy
-            )
-            Text(
-                text = body,
-                style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 22.sp),
-                color = colors.colorNavy.copy(alpha = 0.72f)
-            )
-        }
-    }
-}
-
-@Composable
-private fun HomeSplashLoader(loadingText: String) {
-    val colors = KompassTheme.colors
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(colors.colorOrangeMain)
-            .windowInsetsPadding(WindowInsets.statusBars),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(18.dp)
-        ) {
-            Canvas(
-                modifier = Modifier
-                    .size(72.dp)
-                    .clip(RoundedCornerShape(24.dp))
-                    .background(colors.colorHomePanel)
-                    .border(1.dp, colors.colorHomePanelBorder, RoundedCornerShape(24.dp))
-                    .padding(16.dp)
-            ) {
-                drawCircle(
-                    color = colors.colorOrangeMain,
-                    radius = size.minDimension * 0.12f,
-                    center = center
-                )
-                drawCircle(
-                    color = colors.colorHomeHeroSoft,
-                    radius = size.minDimension * 0.28f,
-                    center = center,
-                    style = Stroke(width = 2.dp.toPx())
+        // Spec A4: an empty Must See hides entirely (no title, no placeholder) and has no "See all" in v1.
+        val hideMustSee = state.sections[HomeSection.HIGHLIGHTS] == SectionStatus.READY && state.mustSeePlaces.isEmpty()
+        if (!hideMustSee) {
+            HomeSectionFrame(state, HomeSection.HIGHLIGHTS, strings.redesign.landmarks, onAction, darkZone = true) {
+                MustSeeSection(
+                    places = state.mustSeePlaces, lang = lang, strings = strings,
+                    onPlaceClick = onPlaceClick, favoriteKeySet = favoriteKeySet,
+                    onPlaceFavoriteToggle = onPlaceFavoriteToggle,
+                    title = strings.redesign.landmarks
                 )
             }
-            Text(
-                text = "KOmpass",
-                style = MaterialTheme.typography.headlineSmall,
-                color = colors.colorHomePanel
-            )
-            Text(
-                text = loadingText,
-                style = MaterialTheme.typography.bodyMedium,
-                color = colors.colorHomeHeroSoft.copy(alpha = 0.84f)
-            )
+            Spacer(Modifier.height(28.dp))
+        }
+
+        // Successfully loaded but empty sections are hidden; loading and failure (with Retry) still show.
+        val hideNotices = state.sections[HomeSection.NOTICES] == SectionStatus.READY && state.infoCenterNotices.isEmpty()
+        if (!hideNotices) {
+            HomeSectionFrame(state, HomeSection.NOTICES, strings.recentNews, onAction, darkZone = true) {
+                InfoCenterPreviewSection(
+                    notices = state.infoCenterNotices, lang = lang, strings = strings,
+                    onNoticeClick = { id -> onAction(HomeAction.NoticeClicked(id)) },
+                    onSeeAll = { onAction(HomeAction.SeeAllInfoCenter) }, title = strings.recentNews
+                )
+            }
+            Spacer(Modifier.height(28.dp))
+        }
+
+        val hideEvents = state.sections[HomeSection.EVENTS] == SectionStatus.READY && state.upcomingEvents.isEmpty()
+        if (!hideEvents) {
+            HomeSectionFrame(state, HomeSection.EVENTS, strings.upcomingEvents, onAction, darkZone = true) {
+                UpcomingEventsSection(
+                    events = state.upcomingEvents, lang = lang, strings = strings,
+                    onEventClick = { id -> onAction(HomeAction.EventClicked(id)) },
+                    onSeeAll = { onAction(HomeAction.SeeAllEvents) },
+                    title = strings.upcomingEvents
+                )
+            }
+            Spacer(Modifier.height(28.dp))
         }
     }
-}
 
-@Composable
-private fun HeroHeader(
-    showMyGuides: Boolean,
-    onMyGuidesClick: () -> Unit,
-    onSearchClick: () -> Unit,
-    onChangeLanguageClick: () -> Unit,
-    strings: llc.bokadev.kompass.core.util.AppStrings
-) {
-    val colors = KompassTheme.colors
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(
-                colors.colorOrangeMain,
-                RoundedCornerShape(bottomStart = 30.dp, bottomEnd = 30.dp)
-            )
-            .windowInsetsPadding(WindowInsets.statusBars)
-            .padding(horizontal = 20.dp, vertical = 20.dp),
-        verticalArrangement = Arrangement.spacedBy(18.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.Top
+    if (state.showLocationPrompt) {
+        AlertDialog(
+            onDismissRequest = { onAction(HomeAction.DismissLocationPrompt) },
+            title = { Text(strings.locationPromptTitle) },
+            text = { Text(strings.locationPromptBody) },
+            confirmButton = {
+                TextButton(onClick = { onAction(HomeAction.RequestLocationPermission) }) {
+                    Text(strings.continueLabel)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { onAction(HomeAction.DismissLocationPrompt) }) {
+                    Text(strings.notNow)
+                }
+            }
+        )
+    }
+
+    if (showAreaSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showAreaSheet = false },
+            containerColor = HomePalette.surface
         ) {
             Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
+                Modifier.padding(horizontal = 20.dp, vertical = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(
-                    text = strings.heroLocation,
-                    style = helveticaMedium11(),
-                    color = colors.colorNavy
+                    text = strings.redesign.chooseArea,
+                    style = helveticaBold24().copy(fontSize = 22.sp, lineHeight = 28.sp),
+                    color = HomePalette.ink,
+                    modifier = Modifier.padding(bottom = 8.dp)
                 )
-                Text(
-                    text = strings.heroTitle,
-                    style = helveticaBold44(),
-                    lineHeight = 56.sp,
-                    color = colors.colorWhite,
-                    letterSpacing = 0.8.sp
-                )
-            }
-
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(
-                    onClick = onChangeLanguageClick,
-                    modifier = Modifier
-                        .size(44.dp)
-                        .shadow(
-                            elevation = 8.dp,
-                            shape = RoundedCornerShape(15.dp),
-                            ambientColor = colors.colorOrangeMain.copy(alpha = 0.20f),
-                            spotColor = colors.colorOrangeMain.copy(alpha = 0.24f)
-                        )
-                        .clip(RoundedCornerShape(14.dp))
-                        .background(colors.colorHomePanel.copy(alpha = 0.96f))
-                        .border(
-                            1.dp,
-                            colors.colorHomeHeroSoft.copy(alpha = 0.38f),
-                            RoundedCornerShape(15.dp)
-                        )
-                ) {
-                    Canvas(modifier = Modifier.size(22.dp)) {
-                        drawCircle(
-                            color = colors.colorOrangeMain,
-                            radius = size.minDimension * 0.38f,
-                            center = center,
-                            style = Stroke(width = 1.6.dp.toPx())
-                        )
-                        drawLine(
-                            color = colors.colorSignalStrong,
-                            start = Offset(center.x, size.height * 0.16f),
-                            end = Offset(center.x, size.height * 0.84f),
-                            strokeWidth = 1.4.dp.toPx()
-                        )
-                        drawPath(
-                            Path().apply {
-                                moveTo(size.width * 0.18f, center.y)
-                                quadraticTo(center.x, size.height * 0.22f, size.width * 0.82f, center.y)
-                            },
-                            color = colors.colorOrangeMain,
-                            style = Stroke(width = 1.4.dp.toPx())
-                        )
-                        drawPath(
-                            Path().apply {
-                                moveTo(size.width * 0.18f, center.y)
-                                quadraticTo(center.x, size.height * 0.78f, size.width * 0.82f, center.y)
-                            },
-                            color = colors.colorOrangeMain,
-                            style = Stroke(width = 1.4.dp.toPx())
-                        )
-                    }
-                }
-
-                if (showMyGuides) {
-                    IconButton(
-                        onClick = onMyGuidesClick,
+                HomeArea.entries.forEach { area ->
+                    val selected = state.area == area
+                    Row(
                         modifier = Modifier
-                            .size(44.dp)
-                            .shadow(
-                                elevation = 8.dp,
-                                shape = RoundedCornerShape(15.dp),
-                                ambientColor = colors.colorOrangeMain.copy(alpha = 0.20f),
-                                spotColor = colors.colorOrangeMain.copy(alpha = 0.24f)
-                            )
-                            .clip(RoundedCornerShape(15.dp))
-                            .background(colors.colorHomePanel.copy(alpha = 0.96f))
-                            .border(
-                                1.dp,
-                                colors.colorHomeHeroSoft.copy(alpha = 0.38f),
-                                RoundedCornerShape(15.dp)
-                            )
+                            .fillMaxWidth()
+                            .heightIn(min = 48.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(if (selected) HomePalette.selection else Color.Transparent)
+                            .clickable {
+                                showAreaSheet = false
+                                onAction(HomeAction.SelectArea(area))
+                            }
+                            .padding(horizontal = 14.dp, vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Canvas(modifier = Modifier.size(22.dp)) {
-                            drawCircle(
-                                color = colors.colorOrangeMain,
-                                radius = size.minDimension * 0.18f,
-                                center = center
-                            )
-                            drawCircle(
-                                color = colors.colorOrangeMain,
-                                radius = size.minDimension * 0.36f,
-                                center = center,
-                                style = Stroke(width = 2.dp.toPx())
-                            )
+                        Text(
+                            text = area.label(strings),
+                            style = helveticaMedium16().copy(fontSize = 16.sp, lineHeight = 24.sp),
+                            color = HomePalette.ink,
+                            modifier = Modifier.weight(1f)
+                        )
+                        if (selected) {
+                            CheckIcon(color = HomePalette.action, size = 16.dp)
                         }
                     }
                 }
             }
         }
+    }
+    }
+}
 
-        Column(
-            modifier = Modifier
+@Composable
+private fun homeHeadingStyle() = helveticaBold24().copy(fontSize = 22.sp, lineHeight = 28.sp)
+
+@Composable
+private fun homeBodyStyle() = helveticaMedium16().copy(fontSize = 16.sp, lineHeight = 24.sp)
+
+@Composable
+private fun homeMetaStyle() = helveticaRegular14().copy(fontSize = 14.sp, lineHeight = 20.sp)
+
+/**
+ * [darkZone] sections render their heading/metadata on a local translucent ink panel rather
+ * than bare text on the raw gradient. The gradient's color at any given scroll offset depends
+ * on total page height, which shifts with how much content each section above it actually
+ * rendered (loading/empty/failed states are far shorter than a loaded section) — so white text
+ * assumed to land on the gradient's dark half can end up on its light half instead. A local
+ * opaque-ish backing makes contrast correct regardless of where the section actually lands.
+ */
+@Composable
+private fun localSectionScrim(darkZone: Boolean): Color? =
+    if (darkZone) HomePalette.ink.copy(alpha = 0.34f) else null
+
+@Composable
+private fun HomeSectionFrame(
+    state: HomeState, section: HomeSection, title: String,
+    onAction: (HomeAction) -> Unit, darkZone: Boolean = false, content: @Composable () -> Unit
+) {
+    val strings = rememberAppStrings()
+    // All lettering on Home's gradient is white (owner's call, 2026-10-06).
+    val titleColor = HomePalette.surface
+    val metaColor = HomePalette.surface.copy(alpha = 0.7f)
+    val scrim = localSectionScrim(darkZone)
+    when (state.sections[section]) {
+        SectionStatus.READY -> content()
+        else -> Column(
+            Modifier
                 .fillMaxWidth()
-                .shadow(
-                    elevation = 16.dp,
-                    shape = RoundedCornerShape(24.dp),
-                    ambientColor = colors.colorOrangeMain.copy(alpha = 0.10f),
-                    spotColor = colors.colorOrangeMain.copy(alpha = 0.14f)
-                )
-                .clip(RoundedCornerShape(24.dp))
-                .background(colors.colorHomePanel)
-                .border(
-                    1.dp,
-                    colors.colorHomePanelBorder,
-                    RoundedCornerShape(24.dp)
-                )
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+                .padding(horizontal = 20.dp)
+                .let {
+                    if (scrim != null) it.clip(RoundedCornerShape(16.dp)).background(scrim).padding(16.dp)
+                    else it
+                },
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(title, style = homeHeadingStyle(), color = titleColor)
+            // Failure text is white like the rest of Home's lettering: the error red measured 1.5–3:1
+            // on the gradient. The message and the Retry pill carry the meaning.
+            Text(
+                if (state.sections[section] == SectionStatus.FAILED) strings.redesign.sectionError else strings.loadingLabel,
+                style = homeMetaStyle(),
+                color = if (state.sections[section] == SectionStatus.FAILED) titleColor else metaColor
+            )
+            if (state.sections[section] == SectionStatus.FAILED) {
+                // Same night-on-lamp pill as the other screens' Retry (white on periwinkle was 3.9:1).
                 Text(
-                    text = strings.searchPlaceholder,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = colors.colorHomeHeroMuted
-                )
-                Text(
-                    text = strings.heroLocation,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = colors.colorOrangeMain
-                )
-            }
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(colors.colorWhite)
-                    .border(
-                        1.dp,
-                        colors.colorSignal.copy(alpha = 0.18f),
-                        RoundedCornerShape(16.dp)
-                    )
-                    .clickable(onClick = onSearchClick)
-                    .padding(horizontal = 16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                Canvas(modifier = Modifier.size(17.dp)) {
-                    drawCircle(
-                        color = colors.colorSignalStrong,
-                        radius = 5.dp.toPx(),
-                        style = Stroke(width = 1.6.dp.toPx())
-                    )
-                    drawLine(
-                        color = colors.colorSignalStrong,
-                        start = Offset(size.width * 0.68f, size.height * 0.68f),
-                        end = Offset(size.width * 0.96f, size.height * 0.96f),
-                        strokeWidth = 1.6.dp.toPx()
-                    )
-                }
-                Text(
-                    text = strings.searchPlaceholder,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = colors.colorSlate
+                    text = strings.retry,
+                    style = helveticaMedium13(),
+                    color = LamplightTheme.colors.night,
+                    modifier = Modifier
+                        .heightIn(min = LamplightDimens.minTouchTarget)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(LamplightTheme.colors.lamp)
+                        .clickable { onAction(HomeAction.RetrySection(section)) }
+                        .padding(horizontal = 16.dp, vertical = 14.dp)
                 )
             }
         }
     }
 }
 
+/**
+ * Free-scrolling row of Landmarks (Must See data) cards (spec A3/A5), no auto-advance. An
+ * [EqualHeightRow] rather than a `LazyRow`, so every card takes the tallest card's height and
+ * the save buttons line up (the spec accepts a non-lazy row for this list size). The trade-off:
+ * no snap-to-card fling, since Compose's snap providers target lazy layouts only.
+ * Cards are 196dp (224dp at font scale 1.3+), smaller than the spec's 232dp at the owner's request.
+ */
 @Composable
 private fun MustSeeSection(
     places: List<Place>,
-    isLoading: Boolean,
     lang: String,
+    strings: AppStrings,
     onPlaceClick: (String) -> Unit,
     favoriteKeySet: Set<FavoriteKey>,
     onPlaceFavoriteToggle: (String) -> Unit,
-    onSeeAll: () -> Unit,
-    title: String,
-    loadingLabel: String
+    title: String
 ) {
-    val colors = KompassTheme.colors
+    val colors = LamplightTheme.colors
+    val cardWidth = if (LocalDensity.current.fontScale >= 1.3f) 224.dp else 196.dp
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(colors.colorWhite)
-            .padding(top = 20.dp, bottom = 26.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
-        SectionHeader(title = title, onSeeAll = onSeeAll)
-        if (isLoading) {
-            LoadingText(loadingLabel)
-        } else {
-            val pagerState = rememberPagerState(pageCount = { places.size })
-            Column(
-                verticalArrangement = Arrangement.spacedBy(14.dp)
-            ) {
-                HorizontalPager(
-                    state = pagerState,
-                    contentPadding = PaddingValues(horizontal = 66.dp),
-                    pageSpacing = (-124).dp,
-                    modifier = Modifier.fillMaxWidth()
-                ) { page ->
-                    val place = places[page]
-                    val signedOffset = (page - pagerState.currentPage) - pagerState.currentPageOffsetFraction
-                    val pageOffset = signedOffset.absoluteValue
-                    val normalizedOffset = pageOffset.coerceIn(0f, 1f)
-                    val scale = lerp(0.92f, 1f, 1f - normalizedOffset)
-                    val alpha = lerp(0.72f, 1f, 1f - normalizedOffset)
-                    val horizontalPull = (signedOffset * -34f).dp
-                    val verticalDrop = (normalizedOffset * 32f).dp
-
-                    Box(
-                        modifier = Modifier
-                            .zIndex(1f - normalizedOffset)
-                            .offset(x = horizontalPull, y = verticalDrop)
-                            .scale(scale)
-                            .alpha(alpha)
-                    ) {
-                        FeaturedPlaceCard(
-                            name = place.localizedName(lang),
-                            meta = place.toMustSeeMeta(short = true),
-                            imageUrl = place.photos.firstOrNull()?.let { buildPhotoUrl(it) },
-                            isFavorited = favoriteKeySet.contains(FavoriteKey(FavoriteItemType.PLACE, place.id)),
-                            onFavoriteClick = { onPlaceFavoriteToggle(place.id) },
-                            onClick = { onPlaceClick(place.id) }
-                        )
-                    }
-                }
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp),
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(7.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        repeat(places.size) { index ->
-                            val selected = index == pagerState.currentPage
-                            Box(
-                                modifier = Modifier
-                                    .height(8.dp)
-                                    .width(if (selected) 28.dp else 8.dp)
-                                    .clip(RoundedCornerShape(999.dp))
-                                    .background(
-                                        if (selected) colors.colorOrangeMain else colors.colorNavy.copy(alpha = 0.18f)
-                                    )
-                            )
-                        }
-                    }
-                }
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
+            verticalAlignment = Alignment.Bottom
+        ) {
+            Text(
+                text = title,
+                style = LamplightType.sectionTitle(),
+                color = HomePalette.surface,
+                modifier = Modifier.weight(1f).semantics { heading() }
+            )
+            Text(
+                text = strings.redesign.wholeBay.uppercaseFor(lang),
+                style = LamplightType.label(),
+                color = HomePalette.surface,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+        }
+        EqualHeightRow(
+            spacing = 12.dp,
+            modifier = Modifier
+                .horizontalScroll(rememberScrollState())
+                .padding(horizontal = 20.dp)
+        ) {
+            places.forEach { place ->
+                MustSeeCard(
+                    name = place.localizedName(lang),
+                    areaLabel = place.toMustSeeAreaLabel(strings)?.uppercaseFor(lang),
+                    description = place.localizedDescription(lang).takeIf { it.isNotBlank() },
+                    imageUrl = place.photos.firstOrNull()?.let { buildPhotoUrl(it) },
+                    isSaved = favoriteKeySet.contains(FavoriteKey(FavoriteItemType.PLACE, place.id)),
+                    strings = strings.redesign,
+                    onToggleSave = { onPlaceFavoriteToggle(place.id) },
+                    onClick = { onPlaceClick(place.id) },
+                    modifier = Modifier.width(cardWidth)
+                )
             }
         }
     }
@@ -613,69 +381,69 @@ private fun MustSeeSection(
 
 @Composable
 private fun NearbyYouSection(
-    nearbyPlaces: List<NearbyPlace>,
-    isLoading: Boolean,
+    state: HomeState,
     lang: String,
+    strings: AppStrings,
     onPlaceClick: (String) -> Unit,
+    onListenClick: (String) -> Unit,
     favoriteKeySet: Set<FavoriteKey>,
     onPlaceFavoriteToggle: (String) -> Unit,
-    onSeeAll: () -> Unit,
+    onSeeAll: (() -> Unit)?,
     title: String,
-    emptyMessage: String,
-    loadingLabel: String
+    emptyMessage: String
 ) {
-    val colors = KompassTheme.colors
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(colors.colorWhite)
-            .padding(vertical = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         SectionHeader(title = title, onSeeAll = onSeeAll)
-        Column(
-            modifier = Modifier.padding(horizontal = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
-        ) {
-            if (isLoading && nearbyPlaces.isEmpty()) {
-                LoadingText(loadingLabel)
-            } else if (nearbyPlaces.isEmpty()) {
+        // The destination's editorial introduction sits apart from the attractions, never as a card.
+        state.areaOverview?.let { overview ->
+            val name = overview.localizedName(lang)
+            Row(
+                modifier = Modifier
+                    .padding(horizontal = 20.dp)
+                    .heightIn(min = 48.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .clickable(role = Role.Button) { onPlaceClick(overview.id) }
+                    .padding(vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
                 Text(
-                    text = emptyMessage,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = colors.colorSlate
+                    text = strings.home.aboutDestination.replace("{name}", name),
+                    style = homeBodyStyle().copy(fontWeight = FontWeight.SemiBold),
+                    color = HomePalette.surface
                 )
-            } else {
-//                nearbyPlaces.firstOrNull()?.let { nearbyPlace ->
-//                    val place = nearbyPlace.place
-//                    NearbyDiscoveryCard(
-//                        name = place.localizedName(lang),
-//                        category = place.category.toEditorialPlaceCategory(),
-//                        zone = place.zone?.prettyUiLabel() ?: "Kotor",
-//                        distance = nearbyPlace.distanceKm.toNearbyDistanceLine(),
-//                        meta = nearbyPlace.toNearbyMeta(),
-//                        imageUrl = place.photos.firstOrNull()?.let { buildPhotoUrl(it) },
-//                        isFavorited = favoriteKeySet.contains(FavoriteKey(FavoriteItemType.PLACE, place.id)),
-//                        onFavoriteClick = { onPlaceFavoriteToggle(place.id) },
-//                        onClick = { onPlaceClick(place.id) }
-//                    )
-//                }
-
-                nearbyPlaces.drop(1).take(3).forEach { nearbyPlace ->
-                    val place = nearbyPlace.place
-                    CompactPlaceCard(
-                        name = place.localizedName(lang),
-                        category = place.category.toEditorialPlaceCategory(),
-                        zone = place.zone?.prettyUiLabel() ?: "Kotor",
-                        distance = nearbyPlace.distanceKm.toNearbyDistanceLine(),
-                        meta = nearbyPlace.toNearbyMeta(),
-                        imageUrl = place.photos.firstOrNull()?.let { buildPhotoUrl(it) },
-                        isFavorited = favoriteKeySet.contains(FavoriteKey(FavoriteItemType.PLACE, place.id)),
-                        onFavoriteClick = { onPlaceFavoriteToggle(place.id) },
-                        onClick = { onPlaceClick(place.id) }
-                    )
-                }
+                ArrowRightIcon(color = HomePalette.surface, size = 14.dp)
             }
+        }
+        if (state.nearbyPlaces.isEmpty()) {
+            Text(
+                text = emptyMessage,
+                style = homeMetaStyle(),
+                color = HomePalette.onGradientSecondary,
+                modifier = Modifier.padding(horizontal = 20.dp)
+            )
+        } else {
+            val items = state.nearbyPlaces.map { nearby ->
+                val place = nearby.place
+                NearbyCardUi(
+                    id = place.id,
+                    title = place.localizedName(lang),
+                    meta = nearby.toNearbyMeta(showDistance = state.isUsingCurrentLocation, strings = strings),
+                    imageUrl = place.photos.firstOrNull()?.let { buildPhotoUrl(it) },
+                    hasAudio = place.localizedAudioFile(lang) != null,
+                    isSaved = favoriteKeySet.contains(FavoriteKey(FavoriteItemType.PLACE, place.id))
+                )
+            }
+            NearbyStackCarousel(
+                items = items,
+                strings = strings.redesign,
+                onOpen = onPlaceClick,
+                onPrimary = { item -> if (item.hasAudio) onListenClick(item.id) else onPlaceClick(item.id) },
+                onToggleSave = onPlaceFavoriteToggle
+            )
         }
     }
 }
@@ -684,40 +452,38 @@ private fun NearbyYouSection(
 @OptIn(ExperimentalTime::class)
 private fun UpcomingEventsSection(
     events: List<Event>,
-    isLoading: Boolean,
     lang: String,
+    strings: AppStrings,
     onEventClick: (String) -> Unit,
     onSeeAll: () -> Unit,
-    title: String,
-    loadingLabel: String
+    title: String
 ) {
-    val colors = KompassTheme.colors
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(colors.colorWhite)
-            .padding(vertical = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        SectionHeader(title = title, onSeeAll = onSeeAll)
-        Column(
-            modifier = Modifier.padding(horizontal = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+        SectionHeader(
+            title = title,
+            onSeeAll = onSeeAll,
+            titleColor = HomePalette.surface,
+            labelColor = HomePalette.surface
+        )
+        EqualHeightRow(
+            spacing = 12.dp,
+            modifier = Modifier
+                .horizontalScroll(rememberScrollState())
+                .padding(horizontal = 20.dp)
         ) {
-            if (isLoading && events.isEmpty()) {
-                LoadingText(loadingLabel)
-            } else {
-                events.forEach { event ->
-                    EventCard(
-                        name = event.localizedName(lang),
-                        venue = event.localizedVenue(lang),
-                        day = event.startTime.toHomeEventDay(),
-                        month = event.startTime.toHomeEventMonth(),
-                        meta = event.toHomeEventMeta(),
-                        price = event.price,
-                        onClick = { onEventClick(event.id) },
-                    )
-                }
+            events.forEach { event ->
+                HomeEventCard(
+                    name = event.localizedName(lang),
+                    venueLine = event.localizedVenue(lang) + event.toRecurrenceSuffix(strings),
+                    dateTag = event.startTime.toDateTag(lang),
+                    startTime = event.toHomeEventMeta(),
+                    imageUrl = event.photos.firstOrNull()?.let { buildPhotoUrl(it) },
+                    onClick = { onEventClick(event.id) },
+                    modifier = Modifier.width(168.dp).fillMaxHeight()
+                )
             }
         }
     }
@@ -727,244 +493,67 @@ private fun UpcomingEventsSection(
 private fun InfoCenterPreviewSection(
     notices: List<InfoNotice>,
     lang: String,
+    strings: AppStrings,
     onNoticeClick: (String) -> Unit,
     onSeeAll: () -> Unit,
     title: String
 ) {
-    val colors = KompassTheme.colors
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(colors.colorWhite)
-            .padding(vertical = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        SectionHeader(title = title, onSeeAll = onSeeAll)
+        SectionHeader(
+            title = title,
+            onSeeAll = onSeeAll,
+            titleColor = HomePalette.surface,
+            labelColor = HomePalette.surface
+        )
         Column(
             modifier = Modifier.padding(horizontal = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             notices.forEach { notice ->
-                val metaLine = listOfNotNull(
-                    notice.noticeType.prettyUiLabel(),
-                    notice.startsAt?.toNoticeMetaTime(),
-                    notice.localizedLocation(lang).ifBlank { null }
-                ).joinToString(" · ")
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(140.dp)
-                        .shadow(10.dp, RoundedCornerShape(18.dp), ambientColor = Color.Black.copy(alpha = 0.12f), spotColor = Color.Black.copy(alpha = 0.16f))
-                        .clip(RoundedCornerShape(18.dp))
-                        .background(if (notice.priorityRank() == 0) colors.colorOrangeMain else colors.colorNavy)
-                        .clickable { onNoticeClick(notice.id) }
-                ) {
-                    if (!notice.imageUrl.isNullOrBlank()) {
-                        AsyncImage(
-                            model = notice.imageUrl,
-                            contentDescription = notice.localizedTitle(lang),
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Crop,
-                            colorFilter = ColorFilter.colorMatrix(
-                                ColorMatrix().apply { setToSaturation(0.7f) }
-                            ),
-                            alpha = 0.92f
-                        )
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(
-                                Brush.verticalGradient(
-                                    colors = listOf(
-                                        Color.Transparent,
-                                        Color.Black.copy(alpha = 0.22f),
-                                        Color.Black.copy(alpha = 0.82f)
-                                    ),
-                                    startY = 36f
-                                )
-                            )
-                    )
-
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(
-                                Brush.verticalGradient(
-                                    colors = listOf(
-                                        Color.Transparent,
-                                        colors.colorOrangeMain.copy(alpha = 0.08f),
-                                        colors.colorOrangeMain.copy(alpha = 0.20f)
-                                    )
-                                )
-                            )
-                    )
-
-                    Column(
-                        modifier = Modifier
-                            .align(Alignment.BottomStart)
-                            .padding(horizontal = 18.dp, vertical = 16.dp),
-                        verticalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        Text(
-                            text = notice.noticeType.prettyUiLabel(),
-                            style = MaterialTheme.typography.labelSmall.copy(fontSize = 12.sp),
-                            color = colors.colorWhite.copy(alpha = 0.9f)
-                        )
-                        Text(
-                            text = notice.localizedTitle(lang),
-                            style = MaterialTheme.typography.titleLarge.copy(fontSize = 24.sp, lineHeight = 28.sp),
-                            color = colors.colorWhite,
-                            maxLines = 2
-                        )
-                        Text(
-                            text = notice.localizedShortDescription(lang),
-                            style = MaterialTheme.typography.bodyMedium.copy(fontSize = 15.sp, lineHeight = 20.sp),
-                            color = colors.colorWhite.copy(alpha = 0.86f),
-                            maxLines = 2
-                        )
-                        if (metaLine.isNotBlank()) {
-                            Text(
-                                text = metaLine,
-                                style = MaterialTheme.typography.labelSmall.copy(fontSize = 12.sp),
-                                color = colors.colorWhite.copy(alpha = 0.72f),
-                                maxLines = 1
-                            )
-                        }
-                    }
-                }
+                NoticeItem(
+                    level = notice.toNoticeLevel(),
+                    label = notice.toNoticeLabel(lang, strings),
+                    title = notice.localizedTitle(lang),
+                    summary = notice.localizedShortDescription(lang),
+                    onClick = { onNoticeClick(notice.id) }
+                )
             }
         }
     }
 }
 
+/**
+ * A horizontal row whose children all get the tallest child's height, so cards with shorter
+ * text keep their bottom-pinned buttons aligned with their neighbours.
+ *
+ * Not `Row(Modifier.height(IntrinsicSize.Max))`: text intrinsics ignore `maxLines`, so that
+ * reserves height for a full un-ellipsized description and leaves a gap above the buttons.
+ * Instead, the children are measured once at their real wrapped height to find the tallest,
+ * then composed again at that fixed height. That's fine for the short, non-lazy rows used here.
+ */
 @Composable
-private fun LoadingText(label: String) {
-    val colors = KompassTheme.colors
-    Text(
-        text = label,
-        style = MaterialTheme.typography.bodyMedium,
-        color = colors.colorSlate,
-        modifier = Modifier.padding(horizontal = 20.dp)
-    )
-}
-
-@OptIn(ExperimentalTime::class)
-private fun String.toHomeEventDay(): String = runCatching {
-    Instant.parse(this)
-        .toLocalDateTime(TimeZone.currentSystemDefault())
-        .date
-        .day
-        .toString()
-}.getOrDefault("--")
-
-@OptIn(ExperimentalTime::class)
-private fun String.toHomeEventMonth(): String = runCatching {
-    Instant.parse(this)
-        .toLocalDateTime(TimeZone.currentSystemDefault())
-        .date
-        .month
-        .name
-        .take(3)
-}.getOrDefault("---")
-
-private fun Double.toDistanceLabel(): String {
-    return if (this < 1.0) {
-        "${(this * 1000).roundToInt()} m"
-    } else {
-        "${((this * 10).roundToInt() / 10.0)} km"
-    }
-}
-
-private fun Double.toNearbyDistanceLine(): String {
-    return if (this < 1.0) {
-        "${(this * 1000).roundToInt()} m away"
-    } else {
-        "${((this * 10).roundToInt() / 10.0)} km away"
-    }
-}
-
-private fun NearbyPlace.toNearbyMeta(): String {
-    val distanceText = when {
-        distanceKm < 1.0 -> "${(distanceKm * 12).roundToInt()} min walk"
-        distanceKm <= 5.0 -> "${(distanceKm * 3).roundToInt()} min drive"
-        else -> "${(distanceKm * 2.2).roundToInt()} min drive"
-    }
-
-    val bestTimeText = when (place.bestTime.name.lowercase()) {
-        "morning" -> "Best in morning"
-        "afternoon" -> "Best in afternoon"
-        "evening" -> "Best in evening"
-        "night" -> "Best at night"
-        else -> null
-    }
-
-    return listOfNotNull(distanceText, bestTimeText).joinToString(" · ")
-}
-
-@OptIn(ExperimentalTime::class)
-private fun String.toNoticeMetaTime(): String? = runCatching {
-    val dateTime = Instant.parse(this).toLocalDateTime(TimeZone.currentSystemDefault())
-    "${dateTime.date.day}. ${dateTime.date.month.name.take(3)}"
-}.getOrNull()
-
-private fun Event.toHomeEventMeta(): String {
-    val start = startTime.toHomeEventTime()
-    val end = endTime?.toHomeEventTime()
-    return when {
-        start != null && end != null -> "$start – $end"
-        start != null -> start
-        else -> ""
-    }
-}
-
-private fun Place.toMustSeeMeta(short: Boolean = false): String {
-    val categoryLabel = category.toEditorialPlaceCategory()
-    val zoneLabel = zone?.takeIf { it.isNotBlank() }?.prettyUiLabel() ?: "Kotor"
-    return if (short) {
-        "$categoryLabel · $zoneLabel"
-    } else {
-        "$categoryLabel · $zoneLabel"
-    }
-}
-
-private fun PlaceCategory.toEditorialPlaceCategory(): String = when (this) {
-    PlaceCategory.EAT_AND_DRINK -> "Eat & Drink"
-    PlaceCategory.SEE_AND_VISIT -> "Historic Site"
-    PlaceCategory.ACTIVITIES -> "Activity"
-    PlaceCategory.HIDDEN_GEMS -> "Hidden Gem"
-    PlaceCategory.PRACTICAL -> "Practical"
-}
-
-private fun String.prettyUiLabel(): String =
-    replace('_', ' ')
-        .replace('-', ' ')
-        .split(' ')
-        .filter { it.isNotBlank() }
-        .joinToString(" ") { word ->
-            word.lowercase().replaceFirstChar { char ->
-                if (char.isLowerCase()) char.titlecase() else char.toString()
+private fun EqualHeightRow(
+    spacing: Dp,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit
+) {
+    SubcomposeLayout(modifier) { constraints ->
+        val probe = Constraints(maxWidth = constraints.maxWidth)
+        val tallest = subcompose("probe", content).maxOfOrNull { it.measure(probe).height } ?: 0
+        val placeables = subcompose("content", content).map {
+            it.measure(Constraints(maxWidth = constraints.maxWidth, minHeight = tallest, maxHeight = tallest))
+        }
+        val gap = spacing.roundToPx()
+        val width = placeables.sumOf { it.width } + gap * (placeables.size - 1).coerceAtLeast(0)
+        layout(width, tallest) {
+            var x = 0
+            placeables.forEach { placeable ->
+                placeable.placeRelative(x, 0)
+                x += placeable.width + gap
             }
         }
-
-private fun String.toHomeEventCategory(): String =
-    replace('_', ' ')
-        .replace('-', ' ')
-        .split(' ')
-        .filter { it.isNotBlank() }
-        .joinToString(" ") { word ->
-            word.lowercase().replaceFirstChar { char ->
-                if (char.isLowerCase()) char.titlecase() else char.toString()
-            }
-        }
-
-@OptIn(ExperimentalTime::class)
-private fun String.toHomeEventTime(): String? = runCatching {
-    Instant.parse(this)
-        .toLocalDateTime(TimeZone.currentSystemDefault())
-        .time
-        .let { time ->
-            "${time.hour.toString().padStart(2, '0')}:${time.minute.toString().padStart(2, '0')}"
-        }
-}.getOrNull()
+    }
+}

@@ -111,15 +111,17 @@ Text(color = colorNavy)
 | `colorError` | Error states | `#DC2626` |
 | `colorSponsored` | Sponsored badge | `#F59E0B` |
 
-## MVI Pattern
+## MVI Pattern (Amplitudo-style, `core/presentation/mvi`)
 
-Every screen follows this structure strictly:
-- `sealed interface [Screen]Intent` — all user actions
-- `data class [Screen]State(...)` — immutable, single source of truth
-- `sealed interface [Screen]SideEffect` — one-shot events (navigation, toasts)
-- ViewModel exposes `StateFlow<State>`, processes intents via `fun onIntent(intent)`
-- No mutable state outside ViewModels
-- UI observes state via `collectAsState()`, dispatches intents via `onIntent()`
+Every screen follows this structure strictly (see the KMP-CMP-Amplitudo-style skill):
+- `[Screen]State.kt` — `data class` implementing `BaseViewState` (`isLoading` = nothing to show yet, `error: UiText?` = nothing usable could be loaded; a refresh failure with content on screen is a separate flag like `refreshFailed`)
+- `[Screen]Action.kt` — `sealed interface ... : BaseAction`, every user intent, dispatched via `vm.onAction(action)`
+- `[Screen]Event.kt` — `sealed interface ... : BaseEvent`, UI-only one-off effects (snackbars, external hand-offs via `ExternalLaunch`). Use `Nothing` when a screen has none. **Never navigation.**
+- `[Screen]ViewModel.kt` — extends `BaseViewModel<State, Action, Event>(initialState)`, initial load in `onFirstStart()`, navigates by calling the injected `Navigator` (`navigateTo`, `navigateUp`, `switchTab`)
+- `[Screen]Screen.kt` — orchestrator: `koinViewModel()`, `collectAsState()`, collects `events`, owns screen-lifetime wiring (audio owner keys, launcher); **no navigation callbacks**
+- `[Screen]ScreenContent.kt` — stateless UI taking `state` + `onAction`
+- Read screens that load/fail as a whole wrap content in `BaseContentView` (mvi); visitor-facing errors are `UiText`, never exception text
+- `NavigatorBridge` (MainShell) applies `Navigator` commands to the selected tab's controller
 
 ## Local Supabase Development
 

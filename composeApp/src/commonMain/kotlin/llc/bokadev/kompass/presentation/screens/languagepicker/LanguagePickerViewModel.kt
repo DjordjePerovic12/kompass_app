@@ -1,35 +1,37 @@
 package llc.bokadev.kompass.presentation.screens.languagepicker
 
-import llc.bokadev.kompass.core.presentation.base.BaseEvent
-import llc.bokadev.kompass.core.presentation.base.BaseState
-import llc.bokadev.kompass.core.presentation.base.BaseViewModel
+import llc.bokadev.kompass.core.presentation.mvi.BaseAction
+import llc.bokadev.kompass.core.presentation.mvi.BaseViewModel
+import llc.bokadev.kompass.core.presentation.mvi.BaseViewState
+import llc.bokadev.kompass.core.presentation.mvi.Navigator
+import llc.bokadev.kompass.core.presentation.mvi.UiText
 import llc.bokadev.kompass.core.util.AppPreferences
+import llc.bokadev.kompass.core.util.supportedDeviceLanguage
+import llc.bokadev.kompass.presentation.navigation.Route
 
 data class LanguagePickerState(
     override val isLoading: Boolean = false,
-    override val error: String? = null
-) : BaseState()
+    override val error: UiText? = null
+) : BaseViewState
 
-sealed interface LanguagePickerEvent : BaseEvent {
-    data class SelectLanguage(val code: String) : LanguagePickerEvent
+sealed interface LanguagePickerAction : BaseAction {
+    data class SelectLanguage(val code: String) : LanguagePickerAction
+    data object UsePhoneLanguage : LanguagePickerAction
 }
 
-sealed interface LanguagePickerSideEffect {
-    data object NavigateToMain : LanguagePickerSideEffect
-}
-
+/** First launch: stores the language, marks first launch done and enters the app. */
 class LanguagePickerViewModel(
-    private val prefs: AppPreferences
-) : BaseViewModel<LanguagePickerState, LanguagePickerEvent>() {
+    private val prefs: AppPreferences,
+    private val navigator: Navigator
+) : BaseViewModel<LanguagePickerState, LanguagePickerAction, Nothing>(LanguagePickerState()) {
 
-    override val initialState = LanguagePickerState()
-
-    override fun onIntent(event: LanguagePickerEvent) {
-        when (event) {
-            is LanguagePickerEvent.SelectLanguage -> {
-                prefs.setSelectedLanguage(event.code)
-                prefs.setFirstLaunch(false)
-            }
+    override fun onAction(action: LanguagePickerAction) {
+        val code = when (action) {
+            is LanguagePickerAction.SelectLanguage -> action.code
+            LanguagePickerAction.UsePhoneLanguage -> supportedDeviceLanguage()
         }
+        prefs.setSelectedLanguage(code)
+        prefs.setFirstLaunch(false)
+        navigator.navigateTo(Route.Main, popUpToRoute = Route.LanguagePicker, popUpToInclusive = true)
     }
 }

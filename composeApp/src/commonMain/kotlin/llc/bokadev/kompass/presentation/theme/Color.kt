@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.Color
 // =====================================================
 
 val colorMain = Color(0xFFC4AC49)
+
 val colorBlack = Color(0xFF000000)
 val colorWarmOffWhite = Color(0xFFF8F3EA)
 val colorHeaderTitle = Color(0xFFF8F1E8)
@@ -263,4 +264,57 @@ val defaultKompassColors = KompassColors(
 object KompassTheme {
     val colors: KompassColors
         @Composable get() = LocalKompassColors.current
+}
+
+/**
+ * Semantic tokens for the Ronas-reference Home/navigation/detail redesign slice, matching the
+ * reference's own published brand colors exactly (periwinkle #777DB6, muted mauve #AD9DBE,
+ * near-black #1E1B20, white). Scoped to the components actually redesigned (Home, shared
+ * bottom navigation, place/activity details) — untouched screens keep their existing colors.
+ */
+internal object HomePalette {
+    val surface = Color(0xFFFFFFFF)
+    val ink = Color(0xFF1E1B20)
+    val action = Color(0xFF777DB6)
+    val selection = Color(0xFFAD9DBE)
+
+    /** Visibly light purple (not a washed-out near-white) — the whole page gradient's top stop. */
+    val canvas = Color(0xFFC9BFD5)
+
+    /** Secondary/muted text — derived from [ink] rather than a separate hardcoded hex. */
+    val secondaryText: Color get() = ink.copy(alpha = 0.6f)
+
+    /** Gradient midpoint, blending [action]/[selection] toward [ink]. */
+    val violet = Color(0xFF55517A)
+
+    /**
+     * The gradient's top stop: [canvas]'s lavender, deepened so text keeps WCAG AA at every point of
+     * the pinned gradient (text scrolls across all of it). [canvas] itself gave white 1.8–2.4:1 on
+     * device. Worst case now: white 5.5:1, chalk 5.0:1, [onGradientSecondary] 4.5:1.
+     */
+    val gradientTop = Color(0xFF6A6489)
+
+    /** Secondary lettering directly on the gradient (Lamplight's textSecondary/Tertiary were 2.4–2.8:1). */
+    val onGradientSecondary = Color.White.copy(alpha = 0.85f)
+
+    /**
+     * The whole page sits on one continuous [gradientTop] → [violet] → [ink] gradient — there is no
+     * flat "canvas-only" zone and no flat dark "ink-only" block. Lettering directly on it is white;
+     * dark text belongs on its own surface (cards, sheets, the yellow header).
+     */
+    val pageGradientStops = listOf(gradientTop, violet, ink)
+}
+
+/** Readable roles for the first redesign slice, without recoloring unrelated screens. */
+internal object RedesignPalette {
+    val text = Color(0xFF292820)
+    val secondaryText = Color(0xFF625E55)
+    val action = Color(0xFF675319)
+    val border = Color(0xFFB3A47B)
+    val error = Color(0xFF9C3E32)
+    val places = Color(0xFF4B5446)
+    val food = Color(0xFF71602F)
+    val activities = Color(0xFF465556)
+    val drive = Color(0xFF645C50)
+    val stories = Color(0xFF544C48)
 }

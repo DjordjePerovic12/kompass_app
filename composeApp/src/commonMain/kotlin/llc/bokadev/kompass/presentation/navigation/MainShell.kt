@@ -1,140 +1,256 @@
 package llc.bokadev.kompass.presentation.navigation
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.*
+import androidx.navigation.compose.*
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.ime
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import llc.bokadev.kompass.domain.model.UtilityCategory
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
+import kotlinx.coroutines.withTimeoutOrNull
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.navigation.NavDestination.Companion.hasRoute
+import androidx.navigation.navigation
+import llc.bokadev.kompass.core.audio.AudioController
+import llc.bokadev.kompass.core.audio.AudioState
+import llc.bokadev.kompass.core.util.AppStrings
+import llc.bokadev.kompass.core.audio.NavAudioHost
+import llc.bokadev.kompass.core.presentation.SnackbarBus
+import llc.bokadev.kompass.core.presentation.mvi.Navigator
+import llc.bokadev.kompass.core.util.ConnectivityMonitor
+import llc.bokadev.kompass.core.util.currentAppLanguage
+import llc.bokadev.kompass.core.util.rememberAppStrings
+import llc.bokadev.kompass.core.util.supportedDeviceLanguage
+import llc.bokadev.kompass.presentation.shared.LanguageSheet
+import llc.bokadev.kompass.presentation.shared.LanguageSheetHost
+import llc.bokadev.kompass.core.util.AppPreferences
+import llc.bokadev.kompass.core.util.AudioGuidePlayer
+import llc.bokadev.kompass.core.util.PlaybackRequestGuard
 import llc.bokadev.kompass.presentation.screens.categories.CategoriesScreen
-import llc.bokadev.kompass.presentation.screens.experiences.ExperiencesScreen
 import llc.bokadev.kompass.presentation.screens.home.HomeScreen
-import llc.bokadev.kompass.presentation.theme.KompassTheme
+import llc.bokadev.kompass.presentation.screens.onboarding.OnboardingScreen
+import llc.bokadev.kompass.presentation.screens.onboarding.OnboardingViewModel
+import org.koin.compose.viewmodel.koinViewModel
+import llc.bokadev.kompass.presentation.theme.LamplightTheme
+import llc.bokadev.kompass.presentation.theme.ProvideLamplightTheme
+import org.koin.compose.koinInject
 
 @Composable
-fun MainShell(
-    initialTab: BottomTab = BottomTab.Home,
-    backTab: BottomTab? = null,
-    onSelectRootTab: (BottomTab) -> Unit,
-    onSelectRootTabWithBackTarget: (BottomTab, BottomTab?) -> Unit,
-    onNavigateToPlaceDetail: (String) -> Unit,
-    onNavigateToEventDetail: (String) -> Unit,
-    onNavigateToEvents: () -> Unit,
-    onNavigateToExperienceDetail: (String) -> Unit,
-    onNavigateToInfoCenterDetail: (String) -> Unit,
-    onNavigateToItineraryDetail: (String) -> Unit,
-    onNavigateToPlacesList: (String) -> Unit,
-    onNavigateToMustSeePlaces: () -> Unit,
-    onNavigateToNearbyPlaces: () -> Unit,
-    onNavigateToServices: () -> Unit,
-    onNavigateToInfoCenter: () -> Unit,
-    onNavigateToMyGuides: () -> Unit,
-    onNavigateToFavorites: () -> Unit,
-    onNavigateToSearch: () -> Unit,
-    onNavigateToChangeLanguage: () -> Unit,
-    onNavigateToLocalFinds: () -> Unit,
-    onNavigateToUtilityMap: (UtilityCategory) -> Unit
-) {
-    val selectedTab = initialTab
-    var homeVersion by rememberSaveable { mutableIntStateOf(0) }
-    var categoriesVersion by rememberSaveable { mutableIntStateOf(0) }
-    var activitiesVersion by rememberSaveable { mutableIntStateOf(0) }
-    var essentialsVersion by rememberSaveable { mutableIntStateOf(0) }
-
-    fun navigateToTab(tab: BottomTab) {
-        if (tab == selectedTab) {
-            when (tab) {
-                BottomTab.Home -> homeVersion += 1
-                BottomTab.Categories -> categoriesVersion += 1
-                BottomTab.Activities -> activitiesVersion += 1
-                BottomTab.Essentials -> essentialsVersion += 1
+fun MainShell() {
+    val preferences = koinInject<AppPreferences>()
+    // First-run intro gate: its ViewModel owns the stored "seen" flag.
+    val onboardingVm: OnboardingViewModel = koinViewModel()
+    val onboarding by onboardingVm.state.collectAsState()
+    if (!onboarding.completed) {
+        OnboardingScreen(onAction = onboardingVm::onAction)
+        return
+    }
+    var selected by rememberSaveable { mutableStateOf(BottomTab.Home) }
+    // Controllers outlive the visible host, retaining each tab's entries and ViewModels.
+    val home = rememberNavController()
+    val explore = rememberNavController()
+    val saved = rememberNavController()
+    val essentials = rememberNavController()
+    val controller = when (selected) {
+        BottomTab.Home -> home
+        BottomTab.Explore -> explore
+        BottomTab.Saved -> saved
+        BottomTab.Essentials -> essentials
+    }
+    val holder = rememberSaveableStateHolder()
+    val player = koinInject<AudioGuidePlayer>()
+    val playbackGuard = koinInject<PlaybackRequestGuard>()
+    val navigator = koinInject<Navigator>()
+    val audio = koinInject<AudioController>()
+    val navAudio = koinInject<NavAudioHost>()
+    val connectivity = koinInject<ConnectivityMonitor>()
+    val snackbarBus = koinInject<SnackbarBus>()
+    val languageSheet = koinInject<LanguageSheetHost>()
+    val languageSheetOpen by languageSheet.isOpen.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val strings = rememberAppStrings()
+    LaunchedEffect(snackbarBus) {
+        snackbarBus.messages.collect { message ->
+            // Actions (Undo) stay up for 5s, plain messages for the short default.
+            val result = if (message.actionLabel != null || message.durationMs != null) {
+                withTimeoutOrNull(message.durationMs ?: 5_000L) {
+                    snackbarHostState.showSnackbar(message.text, message.actionLabel, duration = SnackbarDuration.Indefinite)
+                }.also { if (it == null) snackbarHostState.currentSnackbarData?.dismiss() }
+            } else {
+                snackbarHostState.showSnackbar(message.text)
             }
-            return
+            if (result == SnackbarResult.ActionPerformed) message.onAction?.invoke()
         }
-        onSelectRootTab(tab)
     }
-
-    fun navigateBackFromRootTab() {
-        if (selectedTab == BottomTab.Home) return
-        onSelectRootTab(backTab ?: BottomTab.Home)
+    val homeRootReset = remember { HomeRootResetSequencer() }
+    val entry by controller.currentBackStackEntryAsState()
+    val fullScreen = entry?.destination?.hasRoute<Route.UtilityMap>() == true
+    val inLibrary = entry?.destination?.hasRoute<Route.MyGuides>() == true
+    // Search spec §2.6: the floating bar never sits on top of the keyboard.
+    val imeVisible = WindowInsets.ime.getBottom(LocalDensity.current) > 0
+    fun select(tab: BottomTab) {
+        // Listen spec §4.1: tapping any tab leaves the audio library (which stops its playback).
+        if (inLibrary) controller.popBackStack()
+        if (tab != selected) {
+            player.stop()
+            playbackGuard.invalidate()
+            selected = tab
+        } else {
+            when (tab) {
+                BottomTab.Home -> controller.popBackStack<Route.Home>(false)
+                BottomTab.Explore -> controller.popBackStack<Route.Explore>(false)
+                BottomTab.Saved -> controller.popBackStack<Route.Favorites>(false)
+                BottomTab.Essentials -> controller.popBackStack<Route.Essentials>(false)
+            }
+        }
     }
-
+    NavigatorBridge(navigator, controller, onSwitchTab = ::select)
+    ProvideLamplightTheme {
     Scaffold(
-        containerColor = KompassTheme.colors.colorSurface,
-        contentWindowInsets = WindowInsets(0)
-    ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            Box(modifier = Modifier
-                .fillMaxSize()
-                .padding(bottom = 82.dp)
-            ) {
-            when (selectedTab) {
-                BottomTab.Home -> HomeScreen(
-                    vmKey = "home-$homeVersion",
-                    onNavigateToPlaceDetail = onNavigateToPlaceDetail,
-                    onNavigateToEventDetail = onNavigateToEventDetail,
-                    onNavigateToInfoCenterDetail = onNavigateToInfoCenterDetail,
-                    onNavigateToEvents = onNavigateToEvents,
-                    onNavigateToItineraryDetail = onNavigateToItineraryDetail,
-                    onNavigateToMustSeePlaces = onNavigateToMustSeePlaces,
-                    onNavigateToNearbyPlaces = onNavigateToNearbyPlaces,
-                    onNavigateToInfoCenter = onNavigateToInfoCenter,
-                    onNavigateToMyGuides = onNavigateToMyGuides,
-                    onNavigateToSearch = onNavigateToSearch,
-                    onNavigateToChangeLanguage = onNavigateToChangeLanguage
-                )
-
-                BottomTab.Categories -> CategoriesScreen(
-                    vmKey = "categories-$categoriesVersion",
-                    onBack = { navigateBackFromRootTab() },
-                    onNavigateToPlacesList = onNavigateToPlacesList,
-                    onNavigateToNearbyPlaces = onNavigateToNearbyPlaces,
-                    onNavigateToActivities = {
-                        onSelectRootTabWithBackTarget(BottomTab.Activities, BottomTab.Categories)
-                    },
-                    onNavigateToEssentials = {
-                        onSelectRootTabWithBackTarget(BottomTab.Essentials, BottomTab.Categories)
-                    },
-                    onNavigateToServices = onNavigateToServices,
-                    onNavigateToEvents = onNavigateToEvents,
-                    onNavigateToInfoCenter = onNavigateToInfoCenter,
-                    onNavigateToFavorites = onNavigateToFavorites,
-                    onNavigateToLocalFinds = onNavigateToLocalFinds
-                )
-
-                BottomTab.Activities -> ExperiencesScreen(
-                    vmKey = "activities-$activitiesVersion",
-                    onNavigateToExperienceDetail = onNavigateToExperienceDetail,
-                    onBack = { navigateBackFromRootTab() }
-                )
-
-                BottomTab.Essentials -> llc.bokadev.kompass.presentation.screens.essentials.EssentialsScreen(
-                    vmKey = "essentials-$essentialsVersion",
-                    onBack = { navigateBackFromRootTab() },
-                    onOpenUtilityCategoryMap = onNavigateToUtilityMap
+        // Explicit, not incidental: Scaffold's own containerColor defaults to
+        // MaterialTheme.colorScheme.background, which is still the app's old warm off-white
+        // token (KOmpassTheme.kt's KompassColorScheme). Leaving it unset leaks that color into
+        // any gap instead of the current screen's own content showing through.
+        containerColor = Color.Transparent,
+        contentWindowInsets = WindowInsets(0),
+        snackbarHost = {
+            SnackbarHost(snackbarHostState) { data ->
+                Snackbar(
+                    snackbarData = data,
+                    shape = RoundedCornerShape(16.dp),
+                    containerColor = LamplightTheme.colors.chalk,
+                    contentColor = LamplightTheme.colors.night,
+                    actionColor = LamplightTheme.colors.night
                 )
             }
-
-            }
-            Box(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-            ) {
+        },
+        bottomBar = {
+            if (!fullScreen && !imeVisible) {
                 KompassBottomNavBar(
-                    selectedTab = selectedTab,
-                    onTabSelected = {
-                        navigateToTab(it)
+                    selectedTab = selected.takeUnless { inLibrary },
+                    onTabSelected = ::select,
+                    audioButton = {
+                        ShellAudioButton(
+                            audio = audio,
+                            navAudio = navAudio,
+                            snackbarBus = snackbarBus,
+                            strings = strings,
+                            onOpenLibrary = { controller.navigate(Route.MyGuides) { launchSingleTop = true } }
+                        )
                     }
                 )
             }
         }
+    ) { padding ->
+        holder.SaveableStateProvider(selected.name) {
+            NavHost(controller, startDestination = Route.TabGraph(selected.name),
+                modifier = Modifier.padding(padding).consumeWindowInsets(padding),
+                enterTransition = kompassEnterTransition,
+                exitTransition = kompassExitTransition,
+                popEnterTransition = kompassPopEnterTransition,
+                popExitTransition = kompassPopExitTransition) {
+                navigation<Route.TabGraph>(startDestination = when (selected) {
+                    BottomTab.Home -> Route.Home
+                    BottomTab.Explore -> Route.Explore
+                    BottomTab.Saved -> Route.Favorites
+                    BottomTab.Essentials -> Route.Essentials
+                }) {
+                    composable<Route.Home> {
+                        // Home navigates entirely through its injected Navigator (see
+                        // NavigatorBridge above) — no callbacks threaded through here.
+                        HomeScreen()
+                    }
+                    composable<Route.Explore> {
+                        CategoriesScreen()
+                    }
+                    detailDestinations()
+                }
+            }
+        }
     }
+    }
+    if (languageSheetOpen) {
+        LanguageSheet(
+            currentLanguage = currentAppLanguage(),
+            strings = strings.language,
+            onSelect = { code ->
+                preferences.setSelectedLanguage(code)
+                languageSheet.close()
+            },
+            onUsePhoneLanguage = {
+                preferences.setSelectedLanguage(supportedDeviceLanguage())
+                languageSheet.close()
+            },
+            onDismiss = languageSheet::close
+        )
+    }
+    // Backgrounding does not change destinations and must not stop audio.
+    DisposableEffect(controller) {
+        var previous = controller.currentBackStackEntry?.id
+        val listener = androidx.navigation.NavController.OnDestinationChangedListener { nav, _, _ ->
+            val next = nav.currentBackStackEntry?.id
+            if (previous != null && previous != next) {
+                player.stop()
+                playbackGuard.invalidate()
+            }
+            previous = next
+        }
+        controller.addOnDestinationChangedListener(listener)
+        onDispose { controller.removeOnDestinationChangedListener(listener) }
+    }
+    RootTabBackHandler(selected != BottomTab.Home && controller.previousBackStackEntry == null) {
+        player.stop()
+        playbackGuard.invalidate()
+        // Switch to Home first; the pop below only runs once Home's graph is actually
+        // installed (see HomeRootResetSequencer) — popping home's stack here directly can
+        // crash if Home was never the mounted tab (e.g. restored into another tab).
+        homeRootReset.arm()
+        selected = BottomTab.Home
+    }
+    LaunchedEffect(selected) {
+        if (homeRootReset.consume(selected)) {
+            home.popBackStack<Route.Home>(inclusive = false)
+        }
+    }
+}
+
+/**
+ * The center button bound to app state: always the Listen library (never a play control), showing
+ * whatever plays app-wide. Inside the library it is marked current and does nothing.
+ */
+@Composable
+private fun ShellAudioButton(
+    audio: AudioController,
+    navAudio: NavAudioHost,
+    snackbarBus: SnackbarBus,
+    strings: AppStrings,
+    onOpenLibrary: () -> Unit
+) {
+    val context by navAudio.current.collectAsState()
+    val audioState by audio.state.collectAsState()
+    val inLibrary = context?.isLibrary == true
+    val playing = audioState.trackOrNull?.takeIf { audioState is AudioState.Playing || audioState is AudioState.Paused }
+    // Detail screens play from their own controls: a failure is announced here, once, app-wide.
+    // The library shows its own message, so not while it is on top.
+    LaunchedEffect(audioState is AudioState.Failed) {
+        if (audioState is AudioState.Failed && !inLibrary) snackbarBus.show(strings.detail.couldntPlayAudio)
+    }
+    NavAudioButton(
+        state = audioState.toListenButtonState(),
+        label = strings.listen.title,
+        description = listOfNotNull(strings.detail.openAudioLibrary, playing?.let { "${strings.listen.nowPlaying.lowercase()}: ${it.title}" }).joinToString(". "),
+        current = inLibrary,
+        onClick = { if (!inLibrary) onOpenLibrary() }
+    )
 }

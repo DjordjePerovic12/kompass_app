@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      The stock Theme.Material.Light windowBackground is near-white. Any gap Compose doesn't
+      explicitly paint (edge-to-edge inset rounding, the first composition frame before Scaffold
+      lays out) exposes this native backdrop directly, which reads as a stray light patch behind
+      dark UI like the floating bottom nav bar. Matching it to the app's own ink tone makes any
+      such gap invisible instead of trying to eliminate every possible gap in Compose.
+    -->
+    <style name="AppTheme" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">#FF1E1B20</item>
+    </style>
+</resources>

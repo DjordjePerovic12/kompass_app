@@ -27,23 +27,28 @@ class FavoritesRepositoryImpl(
         return _favoritesFlow.value.any { it.type == type && it.id == id }
     }
 
-    override fun toggleFavorite(type: FavoriteItemType, id: String) {
-        val updated = _favoritesFlow.value.toMutableList().apply {
-            val existingIndex = indexOfFirst { it.type == type && it.id == id }
-            if (existingIndex >= 0) {
-                removeAt(existingIndex)
-            } else {
-                add(
-                    FavoriteEntry(
-                        type = type,
-                        id = id,
-                        favoritedAtEpochMs = Clock.System.now().toEpochMilliseconds()
-                    )
-                )
-            }
-        }
-        _favoritesFlow.value = updated
-        persistFavorites(updated)
+    override fun save(type: FavoriteItemType, id: String): FavoriteEntry {
+        _favoritesFlow.value.firstOrNull { it.type == type && it.id == id }?.let { return it }
+        val entry = FavoriteEntry(type = type, id = id, favoritedAtEpochMs = Clock.System.now().toEpochMilliseconds())
+        update(_favoritesFlow.value + entry)
+        return entry
+    }
+
+    override fun remove(type: FavoriteItemType, id: String): FavoriteEntry? {
+        val existing = _favoritesFlow.value.firstOrNull { it.type == type && it.id == id } ?: return null
+        update(_favoritesFlow.value - existing)
+        return existing
+    }
+
+    override fun restore(entry: FavoriteEntry) {
+        if (isFavorited(entry.type, entry.id)) return
+        update(_favoritesFlow.value + entry)
+    }
+
+    /** Writes to storage first, then publishes, so a navigation right after a tap can't lose it. */
+    private fun update(favorites: List<FavoriteEntry>) {
+        persistFavorites(favorites)
+        _favoritesFlow.value = favorites
     }
 
     override fun getFavoriteKeySet(): Set<FavoriteKey> {

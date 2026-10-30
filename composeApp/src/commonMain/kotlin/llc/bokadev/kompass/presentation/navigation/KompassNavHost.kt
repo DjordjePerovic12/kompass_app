@@ -1,285 +1,174 @@
 package llc.bokadev.kompass.presentation.navigation
 
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.navigation.NavBackStackEntry
+import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
-import llc.bokadev.kompass.domain.model.UtilityCategory
+import llc.bokadev.kompass.core.presentation.mvi.Navigator
+import llc.bokadev.kompass.presentation.screens.excursions.ExcursionsScreen
+import llc.bokadev.kompass.presentation.screens.categorylist.CategoryListKind
+import llc.bokadev.kompass.presentation.screens.categorylist.CategoryListScreen
+import llc.bokadev.kompass.presentation.screens.essentials.EssentialsScreen
+import llc.bokadev.kompass.presentation.screens.essentials.UtilityMapScreen
 import llc.bokadev.kompass.presentation.screens.eventdetail.EventDetailScreen
 import llc.bokadev.kompass.presentation.screens.events.EventsScreen
 import llc.bokadev.kompass.presentation.screens.experiencedetail.ExperienceDetailScreen
-import llc.bokadev.kompass.presentation.screens.experiencedetail.ExperienceGuideScreen
-import llc.bokadev.kompass.presentation.screens.experiences.ExperiencesScreen
 import llc.bokadev.kompass.presentation.screens.favorites.FavoritesScreen
 import llc.bokadev.kompass.presentation.screens.infocenter.InfoCenterDetailScreen
 import llc.bokadev.kompass.presentation.screens.infocenter.InfoCenterScreen
-import llc.bokadev.kompass.presentation.screens.itinerarydetail.ItineraryDetailScreen
 import llc.bokadev.kompass.presentation.screens.languagepicker.LanguagePickerScreen
-import llc.bokadev.kompass.presentation.screens.mustsee.MustSeePlacesScreen
-import llc.bokadev.kompass.presentation.screens.myguides.MyGuidesScreen
-import llc.bokadev.kompass.presentation.screens.placedetail.PlaceDetailScreen
-import llc.bokadev.kompass.presentation.screens.placedetail.PlaceGuideScreen
-import llc.bokadev.kompass.presentation.screens.category_items_list.CategoryItemsListScreen
-import llc.bokadev.kompass.presentation.screens.essentials.EssentialsScreen
-import llc.bokadev.kompass.presentation.screens.essentials.UtilityMapScreen
-import llc.bokadev.kompass.presentation.screens.nearby.NearbyPlacesScreen
-import llc.bokadev.kompass.presentation.screens.search.SearchScreen
-import llc.bokadev.kompass.presentation.screens.payment.PaymentCheckoutScreen
 import llc.bokadev.kompass.presentation.screens.localfinds.LocalFindDetailScreen
 import llc.bokadev.kompass.presentation.screens.localfinds.LocalFindsScreen
-import llc.bokadev.kompass.presentation.screens.services.ServicesScreen
+import llc.bokadev.kompass.presentation.screens.listen.ListenScreen
+import llc.bokadev.kompass.presentation.screens.placedetail.PlaceDetailScreen
+import org.koin.compose.koinInject
+import llc.bokadev.kompass.presentation.screens.search.SearchScreen
 import llc.bokadev.kompass.presentation.screens.services.ServiceDetailScreen
+import llc.bokadev.kompass.presentation.screens.services.ServicesScreen
+
+private const val NavTransitionEnterMs = 180
+private const val NavTransitionExitMs = 150
+
+internal val kompassEnterTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition = {
+    fadeIn(tween(NavTransitionEnterMs)) +
+        slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Start, tween(NavTransitionEnterMs))
+}
+internal val kompassExitTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition = {
+    fadeOut(tween(NavTransitionExitMs)) +
+        slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Start, tween(NavTransitionExitMs))
+}
+internal val kompassPopEnterTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition = {
+    fadeIn(tween(NavTransitionEnterMs)) +
+        slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.End, tween(NavTransitionEnterMs))
+}
+internal val kompassPopExitTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition = {
+    fadeOut(tween(NavTransitionExitMs)) +
+        slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.End, tween(NavTransitionExitMs))
+}
 
 @Composable
 fun KompassNavHost(isFirstLaunch: Boolean) {
     val navController = rememberNavController()
-    val startDestination: Route = if (isFirstLaunch) Route.LanguagePicker else Route.Main()
-
-    NavHost(
-        navController = navController,
-        startDestination = startDestination
-    ) {
+    val navigator = koinInject<Navigator>()
+    NavHost(navController = navController,
+        startDestination = if (isFirstLaunch) Route.LanguagePicker else Route.Main,
+        enterTransition = kompassEnterTransition,
+        exitTransition = kompassExitTransition,
+        popEnterTransition = kompassPopEnterTransition,
+        popExitTransition = kompassPopExitTransition) {
         composable<Route.LanguagePicker> {
-            LanguagePickerScreen(
-                onLanguageSelected = {
-                    navController.navigate(Route.Main()) {
-                        popUpTo<Route.LanguagePicker> { inclusive = true }
-                    }
-                }
-            )
+            // Only first launch lives on this root controller; MainShell's bridge serves the tabs.
+            NavigatorBridge(navigator, navController)
+            LanguagePickerScreen()
         }
-
-        composable<Route.ChangeLanguage> {
-            LanguagePickerScreen(
-                showBack = true,
-                onBack = { navController.popBackStack() },
-                onLanguageSelected = { navController.popBackStack() }
-            )
-        }
-
-        composable<Route.Main> { backStackEntry ->
-            val route: Route.Main = backStackEntry.toRoute()
-            val navigateToRootTab: (BottomTab) -> Unit = { tab ->
-                navController.navigate(Route.Main(tab.name)) {
-                    popUpTo<Route.Main> { inclusive = true }
-                    launchSingleTop = true
-                }
-            }
-            val navigateToRootTabWithBackTarget: (BottomTab, BottomTab?) -> Unit = { tab, backTab ->
-                navController.navigate(Route.Main(tab.name, backTab?.name)) {
-                    popUpTo<Route.Main> { inclusive = true }
-                    launchSingleTop = true
-                }
-            }
-            MainShell(
-                initialTab = runCatching { BottomTab.valueOf(route.tab) }.getOrElse { BottomTab.Home },
-                backTab = route.backTab?.let { runCatching { BottomTab.valueOf(it) }.getOrNull() },
-                onSelectRootTab = navigateToRootTab,
-                onSelectRootTabWithBackTarget = navigateToRootTabWithBackTarget,
-                onNavigateToPlaceDetail = { id -> navController.navigate(Route.PlaceDetail(id)) },
-                onNavigateToEventDetail = { id -> navController.navigate(Route.EventDetail(id)) },
-                onNavigateToEvents = { navController.navigate(Route.Events) },
-                onNavigateToExperienceDetail = { id -> navController.navigate(Route.ExperienceDetail(id)) },
-                onNavigateToInfoCenterDetail = { id -> navController.navigate(Route.InfoCenterDetail(id)) },
-                onNavigateToItineraryDetail = { id -> navController.navigate(Route.ItineraryDetail(id)) },
-                onNavigateToPlacesList = { category -> navController.navigate(Route.CategoryItemsList(category)) },
-                onNavigateToMustSeePlaces = { navController.navigate(Route.MustSeePlaces) },
-                onNavigateToNearbyPlaces = { navController.navigate(Route.NearbyPlaces) },
-                onNavigateToServices = { navController.navigate(Route.Services) },
-                onNavigateToInfoCenter = { navController.navigate(Route.InfoCenter) },
-                onNavigateToMyGuides = { navController.navigate(Route.MyGuides) },
-                onNavigateToFavorites = { navController.navigate(Route.Favorites) },
-                onNavigateToSearch = { navController.navigate(Route.Search) },
-                onNavigateToChangeLanguage = { navController.navigate(Route.ChangeLanguage) },
-                onNavigateToLocalFinds = { navController.navigate(Route.LocalFinds) },
-                onNavigateToUtilityMap = { category ->
-                    navController.navigate(Route.UtilityMap(category.name))
-                }
-            )
-        }
-
-        composable<Route.Events> {
-            EventsScreen(
-                onBack = { navController.popBackStack() },
-                onNavigateToEventDetail = { id -> navController.navigate(Route.EventDetail(id)) }
-            )
-        }
-
-        composable<Route.PlaceDetail> { backStackEntry ->
-            val route: Route.PlaceDetail = backStackEntry.toRoute()
-            PlaceDetailScreen(
-                id = route.id,
-                onBack = { navController.popBackStack() }
-            )
-        }
-
-        composable<Route.PlaceGuide> { backStackEntry ->
-            val route: Route.PlaceGuide = backStackEntry.toRoute()
-            PlaceGuideScreen(
-                id = route.id,
-                autoplay = route.autoplay,
-                deep = route.deep,
-                onBack = { navController.popBackStack() }
-            )
-        }
-
-        composable<Route.EventDetail> { backStackEntry ->
-            val route: Route.EventDetail = backStackEntry.toRoute()
-            EventDetailScreen(id = route.id, onBack = { navController.popBackStack() })
-        }
-
-        composable<Route.ExperienceDetail> { backStackEntry ->
-            val route: Route.ExperienceDetail = backStackEntry.toRoute()
-            ExperienceDetailScreen(
-                id = route.id,
-                onBack = { navController.popBackStack() }
-            )
-        }
-
-        composable<Route.ExperienceGuide> { backStackEntry ->
-            val route: Route.ExperienceGuide = backStackEntry.toRoute()
-            ExperienceGuideScreen(
-                id = route.id,
-                autoplay = route.autoplay,
-                deep = route.deep,
-                onBack = { navController.popBackStack() }
-            )
-        }
-
-        composable<Route.ItineraryDetail> { backStackEntry ->
-            val route: Route.ItineraryDetail = backStackEntry.toRoute()
-            ItineraryDetailScreen(id = route.id, onBack = { navController.popBackStack() })
-        }
-
-        composable<Route.CategoryItemsList> { backStackEntry ->
-            val route: Route.CategoryItemsList = backStackEntry.toRoute()
-            CategoryItemsListScreen(
-                category = route.category,
-                onBack = { navController.popBackStack() },
-                onPlaceClick = { id -> navController.navigate(Route.PlaceDetail(id)) }
-            )
-        }
-
-        composable<Route.NearbyPlaces> {
-            NearbyPlacesScreen(
-                onBack = { navController.popBackStack() },
-                onPlaceClick = { id -> navController.navigate(Route.PlaceDetail(id)) }
-            )
-        }
-
-        composable<Route.MustSeePlaces> {
-            MustSeePlacesScreen(
-                onBack = { navController.popBackStack() },
-                onPlaceClick = { id -> navController.navigate(Route.PlaceDetail(id)) }
-            )
-        }
-
-        composable<Route.Activities> {
-            LaunchedEffect(Unit) {
-                navController.navigate(Route.Main(BottomTab.Activities.name)) {
-                    popUpTo<Route.Main> { inclusive = true }
-                    launchSingleTop = true
-                }
-            }
-        }
-
-        composable<Route.Essentials> {
-            LaunchedEffect(Unit) {
-                navController.navigate(Route.Main(BottomTab.Essentials.name)) {
-                    popUpTo<Route.Main> { inclusive = true }
-                    launchSingleTop = true
-                }
-            }
-        }
-
-        composable<Route.UtilityMap> { backStackEntry ->
-            val route: Route.UtilityMap = backStackEntry.toRoute()
-            UtilityMapScreen(
-                vmKey = "utility-map-${route.category}",
-                onBack = { navController.popBackStack() }
-            )
-        }
-
-        composable<Route.Services> {
-            ServicesScreen(
-                onBack = { navController.popBackStack() },
-                onServiceClick = { id -> navController.navigate(Route.ServiceDetail(id)) }
-            )
-        }
-
-        composable<Route.ServiceDetail> { backStackEntry ->
-            val route: Route.ServiceDetail = backStackEntry.toRoute()
-            ServiceDetailScreen(
-                id = route.id,
-                onBack = { navController.popBackStack() }
-            )
-        }
-
-        composable<Route.MyGuides> {
-            MyGuidesScreen(
-                onBack = { navController.popBackStack() },
-                onOpenPlaceGuide = { id, deep -> navController.navigate(Route.PlaceGuide(id, autoplay = true, deep = deep)) },
-                onOpenActivityGuide = { id, deep -> navController.navigate(Route.ExperienceGuide(id, autoplay = true, deep = deep)) },
-                onOpenPlace = { id -> navController.navigate(Route.PlaceDetail(id)) },
-                onOpenActivity = { id -> navController.navigate(Route.ExperienceDetail(id)) }
-            )
-        }
-
-        composable<Route.Favorites> {
-            FavoritesScreen(
-                onBack = { navController.popBackStack() },
-                onPlaceClick = { id -> navController.navigate(Route.PlaceDetail(id)) },
-                onActivityClick = { id -> navController.navigate(Route.ExperienceDetail(id)) }
-            )
-        }
-
-        composable<Route.Search> {
-            SearchScreen(
-                onBack = { navController.popBackStack() },
-                onPlaceClick = { id -> navController.navigate(Route.PlaceDetail(id)) },
-                onActivityClick = { id -> navController.navigate(Route.ExperienceDetail(id)) },
-                onEventClick = { id -> navController.navigate(Route.EventDetail(id)) }
-            )
-        }
-
-        composable<Route.InfoCenter> {
-            InfoCenterScreen(
-                onBack = { navController.popBackStack() },
-                onNoticeClick = { id -> navController.navigate(Route.InfoCenterDetail(id)) }
-            )
-        }
-
-        composable<Route.InfoCenterDetail> { backStackEntry ->
-            val route: Route.InfoCenterDetail = backStackEntry.toRoute()
-            InfoCenterDetailScreen(
-                id = route.id,
-                onBack = { navController.popBackStack() }
-            )
-        }
-
-        composable<Route.PaymentCheckout> { backStackEntry ->
-            val route: Route.PaymentCheckout = backStackEntry.toRoute()
-            PaymentCheckoutScreen(
-                sessionId = route.sessionId,
-                onBack = { navController.popBackStack() }
-            )
-        }
-
-        composable<Route.LocalFinds> {
-            LocalFindsScreen(
-                onBack = { navController.popBackStack() },
-                onFindClick = { id -> navController.navigate(Route.LocalFindDetail(id)) }
-            )
-        }
-
-        composable<Route.LocalFindDetail> { backStackEntry ->
-            val route: Route.LocalFindDetail = backStackEntry.toRoute()
-            LocalFindDetailScreen(
-                id = route.id,
-                onBack = { navController.popBackStack() }
-            )
-        }
+        composable<Route.Main> { MainShell() }
     }
+}
+
+/**
+ * Destinations shared by every tab's graph. No callbacks: each screen's ViewModel navigates
+ * through the injected [Navigator], applied to the selected tab's controller by MainShell.
+ */
+internal fun NavGraphBuilder.detailDestinations() {
+    composable<Route.Events> { EventsScreen() }
+
+    composable<Route.PlaceDetail> { entry ->
+        val route: Route.PlaceDetail = entry.toRoute()
+        PlaceDetailScreen(id = route.id, autoplay = route.autoplay)
+    }
+
+    // Compatibility only (restored back stacks): the legacy guide now shows the current detail.
+    composable<Route.PlaceGuide> { entry ->
+        val route: Route.PlaceGuide = entry.toRoute()
+        PlaceDetailScreen(id = route.id, autoplay = route.autoplay)
+    }
+
+    composable<Route.EventDetail> { entry -> EventDetailScreen(id = entry.toRoute<Route.EventDetail>().id) }
+
+    composable<Route.ExperienceDetail> { entry -> ExperienceDetailScreen(id = entry.toRoute<Route.ExperienceDetail>().id) }
+
+    // Compatibility only: the legacy activity guide now shows the current activity detail.
+    composable<Route.ExperienceGuide> { entry -> ExperienceDetailScreen(id = entry.toRoute<Route.ExperienceGuide>().id) }
+
+    // Unfinished in the pilot: never shown, even from a restored back stack.
+    composable<Route.ItineraryDetail> { ClosePilotHiddenRoute() }
+
+    composable<Route.CategoryList> { entry ->
+        val kind = entry.toRoute<Route.CategoryList>().kind
+        // The old distance-based "WORTH_THE_DRIVE" list is gone; a restored stack opens the editorial collection.
+        if (kind == "WORTH_THE_DRIVE") ExcursionsScreen() else CategoryListScreen(kind = kind)
+    }
+
+    // Legacy list routes (compatibility for restored back stacks) render the shared list.
+    composable<Route.CategoryItemsList> { entry ->
+        val category = entry.toRoute<Route.CategoryItemsList>().category
+        CategoryListScreen(kind = (if (category.equals("eat_and_drink", ignoreCase = true)) CategoryListKind.EAT_AND_DRINK else CategoryListKind.PLACES).name)
+    }
+
+    composable<Route.NearbyPlaces> { entry ->
+        if (entry.toRoute<Route.NearbyPlaces>().worthTheDrive) ExcursionsScreen()
+        else CategoryListScreen(kind = CategoryListKind.PLACES.name)
+    }
+
+    composable<Route.MustSeePlaces> { CategoryListScreen(kind = CategoryListKind.MUST_SEE.name) }
+
+    composable<Route.WorthTheDrive> { ExcursionsScreen() }
+
+    composable<Route.Activities> { CategoryListScreen(kind = CategoryListKind.ACTIVITIES.name) }
+
+    composable<Route.Essentials> { EssentialsScreen() }
+
+    // Route.EssentialModule(id): the ViewModel reads "id" from its SavedStateHandle.
+    composable<Route.EssentialModule> { entry ->
+        EssentialsScreen(vmKey = "essentials-module-${entry.toRoute<Route.EssentialModule>().id}")
+    }
+
+    composable<Route.UtilityMap> { entry ->
+        val route: Route.UtilityMap = entry.toRoute()
+        UtilityMapScreen(vmKey = "utility-map-${route.category}-${route.selectedId}")
+    }
+
+    composable<Route.Services> { ServicesScreen() }
+
+    composable<Route.ServiceDetail> { entry -> ServiceDetailScreen(id = entry.toRoute<Route.ServiceDetail>().id) }
+
+    // The Lamplight audio library ("Listen"); the route name is kept for existing callers.
+    composable<Route.MyGuides> { ListenScreen() }
+
+    composable<Route.Favorites> { FavoritesScreen() }
+
+    composable<Route.Search> { SearchScreen() }
+
+    composable<Route.InfoCenter> { InfoCenterScreen() }
+
+    composable<Route.InfoCenterDetail> { entry -> InfoCenterDetailScreen(id = entry.toRoute<Route.InfoCenterDetail>().id) }
+
+    // Payments are out of the pilot: never shown, even from a restored back stack.
+    composable<Route.PaymentCheckout> { ClosePilotHiddenRoute() }
+
+    composable<Route.PremiumBundles> { ClosePilotHiddenRoute() }
+
+    composable<Route.LocalFinds> { LocalFindsScreen() }
+
+    composable<Route.LocalFindDetail> { entry ->
+        val route: Route.LocalFindDetail = entry.toRoute()
+        LocalFindDetailScreen(id = route.id, filter = route.filter)
+    }
+}
+
+/** Pops a destination that pilot visitors must never see (itinerary, payment). */
+@Composable
+private fun ClosePilotHiddenRoute() {
+    val navigator = koinInject<Navigator>()
+    LaunchedEffect(Unit) { navigator.navigateUp() }
 }

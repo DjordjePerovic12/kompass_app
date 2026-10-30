@@ -9,16 +9,20 @@ sealed interface Route {
     data object LanguagePicker : Route
 
     @Serializable
-    data class Main(
-        val tab: String = BottomTab.Home.name,
-        val backTab: String? = null
-    ) : Route
+    data object Main : Route
 
     @Serializable
-    data object ChangeLanguage : Route
+    data class TabGraph(val tab: String = BottomTab.Home.name) : Route
 
     @Serializable
-    data class PlaceDetail(val id: String) : Route
+    data object Home : Route
+
+    @Serializable
+    data object Explore : Route
+
+    /** [autoplay] starts the place's audio once it has loaded (Home "Listen"). */
+    @Serializable
+    data class PlaceDetail(val id: String, val autoplay: Boolean = false) : Route
 
     @Serializable
     data class PlaceGuide(val id: String, val autoplay: Boolean = false, val deep: Boolean = false) : Route
@@ -41,8 +45,18 @@ sealed interface Route {
     @Serializable
     data class CategoryItemsList(val category: String) : Route
 
+    /**
+     * The shared Lamplight list. [kind] is a CategoryListKind name; [area] (a HomeArea preference
+     * value such as "perast") pre-applies the area filter, e.g. from Home's manual-area "See all".
+     */
     @Serializable
-    data object NearbyPlaces : Route
+    data class CategoryList(val kind: String, val area: String? = null) : Route
+
+    @Serializable
+    data class NearbyPlaces(val worthTheDrive: Boolean = false) : Route
+
+    @Serializable
+    data object WorthTheDrive : Route
 
     @Serializable
     data object MustSeePlaces : Route
@@ -53,8 +67,13 @@ sealed interface Route {
     @Serializable
     data object Essentials : Route
 
+    /** Essentials opened on one module (from Search): expanded and scrolled into view. */
     @Serializable
-    data class UtilityMap(val category: String) : Route
+    data class EssentialModule(val id: String) : Route
+
+    @Serializable
+    /** [category] is a UtilityCategory name, or [ALL_CATEGORIES]; [selectedId] pre-selects that pin. */
+    data class UtilityMap(val category: String, val selectedId: String? = null) : Route
 
     @Serializable
     data object Services : Route
@@ -87,5 +106,9 @@ sealed interface Route {
     data object LocalFinds : Route
 
     @Serializable
-    data class LocalFindDetail(val id: String) : Route
+    /** [filter] is the list's [StoryKind] filter (null = All), so "Next story" follows the same list. */
+    data class LocalFindDetail(val id: String, val filter: String? = null) : Route
 }
+
+/** [Route.UtilityMap] category value that shows every utility category on one map. */
+const val ALL_CATEGORIES = "ALL"

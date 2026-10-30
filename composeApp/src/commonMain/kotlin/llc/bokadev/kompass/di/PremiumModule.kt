@@ -10,9 +10,8 @@ import llc.bokadev.kompass.domain.repository.PremiumRepository
 import llc.bokadev.kompass.domain.usecase.HasPremiumAccessUseCase
 import llc.bokadev.kompass.domain.usecase.StartPremiumCheckoutUseCase
 import llc.bokadev.kompass.domain.usecase.VerifyPremiumCheckoutUseCase
-import llc.bokadev.kompass.presentation.screens.myguides.MyGuidesViewModel
-import llc.bokadev.kompass.presentation.screens.payment.PaymentCheckoutViewModel
-import llc.bokadev.kompass.presentation.screens.premium.PremiumBundlesViewModel
+import llc.bokadev.kompass.domain.usecase.GetAudioCatalogUseCase
+import llc.bokadev.kompass.presentation.screens.listen.ListenViewModel
 import org.koin.core.module.dsl.viewModel
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
@@ -25,7 +24,6 @@ val premiumModule = module {
     factory { HasPremiumAccessUseCase(get()) }
     factory { StartPremiumCheckoutUseCase(get()) }
     factory { VerifyPremiumCheckoutUseCase(get()) }
-    viewModel { PremiumBundlesViewModel(get(), get()) }
-    viewModel { MyGuidesViewModel(get(), get(), get(), get(), get(), get()) }
-    viewModel { (sessionId: String) -> PaymentCheckoutViewModel(sessionId, get(), get(), get()) }
+    factory { GetAudioCatalogUseCase(get(), get(), get()) }
+    viewModel { ListenViewModel(get(), get(), get(), get(), get(), get(), get()) }
 }

@@ -10,7 +10,9 @@ data class AudioGuidePlaybackState(
     val isBuffering: Boolean = false,
     val durationMs: Long = 0L,
     val progressMs: Long = 0L,
-    val error: String? = null
+    val error: String? = null,
+    /** The track played to its end (cleared by the next prepare()). */
+    val isCompleted: Boolean = false
 )
 
 interface AudioGuidePlayer {

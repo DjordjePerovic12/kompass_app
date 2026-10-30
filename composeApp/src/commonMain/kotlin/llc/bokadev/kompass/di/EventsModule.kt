@@ -17,6 +17,6 @@ val eventsModule = module {
     factory { GetEventFiltersUseCase(get()) }
     factory { GetUpcomingEventsUseCase(get()) }
     factory { GetEventByIdUseCase(get()) }
-    viewModel { EventsViewModel(get(), get()) }
-    viewModel { (id: String) -> EventDetailViewModel(id, get()) }
+    viewModel { EventsViewModel(get(), get(), get(), get(), get()) }
+    viewModel { (id: String) -> EventDetailViewModel(id, get(), get(), get()) }
 }

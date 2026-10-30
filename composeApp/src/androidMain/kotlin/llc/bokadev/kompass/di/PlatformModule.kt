@@ -5,6 +5,8 @@ import llc.bokadev.kompass.core.util.AndroidAudioGuidePlayer
 import llc.bokadev.kompass.core.util.AndroidOfflineAudioStore
 import llc.bokadev.kompass.core.util.AudioGuidePlayer
 import llc.bokadev.kompass.core.util.AppPreferences
+import llc.bokadev.kompass.core.util.ConnectivityMonitor
+import llc.bokadev.kompass.core.util.AndroidConnectivityMonitor
 import llc.bokadev.kompass.core.util.OfflineAudioStore
 import llc.bokadev.kompass.domain.location.UserLocationProvider
 import llc.bokadev.kompass.location.AndroidUserLocationProvider
@@ -16,5 +18,6 @@ actual val platformModule: Module = module {
     single<AppPreferences> { AndroidAppPreferences(androidContext()) }
     single<AudioGuidePlayer> { AndroidAudioGuidePlayer(androidContext()) }
     single<OfflineAudioStore> { AndroidOfflineAudioStore(androidContext()) }
+    single<ConnectivityMonitor> { AndroidConnectivityMonitor(androidContext()) }
     single<UserLocationProvider> { AndroidUserLocationProvider(androidContext()) }
 }

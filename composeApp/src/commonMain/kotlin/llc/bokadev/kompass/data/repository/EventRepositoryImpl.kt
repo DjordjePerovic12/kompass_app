@@ -12,14 +12,11 @@ import llc.bokadev.kompass.data.remote.dto.EventFilterDto
 import llc.bokadev.kompass.domain.model.Event
 import llc.bokadev.kompass.domain.model.EventFilter
 import llc.bokadev.kompass.domain.repository.EventRepository
-import kotlinx.datetime.DatePeriod
-import kotlinx.datetime.LocalDate
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.plus
-import kotlinx.datetime.toLocalDateTime
+import llc.bokadev.kompass.domain.model.EventDateFilter
+import llc.bokadev.kompass.domain.model.isCurrentOrUpcoming
+import llc.bokadev.kompass.domain.model.matches
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
-import kotlin.time.Instant
 
 @OptIn(ExperimentalTime::class)
 class EventRepositoryImpl(
@@ -31,22 +28,15 @@ class EventRepositoryImpl(
 
     override suspend fun getEvents(dateFilter: String, eventType: String): Result<List<Event>> = runCatching {
         val normalizedEventType = eventType.normalizedFilterValue()
+        val dateRule = EventDateFilter.fromKey(dateFilter)
+        val now = Clock.System.now()
         getActiveEventDtos()
             .map { it.toDomain() }
             .filter { event ->
-                isUpcoming(event) &&
-                matchesDateFilter(event, dateFilter) &&
+                event.isCurrentOrUpcoming(now) &&
+                event.matches(dateRule, now) &&
                 (normalizedEventType == "all" || event.category.normalizedFilterValue() == normalizedEventType)
             }
-    }
-
-    private fun matchesDateFilter(event: Event, dateKey: String): Boolean {
-        val range = eventRangeFor(dateKey) ?: return true
-        return runCatching {
-            val zone = TimeZone.currentSystemDefault()
-            val eventDate = Instant.parse(event.startTime).toLocalDateTime(zone).date
-            eventDate >= range.start && eventDate < range.endExclusive
-        }.getOrDefault(true)
     }
 
     override suspend fun getEventFilters(): Result<List<EventFilter>> = runCatching {
@@ -57,7 +47,7 @@ class EventRepositoryImpl(
     override suspend fun getUpcomingEvents(): Result<List<Event>> = runCatching {
         getActiveEventDtos()
             .map { it.toDomain() }
-            .filter(::isUpcoming)
+            .filter { it.isCurrentOrUpcoming(Clock.System.now()) }
     }
 
     override suspend fun getEventById(id: String): Result<Event> = runCatching {
@@ -150,52 +140,11 @@ class EventRepositoryImpl(
         }.getOrElse { emptyList() }
     }
 
-    private fun eventRangeFor(dateFilter: String): EventDateRange? {
-        val normalizedDateFilter = dateFilter.normalizedFilterValue()
-        if (normalizedDateFilter == "all") return null
-
-        val zone = TimeZone.currentSystemDefault()
-        val today = Clock.System.now().toLocalDateTime(zone).date
-
-        val start: LocalDate = when (normalizedDateFilter) {
-            "today" -> today
-            "this_week" -> today.plus(DatePeriod(days = -today.dayOfWeek.ordinal))
-            "this_month" -> LocalDate(today.year, today.month, 1)
-            else -> return null
-        }
-
-        val end: LocalDate = when (normalizedDateFilter) {
-            "today" -> start.plus(DatePeriod(days = 1))
-            "this_week" -> start.plus(DatePeriod(days = 7))
-            "this_month" -> start.plus(DatePeriod(months = 1))
-            else -> return null
-        }
-
-        return EventDateRange(start = start, endExclusive = end)
-    }
-
-    private fun isUpcoming(event: Event): Boolean {
-        val comparisonInstant = event.endTime?.let(::parseInstantOrNull)
-            ?: parseInstantOrNull(event.startTime)
-            ?: return true
-
-        return comparisonInstant >= Clock.System.now()
-    }
-
-    private fun parseInstantOrNull(value: String): Instant? = runCatching {
-        Instant.parse(value)
-    }.getOrNull()
-
     private companion object {
         const val CACHE_KEY_ACTIVE_EVENTS = "offline_cache_active_events_v1"
         const val CACHE_KEY_EVENT_FILTERS = "offline_cache_event_filters_v1"
     }
 }
-
-private data class EventDateRange(
-    val start: LocalDate,
-    val endExclusive: LocalDate
-)
 
 private fun String.normalizedFilterValue(): String {
     val normalized = lowercase()

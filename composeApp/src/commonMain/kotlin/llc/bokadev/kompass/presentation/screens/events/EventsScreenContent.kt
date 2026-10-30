@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalTime::class)
+
 package llc.bokadev.kompass.presentation.screens.events
 
 import androidx.compose.foundation.background
@@ -10,140 +12,131 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.shape.RoundedCornerShape
+import kotlinx.datetime.DatePeriod
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.plus
+import kotlinx.datetime.toLocalDateTime
+import llc.bokadev.kompass.core.presentation.mvi.asString
+import llc.bokadev.kompass.core.util.AppStrings
 import llc.bokadev.kompass.core.util.currentAppLanguage
-import llc.bokadev.kompass.core.util.noRippleClickable
 import llc.bokadev.kompass.core.util.rememberAppStrings
+import llc.bokadev.kompass.core.util.toClockTime
+import llc.bokadev.kompass.core.util.toDayLabel
+import llc.bokadev.kompass.domain.model.Destination
 import llc.bokadev.kompass.domain.model.EventFilter
-import llc.bokadev.kompass.presentation.theme.KompassTheme
+import llc.bokadev.kompass.domain.model.groupedByListingDay
+import llc.bokadev.kompass.domain.model.isOngoingFromEarlierDay
+import llc.bokadev.kompass.presentation.screens.events.components.EventRow
+import llc.bokadev.kompass.presentation.shared.LamplightChip
+import llc.bokadev.kompass.presentation.shared.LamplightCompactHeader
+import llc.bokadev.kompass.presentation.shared.StateMessage
+import llc.bokadev.kompass.presentation.theme.LamplightTheme
+import llc.bokadev.kompass.presentation.theme.LamplightType
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
+/**
+ * Events in chronological Kotor-day groups (Today, Tomorrow, then dates). A festival that started
+ * earlier and is still on sits under Today as "Ongoing". Filters stay usable while loading.
+ */
 @Composable
-fun EventsScreenContent(
-    state: EventsState,
-    onDateFilterSelected: (String) -> Unit,
-    onTypeFilterSelected: (String) -> Unit,
-    onEventClick: (String) -> Unit,
-    onBack: () -> Unit
-) {
-    val colors = KompassTheme.colors
+fun EventsScreenContent(state: EventsState, onAction: (EventsAction) -> Unit) {
+    val colors = LamplightTheme.colors
     val lang = currentAppLanguage()
     val strings = rememberAppStrings()
+    val s = strings.states
+    val now = Clock.System.now()
+    val today = now.toLocalDateTime(Destination.timeZone).date
+    val groups = state.events.groupedByListingDay(now)
 
     LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(colors.colorHomeCanvas),
-        contentPadding = PaddingValues(horizontal = 18.dp, vertical = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(14.dp)
-    ) {
-        item {
-            FilterSection(
-                title = "When",
-                filters = state.dateFilters,
-                selectedKey = state.selectedDateFilter,
-                lang = lang,
-                onFilterSelected = onDateFilterSelected
-            )
-        }
-
-        item {
-            FilterSection(
-                title = "Type",
-                filters = state.typeFilters,
-                selectedKey = state.selectedTypeFilter,
-                lang = lang,
-                onFilterSelected = onTypeFilterSelected
-            )
-        }
-
-        when {
-            state.error != null -> item {
-                Text(
-                    text = state.error,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = colors.colorError,
-                    modifier = Modifier.padding(horizontal = 2.dp, vertical = 8.dp)
-                )
-            }
-
-            state.events.isEmpty() && !state.isLoading -> item {
-                Text(
-                    text = if (state.isShowingFilteredResults()) {
-                        strings.noEventsForFilters
-                    } else {
-                        strings.noEventsYet
-                    },
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = colors.colorSlate,
-                    modifier = Modifier.padding(horizontal = 2.dp, vertical = 8.dp)
-                )
-            }
-
-            else -> items(state.events) {
-                EventItem(event = it, lang = lang, onClick = { onEventClick(it.id) })
-            }
-        }
-    }
-}
-
-@Composable
-private fun FilterSection(
-    title: String,
-    filters: List<EventFilter>,
-    selectedKey: String,
-    lang: String,
-    onFilterSelected: (String) -> Unit
-) {
-    val colors = KompassTheme.colors
-    Column(
+        modifier = Modifier.fillMaxSize().background(colors.night),
+        contentPadding = PaddingValues(bottom = 26.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.bodySmall,
-            color = colors.colorSlate.copy(alpha = 0.78f)
-        )
-        LazyRow(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            items(filters) { filter ->
-                EventsFilterChip(
-                    label = filter.localizedLabel(lang),
-                    isSelected = filter.key == selectedKey,
-                    onClick = { onFilterSelected(filter.key) }
-                )
+        item(key = "top") {
+            LamplightCompactHeader(
+                title = strings.eventsTitle,
+                subtitle = strings.eventsSubtitle,
+                backLabel = strings.detail.back,
+                onBack = { onAction(EventsAction.Back) }
+            )
+        }
+        if (state.dateFilters.isNotEmpty()) {
+            item(key = "date-filters") { FilterRow(s.filterWhen, state.dateFilters, state.selectedDateFilter, lang) { onAction(EventsAction.SelectDateFilter(it)) } }
+        }
+        if (state.typeFilters.isNotEmpty()) {
+            item(key = "type-filters") { FilterRow(s.filterType, state.typeFilters, state.selectedTypeFilter, lang) { onAction(EventsAction.SelectTypeFilter(it)) } }
+        }
+        if (state.isLoading || state.isRefreshing) {
+            item(key = "progress") {
+                LinearProgressIndicator(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp), color = colors.lamp, trackColor = colors.surfaceMuted)
+            }
+        }
+
+        val pad = Modifier.padding(horizontal = 20.dp)
+        when {
+            state.error != null -> item(key = "failed") {
+                StateMessage(state.error.asString(), pad, actionLabel = strings.retry, onAction = { onAction(EventsAction.Retry) })
+            }
+            state.events.isEmpty() && !state.isLoading && !state.isRefreshing -> item(key = "empty") {
+                if (state.isFiltered) StateMessage(strings.noEventsForFilters, pad, actionLabel = s.resetFilters, onAction = { onAction(EventsAction.ResetFilters) })
+                else StateMessage(strings.noEventsYet, pad)
+            }
+            else -> {
+                if (state.refreshFailed) {
+                    item(key = "stale") { StateMessage(s.couldntRefresh, pad, actionLabel = strings.retry, onAction = { onAction(EventsAction.Retry) }) }
+                }
+                groups.forEach { (day, events) ->
+                    item(key = "day-$day") { DayHeader(day.label(today, lang, strings)) }
+                    items(events, key = { it.id }) { event ->
+                        EventRow(
+                            time = if (event.isOngoingFromEarlierDay(now)) strings.events.ongoing else event.startTime.toClockTime().orEmpty(),
+                            title = event.localizedName(lang),
+                            venue = event.localizedVenue(lang).takeIf { it.isNotBlank() },
+                            price = event.price?.takeIf { it.isNotBlank() },
+                            onClick = { onAction(EventsAction.OpenEvent(event.id)) },
+                            modifier = pad
+                        )
+                    }
+                }
             }
         }
     }
 }
 
 @Composable
-private fun EventsFilterChip(
-    label: String,
-    isSelected: Boolean,
-    onClick: () -> Unit
-) {
-    val colors = KompassTheme.colors
+private fun FilterRow(title: String, filters: List<EventFilter>, selectedKey: String, lang: String, onSelect: (String) -> Unit) {
+    val colors = LamplightTheme.colors
+    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Text(text = title, style = LamplightType.label(), color = colors.textTertiary, modifier = Modifier.padding(start = 20.dp, top = 8.dp))
+        LazyRow(contentPadding = PaddingValues(horizontal = 20.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            items(filters, key = { it.key }) { filter ->
+                LamplightChip(label = filter.localizedLabel(lang), selected = filter.key == selectedKey, onClick = { onSelect(filter.key) })
+            }
+        }
+    }
+}
+
+@Composable
+private fun DayHeader(text: String) {
     Text(
-        text = label,
-        style = MaterialTheme.typography.bodyMedium,
-        color = if (isSelected) colors.colorWhite else colors.filterUnselectedText.copy(alpha = 0.82f),
-        modifier = Modifier
-            .background(
-                color = if (isSelected) colors.colorOrangeMain else colors.filterUnselectedSurface,
-                shape = RoundedCornerShape(100.dp)
-            )
-            .padding(horizontal = 14.dp, vertical = 10.dp)
-            .noRippleClickable(onClick)
+        text = text,
+        style = LamplightType.sectionTitleS(),
+        color = LamplightTheme.colors.textPrimary,
+        modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 14.dp).semantics { heading() }
     )
 }
 
-private fun EventsState.isShowingFilteredResults(): Boolean {
-    return selectedDateFilter != "all_dates" || selectedTypeFilter != "all_types"
+private fun LocalDate.label(today: LocalDate, lang: String, strings: AppStrings): String = when (this) {
+    today -> strings.events.today
+    today.plus(DatePeriod(days = 1)) -> strings.events.tomorrow
+    else -> toDayLabel(lang)
 }

@@ -1,47 +1,39 @@
 package llc.bokadev.kompass.presentation.screens.infocenter
 
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import llc.bokadev.kompass.core.presentation.base.BaseEvent
-import llc.bokadev.kompass.core.presentation.base.BaseState
-import llc.bokadev.kompass.core.presentation.base.BaseViewModel
-import llc.bokadev.kompass.domain.model.InfoNotice
+import llc.bokadev.kompass.core.presentation.mvi.BaseViewModel
+import llc.bokadev.kompass.core.presentation.mvi.Navigator
+import llc.bokadev.kompass.core.presentation.mvi.UiText
 import llc.bokadev.kompass.domain.usecase.GetInfoNoticeByIdUseCase
-
-data class InfoCenterDetailState(
-    override val isLoading: Boolean = true,
-    override val error: String? = null,
-    val notice: InfoNotice? = null
-) : BaseState()
-
-sealed interface InfoCenterDetailEvent : BaseEvent {
-    data object Retry : InfoCenterDetailEvent
-}
+import llc.bokadev.kompass.presentation.shared.ExternalLaunch
 
 class InfoCenterDetailViewModel(
     private val id: String,
-    private val getInfoNoticeById: GetInfoNoticeByIdUseCase
-) : BaseViewModel<InfoCenterDetailState, InfoCenterDetailEvent>() {
+    private val getInfoNoticeById: GetInfoNoticeByIdUseCase,
+    private val navigator: Navigator
+) : BaseViewModel<InfoCenterDetailState, InfoCenterDetailAction, InfoCenterDetailEvent>(InfoCenterDetailState()) {
 
-    override val initialState = InfoCenterDetailState()
+    override suspend fun onFirstStart() = load()
 
-    init {
-        load()
-    }
-
-    override fun onIntent(event: InfoCenterDetailEvent) {
-        when (event) {
-            InfoCenterDetailEvent.Retry -> load()
+    override fun onAction(action: InfoCenterDetailAction) {
+        when (action) {
+            InfoCenterDetailAction.Retry -> viewModelScope.launch { load() }
+            InfoCenterDetailAction.Back -> navigator.navigateUp()
+            InfoCenterDetailAction.OpenSource -> state.value.notice?.externalUrl?.trim()?.takeIf { it.isNotBlank() }?.let {
+                sendEvent(InfoCenterDetailEvent.Launch(ExternalLaunch.Url(it)))
+            }
         }
     }
 
-    private fun load() {
-        viewModelScope.launch {
-            _state.update { it.copy(isLoading = true, error = null) }
-            getInfoNoticeById(id)
-                .onSuccess { notice -> _state.update { it.copy(isLoading = false, notice = notice) } }
-                .onFailure { err -> _state.update { it.copy(isLoading = false, error = err.message) } }
-        }
+    private suspend fun load() {
+        updateState { it.copy(isLoading = it.notice == null, error = null) }
+        getInfoNoticeById(id)
+            .onSuccess { notice -> updateState { it.copy(isLoading = false, notice = notice) } }
+            .onFailure { updateState { it.copy(isLoading = false, error = if (it.notice == null) LOAD_FAILED else null) } }
+    }
+
+    private companion object {
+        val LOAD_FAILED = UiText { it.states.couldntLoadUpdate }
     }
 }

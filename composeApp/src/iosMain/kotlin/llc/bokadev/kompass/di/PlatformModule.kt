@@ -2,6 +2,8 @@ package llc.bokadev.kompass.di
 
 import llc.bokadev.kompass.core.util.AudioGuidePlayer
 import llc.bokadev.kompass.core.util.AppPreferences
+import llc.bokadev.kompass.core.util.ConnectivityMonitor
+import llc.bokadev.kompass.core.util.IosConnectivityMonitor
 import llc.bokadev.kompass.core.util.IosAudioGuidePlayer
 import llc.bokadev.kompass.core.util.IosAppPreferences
 import llc.bokadev.kompass.core.util.IosOfflineAudioStore
@@ -15,5 +17,6 @@ actual val platformModule: Module = module {
     single<AppPreferences> { IosAppPreferences() }
     single<AudioGuidePlayer> { IosAudioGuidePlayer() }
     single<OfflineAudioStore> { IosOfflineAudioStore() }
+    single<ConnectivityMonitor> { IosConnectivityMonitor() }
     single<UserLocationProvider> { IosUserLocationProvider() }
 }

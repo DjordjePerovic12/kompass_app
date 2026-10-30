@@ -6,7 +6,12 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
+import android.content.BroadcastReceiver
 import android.content.Intent
+import android.content.IntentFilter
+import android.media.AudioFocusRequest
+import android.media.AudioManager
+import android.os.SystemClock
 import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.os.Build
@@ -33,10 +38,44 @@ class AudioGuidePlaybackService : Service() {
     private var progressJob: Job? = null
     private var mediaPlayer: MediaPlayer? = null
     private lateinit var mediaSession: MediaSessionCompat
+    private lateinit var audioManager: AudioManager
+    private var focusRequest: AudioFocusRequest? = null
+
+    /** Set when a transient focus loss (call, navigation prompt) paused us while playing. */
+    private var resumeOnFocusGainUntil: Long? = null
+    private var noisyReceiverRegistered = false
+
+    private val focusListener = AudioManager.OnAudioFocusChangeListener { change ->
+        when (change) {
+            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT,
+            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> {
+                if (mediaPlayer?.isPlaying == true) {
+                    pausePlayback()
+                    resumeOnFocusGainUntil = SystemClock.elapsedRealtime() + RESUME_WINDOW_MS
+                }
+            }
+            AudioManager.AUDIOFOCUS_GAIN -> {
+                val deadline = resumeOnFocusGainUntil
+                resumeOnFocusGainUntil = null
+                if (deadline != null && SystemClock.elapsedRealtime() <= deadline) resumePlayback()
+            }
+            AudioManager.AUDIOFOCUS_LOSS -> stopPlayback()
+        }
+    }
+
+    /** Headphones unplugged / Bluetooth gone: pause rather than blast the speaker. */
+    private val noisyReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if (intent?.action == AudioManager.ACTION_AUDIO_BECOMING_NOISY && mediaPlayer?.isPlaying == true) {
+                pausePlayback()
+            }
+        }
+    }
 
     override fun onCreate() {
         super.onCreate()
         ensureNotificationChannel()
+        audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
         mediaSession = MediaSessionCompat(this, "KompassAudioGuides").apply {
             isActive = true
         }
@@ -63,6 +102,8 @@ class AudioGuidePlaybackService : Service() {
     }
 
     override fun onDestroy() {
+        abandonFocus()
+        unregisterNoisy()
         progressJob?.cancel()
         mediaPlayer?.release()
         mediaPlayer = null
@@ -100,6 +141,18 @@ class AudioGuidePlaybackService : Service() {
             )
             setDataSource(url)
             setOnPreparedListener { player ->
+                if (!requestFocus()) {
+                    // Another app holds exclusive focus (e.g. a call): stay prepared and paused.
+                    playbackState.value = playbackState.value.copy(
+                        isBuffering = false,
+                        durationMs = player.duration.toLong(),
+                        progressMs = 0L
+                    )
+                    updateMediaSession()
+                    updateNotification()
+                    return@setOnPreparedListener
+                }
+                registerNoisy()
                 player.start()
                 playbackState.value = playbackState.value.copy(
                     isPlaying = true,
@@ -113,9 +166,11 @@ class AudioGuidePlaybackService : Service() {
                 startProgressLoop()
             }
             setOnCompletionListener {
+                unregisterNoisy()
                 playbackState.value = playbackState.value.copy(
                     isPlaying = false,
-                    progressMs = playbackState.value.durationMs
+                    progressMs = playbackState.value.durationMs,
+                    isCompleted = true
                 )
                 updateMediaSession()
                 updateNotification()
@@ -137,16 +192,76 @@ class AudioGuidePlaybackService : Service() {
 
     private fun togglePlayback() {
         val player = mediaPlayer ?: return
-        if (player.isPlaying) {
-            player.pause()
-            playbackState.value = playbackState.value.copy(isPlaying = false)
-        } else {
-            player.start()
-            playbackState.value = playbackState.value.copy(isPlaying = true)
-            startProgressLoop()
-        }
+        resumeOnFocusGainUntil = null
+        if (player.isPlaying) pausePlayback() else resumePlayback()
+    }
+
+    private fun pausePlayback() {
+        val player = mediaPlayer ?: return
+        if (player.isPlaying) player.pause()
+        unregisterNoisy()
+        playbackState.value = playbackState.value.copy(isPlaying = false)
         updateMediaSession()
         updateNotification()
+    }
+
+    private fun resumePlayback() {
+        val player = mediaPlayer ?: return
+        if (!requestFocus()) return
+        registerNoisy()
+        player.start()
+        playbackState.value = playbackState.value.copy(isPlaying = true, isCompleted = false)
+        startProgressLoop()
+        updateMediaSession()
+        updateNotification()
+    }
+
+    private fun requestFocus(): Boolean {
+        val result = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val request = focusRequest ?: AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+                .setAudioAttributes(
+                    AudioAttributes.Builder()
+                        .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+                        .setUsage(AudioAttributes.USAGE_MEDIA)
+                        .build()
+                )
+                .setWillPauseWhenDucked(true)
+                .setOnAudioFocusChangeListener(focusListener)
+                .build()
+                .also { focusRequest = it }
+            audioManager.requestAudioFocus(request)
+        } else {
+            @Suppress("DEPRECATION")
+            audioManager.requestAudioFocus(focusListener, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN)
+        }
+        return result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED
+    }
+
+    private fun abandonFocus() {
+        resumeOnFocusGainUntil = null
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            focusRequest?.let(audioManager::abandonAudioFocusRequest)
+        } else {
+            @Suppress("DEPRECATION")
+            audioManager.abandonAudioFocus(focusListener)
+        }
+    }
+
+    private fun registerNoisy() {
+        if (noisyReceiverRegistered) return
+        val filter = IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(noisyReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
+        } else {
+            registerReceiver(noisyReceiver, filter)
+        }
+        noisyReceiverRegistered = true
+    }
+
+    private fun unregisterNoisy() {
+        if (!noisyReceiverRegistered) return
+        runCatching { unregisterReceiver(noisyReceiver) }
+        noisyReceiverRegistered = false
     }
 
     private fun seekTo(positionMs: Long) {
@@ -157,6 +272,8 @@ class AudioGuidePlaybackService : Service() {
     }
 
     private fun stopPlayback() {
+        abandonFocus()
+        unregisterNoisy()
         progressJob?.cancel()
         mediaPlayer?.stop()
         mediaPlayer?.release()
@@ -178,7 +295,7 @@ class AudioGuidePlaybackService : Service() {
                     isPlaying = player.isPlaying
                 )
                 updateMediaSession()
-                delay(1000)
+                delay(500)
             }
         }
     }
@@ -289,6 +406,9 @@ class AudioGuidePlaybackService : Service() {
     companion object {
         private const val CHANNEL_ID = "kompass_audio_guides"
         private const val NOTIFICATION_ID = 4012
+
+        /** Resume after a transient focus loss only if focus returns within this window (spec §2.3 rule 6). */
+        private const val RESUME_WINDOW_MS = 30_000L
 
         private const val ACTION_PREPARE = "llc.bokadev.kompass.audio.PREPARE"
         private const val ACTION_TOGGLE = "llc.bokadev.kompass.audio.TOGGLE"

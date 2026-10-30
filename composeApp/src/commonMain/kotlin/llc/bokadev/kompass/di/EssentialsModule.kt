@@ -16,6 +16,6 @@ val essentialsModule = module {
     single<UtilityRepository> { UtilityRepositoryImpl(get(), get()) }
     factory { GetEssentialsUseCase(get()) }
     factory { GetUtilitiesUseCase(get()) }
-    viewModel { EssentialsViewModel(get(), get(), get()) }
-    viewModel { UtilityMapViewModel(get(), get(), get()) }
+    viewModel { EssentialsViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
+    viewModel { UtilityMapViewModel(get(), get(), get(), get(), get()) }
 }

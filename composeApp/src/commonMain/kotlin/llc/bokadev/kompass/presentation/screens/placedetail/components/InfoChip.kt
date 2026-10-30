@@ -22,17 +22,19 @@ import llc.bokadev.kompass.presentation.theme.KompassTheme
 fun InfoChip(
     label: String,
     amber: Boolean = false,
+    accentColor: Color? = null,
     modifier: Modifier = Modifier
 ) {
     val colors = KompassTheme.colors
+    val accent = accentColor ?: colors.colorOrangeMain
     val shape = RoundedCornerShape(14.dp)
     Box(
         modifier = modifier
             .clip(shape)
-            .background(if (amber) colors.colorOrangeMain.copy(alpha = 0.08f) else colors.colorSurface)
+            .background(if (amber) accent.copy(alpha = 0.08f) else colors.colorSurface)
             .border(
                 width = 1.dp,
-                color = if (amber) colors.colorOrangeMain.copy(alpha = 0.24f) else Color.Black.copy(alpha = 0.08f),
+                color = if (amber) accent.copy(alpha = 0.24f) else Color.Black.copy(alpha = 0.08f),
                 shape = shape
             )
             .padding(horizontal = 12.dp, vertical = 8.dp)
@@ -43,13 +45,13 @@ fun InfoChip(
                     modifier = Modifier
                         .size(5.dp)
                         .clip(RoundedCornerShape(999.dp))
-                        .background(colors.colorOrangeMain)
+                        .background(accent)
                 )
             }
             Text(
                 text = label,
                 style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
-                color = if (amber) colors.colorOrangeMain else colors.colorNavy.copy(alpha = 0.82f)
+                color = if (amber) accent else colors.colorNavy.copy(alpha = 0.82f)
             )
         }
     }

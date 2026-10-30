@@ -1,142 +1,173 @@
 package llc.bokadev.kompass.presentation.screens.essentials
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
-import llc.bokadev.kompass.core.presentation.base.BaseEvent
-import llc.bokadev.kompass.core.presentation.base.BaseState
-import llc.bokadev.kompass.core.presentation.base.BaseViewModel
+import llc.bokadev.kompass.core.presentation.mvi.BaseViewModel
+import llc.bokadev.kompass.core.presentation.mvi.Navigator
+import llc.bokadev.kompass.core.util.AppPreferences
+import llc.bokadev.kompass.domain.repository.AnalyticsRepository
+import llc.bokadev.kompass.presentation.navigation.ALL_CATEGORIES
+import llc.bokadev.kompass.presentation.navigation.Route
+import llc.bokadev.kompass.presentation.shared.ExternalLaunch
+import llc.bokadev.kompass.presentation.shared.LanguageSheetHost
 import llc.bokadev.kompass.domain.location.UserLocationProvider
 import llc.bokadev.kompass.domain.model.CityEssential
 import llc.bokadev.kompass.domain.model.EssentialCategory
 import llc.bokadev.kompass.domain.model.GeoPoint
-import llc.bokadev.kompass.domain.model.UtilityCategory
+import llc.bokadev.kompass.domain.model.Utility
 import llc.bokadev.kompass.domain.usecase.GetEssentialsUseCase
 import llc.bokadev.kompass.domain.usecase.GetUtilitiesUseCase
-
-data class EssentialsState(
-    override val isLoading: Boolean = true,
-    override val error: String? = null,
-    val selectedTab: EssentialsTab = EssentialsTab.INFO,
-    val groupedEssentials: Map<EssentialCategory, List<CityEssential>> = emptyMap(),
-    val expandedIds: Set<String> = emptySet(),
-    val sections: List<UtilityCategorySection> = emptyList(),
-    val currentLocation: GeoPoint? = null
-) : BaseState()
-
-enum class EssentialsTab {
-    INFO,
-    UTILITY
-}
-
-sealed interface EssentialsEvent : BaseEvent {
-    data class SelectTab(val tab: EssentialsTab) : EssentialsEvent
-    data class ToggleItem(val id: String) : EssentialsEvent
-    data object Retry : EssentialsEvent
-}
 
 class EssentialsViewModel(
     private val getEssentials: GetEssentialsUseCase,
     private val getUtilities: GetUtilitiesUseCase,
-    private val userLocationProvider: UserLocationProvider
-) : BaseViewModel<EssentialsState, EssentialsEvent>() {
+    private val userLocationProvider: UserLocationProvider,
+    private val appPreferences: AppPreferences,
+    private val savedState: SavedStateHandle,
+    private val navigator: Navigator,
+    private val languageSheet: LanguageSheetHost,
+    private val analytics: AnalyticsRepository
+) : BaseViewModel<EssentialsState, EssentialsAction, EssentialsEvent>(
+    EssentialsState(
+        selectedTab = savedState.get<String>("selectedTab")?.let {
+            runCatching { EssentialsTab.valueOf(it) }.getOrNull()
+        } ?: EssentialsTab.INFO,
+        expandedIds = savedState.get<List<String>>("expandedIds")?.toSet() ?: emptySet(),
+        reminderHidden = appPreferences.getString(REMINDER_HIDDEN_KEY) == "true",
+        // Route.EssentialModule(id) — Search opened one module.
+        focusModuleId = savedState.get<String>("id")
+    )
+) {
 
-    private var cachedEssentials: List<CityEssential> = emptyList()
-    private var cachedUtilities = emptyList<llc.bokadev.kompass.domain.model.Utility>()
-
-    override val initialState = EssentialsState()
+    private var cachedUtilities = emptyList<Utility>()
+    private var cachedEssentials: List<CityEssential>? = null
+    private var loadJob: Job? = null
 
     init {
-        load()
         startLocationRefresh()
+        // The language is changed from this tab's own header: re-localize what was built from it.
+        viewModelScope.launch {
+            appPreferences.selectedLanguageFlow.drop(1).collect { lang ->
+                cachedEssentials?.let { loaded -> updateState { it.withEssentials(loaded, lang) } }
+            }
+        }
     }
 
-    override fun onIntent(event: EssentialsEvent) {
-        when (event) {
-            is EssentialsEvent.SelectTab -> _state.update { it.copy(selectedTab = event.tab) }
-            is EssentialsEvent.ToggleItem -> toggleItem(event.id)
-            EssentialsEvent.Retry -> load()
+    override suspend fun onFirstStart() {
+        analytics.trackScreenView("essentials")
+        load()
+    }
+
+    override fun onAction(action: EssentialsAction) {
+        when (action) {
+            is EssentialsAction.SelectTab -> {
+                savedState["selectedTab"] = action.tab.name
+                updateState { it.copy(selectedTab = action.tab) }
+            }
+            is EssentialsAction.ToggleItem -> setExpanded(action.id, action.id !in state.value.expandedIds)
+            is EssentialsAction.ExpandItem -> setExpanded(action.id, true)
+            EssentialsAction.HideReminder -> {
+                appPreferences.setString(REMINDER_HIDDEN_KEY, "true")
+                updateState { it.copy(reminderHidden = true) }
+            }
+            EssentialsAction.Retry -> load()
+            EssentialsAction.OpenLanguage -> languageSheet.open()
+            is EssentialsAction.OpenUtilityMap ->
+                navigator.navigateTo(Route.UtilityMap(action.category?.name ?: ALL_CATEGORIES, action.selectedId))
+            is EssentialsAction.Dial -> sendEvent(EssentialsEvent.Launch(ExternalLaunch.Dial(action.number)))
+            is EssentialsAction.OpenLocation ->
+                sendEvent(EssentialsEvent.Launch(ExternalLaunch.Maps(action.latitude, action.longitude, action.title)))
+            is EssentialsAction.OpenLink -> sendEvent(EssentialsEvent.Launch(ExternalLaunch.Url(action.url)))
+            EssentialsAction.TurnOnLocation -> sendEvent(EssentialsEvent.Launch(ExternalLaunch.AppSettings))
+            EssentialsAction.Back -> navigator.navigateUp()
         }
     }
 
     private fun load() {
-        viewModelScope.launch {
-            _state.update { it.copy(isLoading = true, error = null) }
+        loadJob?.cancel()
+        loadJob = viewModelScope.launch {
+            updateState { it.copy(isLoading = it.groups.isEmpty() && it.sections.isEmpty()) }
+            val location = async { currentLocationOrNull() }
+            val essentials = async { getEssentials() }
+            val utilities = async { getUtilities() }
 
-            val currentLocation = runCatching { userLocationProvider.getCurrentLocation() }.getOrNull()
-            val origin = currentLocation ?: KOTOR_OLD_TOWN_CENTER
+            val currentLocation = location.await()
+            val essentialsResult = essentials.await()
+            val utilitiesResult = utilities.await()
+            cachedUtilities = utilitiesResult.getOrDefault(cachedUtilities)
+            val lang = appPreferences.getSelectedLanguage()
 
-            val essentialsResult = getEssentials()
-            val utilitiesResult = getUtilities()
+            val loaded = essentialsResult.getOrNull()
+            if (loaded != null) cachedEssentials = loaded
 
-            cachedEssentials = essentialsResult.getOrDefault(emptyList())
-            cachedUtilities = utilitiesResult.getOrDefault(emptyList())
-
-            val groupedEssentials = cachedEssentials.groupBy { it.category }
-            val sections = cachedUtilities
-                .filter { it.latitude != null && it.longitude != null }
-                .groupBy { it.category }
-                .mapNotNull { (category, items) ->
-                    buildUtilitySection(category, items, origin, currentLocation)
-                }
-                .sortedBy { it.category.orderIndex() }
-
-            val error = utilitiesResult.exceptionOrNull()?.message
-                ?: essentialsResult.exceptionOrNull()?.message
-
-            _state.update {
-                it.copy(
+            updateState { current ->
+                (loaded?.let { current.withEssentials(it, lang) } ?: current).copy(
                     isLoading = false,
-                    error = if (groupedEssentials.isEmpty() && sections.isEmpty()) error else null,
-                    groupedEssentials = groupedEssentials,
-                    sections = sections,
+                    essentialsFailed = loaded == null,
+                    sections = sectionsFor(currentLocation),
+                    utilitiesFailed = utilitiesResult.isFailure && cachedUtilities.isEmpty(),
                     currentLocation = currentLocation
                 )
             }
         }
     }
 
+    private fun EssentialsState.withEssentials(loaded: List<CityEssential>, lang: String) = copy(
+        priority = priorityOf(loaded, lang),
+        emergencyNumbers = emergencyNumbersOf(loaded, lang),
+        groups = groupsOf(loaded, lang)
+    )
+
+    private suspend fun currentLocationOrNull(): GeoPoint? =
+        if (!userLocationProvider.hasPermission()) null
+        else runCatching { userLocationProvider.getCurrentLocation() }.getOrNull()
+
     private fun startLocationRefresh() {
         viewModelScope.launch {
             while (true) {
                 delay(5_000L)
-                refreshLocationContext()
+                val location = currentLocationOrNull()
+                updateState { it.copy(currentLocation = location, sections = sectionsFor(location)) }
             }
         }
     }
 
-    private suspend fun refreshLocationContext() {
-        if (!userLocationProvider.hasPermission()) {
-            _state.update { current ->
-                if (current.currentLocation == null) current else current.copy(currentLocation = null)
-            }
-            return
-        }
-
-        val currentLocation = runCatching { userLocationProvider.getCurrentLocation() }.getOrNull()
-        val origin = currentLocation ?: KOTOR_OLD_TOWN_CENTER
-        val sections = cachedUtilities
+    /** Ranked from the device when known, else from Old Town (distances are hidden in that case). */
+    private fun sectionsFor(location: GeoPoint?): List<UtilityCategorySection> =
+        cachedUtilities
             .filter { it.latitude != null && it.longitude != null }
             .groupBy { it.category }
             .mapNotNull { (category, items) ->
-                buildUtilitySection(category, items, origin, currentLocation)
+                buildUtilitySection(category, items, location ?: KOTOR_OLD_TOWN_CENTER, location)
             }
             .sortedBy { it.category.orderIndex() }
 
-        _state.update {
-            it.copy(
-                groupedEssentials = if (cachedEssentials.isEmpty()) it.groupedEssentials else cachedEssentials.groupBy { essential -> essential.category },
-                sections = sections,
-                currentLocation = currentLocation
-            )
-        }
+    private fun setExpanded(id: String, expanded: Boolean) {
+        updateState { it.copy(expandedIds = if (expanded) it.expandedIds + id else it.expandedIds - id) }
+        savedState["expandedIds"] = state.value.expandedIds.toList()
     }
 
-    private fun toggleItem(id: String) {
-        _state.update {
-            val newExpanded = if (id in it.expandedIds) it.expandedIds - id else it.expandedIds + id
-            it.copy(expandedIds = newExpanded)
+    private fun priorityOf(all: List<CityEssential>, lang: String): CityEssential? =
+        all.filter { it.category == EssentialCategory.CUSTOMS && it.hasSubstance(lang) }.minByOrNull { it.sortOrder }
+
+    private fun emergencyNumbersOf(all: List<CityEssential>, lang: String): List<EmergencyNumber> =
+        all.filter { it.category == EssentialCategory.EMERGENCY }
+            .flatMap { parseEmergencyNumbers(it.localizedContent(lang)) }
+            .ifEmpty { BUNDLED_EMERGENCY_NUMBERS }
+
+    private fun groupsOf(all: List<CityEssential>, lang: String): List<EssentialGroup> =
+        EssentialGroupKind.entries.mapNotNull { kind ->
+            all.filter { it.category == kind.category && it.hasSubstance(lang) }
+                .sortedBy { it.sortOrder }
+                .takeIf { it.isNotEmpty() }
+                ?.let { EssentialGroup(kind, it) }
         }
-    }
 }
+
+/** Local, per-device preference: the arrival reminder card is hidden. Not a registration status. */
+internal const val REMINDER_HIDDEN_KEY = "essentials_arrival_reminder_hidden"

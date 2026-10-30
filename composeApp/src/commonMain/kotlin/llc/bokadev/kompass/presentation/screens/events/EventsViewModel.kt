@@ -1,119 +1,136 @@
 package llc.bokadev.kompass.presentation.screens.events
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import llc.bokadev.kompass.core.presentation.base.BaseViewModel
+import llc.bokadev.kompass.core.presentation.mvi.BaseViewModel
+import llc.bokadev.kompass.core.presentation.mvi.Navigator
+import llc.bokadev.kompass.core.presentation.mvi.UiText
+import llc.bokadev.kompass.domain.model.EventFilter
 import llc.bokadev.kompass.domain.model.EventFilterKind
+import llc.bokadev.kompass.domain.repository.AnalyticsRepository
 import llc.bokadev.kompass.domain.usecase.GetEventFiltersUseCase
 import llc.bokadev.kompass.domain.usecase.GetEventsUseCase
+import llc.bokadev.kompass.presentation.navigation.Route
 
 class EventsViewModel(
     private val getEvents: GetEventsUseCase,
-    private val getEventFilters: GetEventFiltersUseCase
-) : BaseViewModel<EventsState, EventsEvent>() {
+    private val getEventFilters: GetEventFiltersUseCase,
+    private val savedState: SavedStateHandle,
+    private val navigator: Navigator,
+    private val analytics: AnalyticsRepository
+) : BaseViewModel<EventsState, EventsAction, Nothing>(
+    EventsState(
+        selectedDateFilter = savedState["selectedDateFilter"] ?: ALL_DATES,
+        selectedTypeFilter = savedState["selectedTypeFilter"] ?: ALL_TYPES
+    )
+) {
 
-    override val initialState = EventsState()
+    /** One request at a time: a newer filter or retry cancels the older one, so it can't overwrite it. */
+    private var loadJob: Job? = null
 
-    private var loadEventsJob: Job? = null
+    override suspend fun onFirstStart() {
+        analytics.trackScreenView("events")
+        loadAll()
+    }
 
-    init { loadInitialData() }
-
-    override fun onIntent(event: EventsEvent) {
-        when (event) {
-            EventsEvent.Retry -> loadInitialData()
-            is EventsEvent.SelectDateFilter -> {
-                _state.update { it.copy(selectedDateFilter = event.value) }
-                loadEvents()
+    override fun onAction(action: EventsAction) {
+        when (action) {
+            EventsAction.Retry -> loadAll()
+            is EventsAction.SelectDateFilter -> {
+                savedState["selectedDateFilter"] = action.key
+                updateState { it.copy(selectedDateFilter = action.key) }
+                reloadForFilters()
             }
-            is EventsEvent.SelectTypeFilter -> {
-                _state.update { it.copy(selectedTypeFilter = event.value) }
-                loadEvents()
+            is EventsAction.SelectTypeFilter -> {
+                savedState["selectedTypeFilter"] = action.key
+                updateState { it.copy(selectedTypeFilter = action.key) }
+                reloadForFilters()
             }
-        }
-    }
-
-    private fun loadInitialData() {
-        viewModelScope.launch {
-            _state.update { it.copy(isLoading = true, error = null) }
-
-            getEventFilters()
-                .onSuccess { filters ->
-                    val dateFilters = filters
-                        .filter { filter -> filter.kind == EventFilterKind.DATE }
-                        .sortedBy { filter -> filter.sortOrder }
-                    val typeFilters = filters
-                        .filter { filter -> filter.kind == EventFilterKind.TYPE }
-                        .sortedBy { filter -> filter.sortOrder }
-
-                    val selectedDateKey = resolveSelectedKey(
-                        currentKey = state.value.selectedDateFilter,
-                        filters = dateFilters,
-                        fallbackKey = "all_dates"
+            EventsAction.ResetFilters -> {
+                savedState["selectedDateFilter"] = ALL_DATES
+                savedState["selectedTypeFilter"] = ALL_TYPES
+                updateState {
+                    it.copy(
+                        selectedDateFilter = resolveSelectedKey(ALL_DATES, it.dateFilters, ALL_DATES),
+                        selectedTypeFilter = resolveSelectedKey(ALL_TYPES, it.typeFilters, ALL_TYPES)
                     )
-                    val selectedTypeKey = resolveSelectedKey(
-                        currentKey = state.value.selectedTypeFilter,
-                        filters = typeFilters,
-                        fallbackKey = "all_types"
+                }
+                reloadForFilters()
+            }
+            is EventsAction.OpenEvent -> {
+                analytics.trackEventView(action.id, contentOrigin = "events_screen")
+                navigator.navigateTo(Route.EventDetail(action.id))
+            }
+            EventsAction.Back -> navigator.navigateUp()
+        }
+    }
+
+    /** Filters and events. Existing events stay on screen while retrying. */
+    private fun loadAll() {
+        loadJob?.cancel()
+        loadJob = viewModelScope.launch {
+            updateState {
+                val hasContent = it.events.isNotEmpty() || it.dateFilters.isNotEmpty()
+                it.copy(isLoading = !hasContent, isRefreshing = hasContent, error = null, refreshFailed = false)
+            }
+            // Missing filters only hide the filter rows; they never block the events themselves.
+            getEventFilters().onSuccess { filters ->
+                val dateFilters = filters.filter { it.kind == EventFilterKind.DATE }.sortedBy { it.sortOrder }
+                val typeFilters = filters.filter { it.kind == EventFilterKind.TYPE }.sortedBy { it.sortOrder }
+                updateState {
+                    it.copy(
+                        dateFilters = dateFilters,
+                        typeFilters = typeFilters,
+                        selectedDateFilter = resolveSelectedKey(it.selectedDateFilter, dateFilters, ALL_DATES),
+                        selectedTypeFilter = resolveSelectedKey(it.selectedTypeFilter, typeFilters, ALL_TYPES)
                     )
-
-                    _state.update {
-                        it.copy(
-                            dateFilters = dateFilters,
-                            typeFilters = typeFilters,
-                            selectedDateFilter = selectedDateKey,
-                            selectedTypeFilter = selectedTypeKey
-                        )
-                    }
                 }
-                .onFailure { err ->
-                    _state.update { it.copy(isLoading = false, error = err.message) }
-                    return@launch
-                }
-
-            getEvents(
-                dateFilter = state.value.selectedDateFilter,
-                eventType = selectedTypeFilterValue()
-            )
-                .onSuccess { events ->
-                    _state.update { it.copy(isLoading = false, events = events) }
-                }
-                .onFailure { err ->
-                    _state.update { it.copy(isLoading = false, error = err.message) }
-                }
+            }
+            fetchEvents()
         }
     }
 
-    private fun loadEvents() {
-        loadEventsJob?.cancel()
-        loadEventsJob = viewModelScope.launch {
-            _state.update { it.copy(isLoading = true, error = null) }
-            getEvents(
-                dateFilter = state.value.selectedDateFilter,
-                eventType = selectedTypeFilterValue()
-            )
-                .onSuccess { events -> _state.update { it.copy(isLoading = false, events = events) } }
-                .onFailure { err -> _state.update { it.copy(isLoading = false, error = err.message) } }
+    /** The previous filter's events would be wrong here, so they're cleared while the new ones load. */
+    private fun reloadForFilters() {
+        loadJob?.cancel()
+        loadJob = viewModelScope.launch {
+            updateState { it.copy(events = emptyList(), isRefreshing = true, error = null, refreshFailed = false) }
+            fetchEvents()
         }
     }
 
-    private fun selectedTypeFilterValue(): String {
-        return state.value.typeFilters
-            .firstOrNull { it.key == state.value.selectedTypeFilter }
-            ?.value
-            ?: "all"
+    private suspend fun fetchEvents() {
+        val current = state.value
+        getEvents(dateFilter = current.selectedDateFilter, eventType = selectedTypeFilterValue())
+            .onSuccess { events ->
+                updateState { it.copy(isLoading = false, isRefreshing = false, error = null, refreshFailed = false, events = events) }
+            }
+            .onFailure {
+                updateState {
+                    val hasEvents = it.events.isNotEmpty()
+                    it.copy(
+                        isLoading = false,
+                        isRefreshing = false,
+                        error = if (hasEvents) null else LOAD_FAILED,
+                        refreshFailed = hasEvents
+                    )
+                }
+            }
     }
 
-    private fun resolveSelectedKey(
-        currentKey: String,
-        filters: List<llc.bokadev.kompass.domain.model.EventFilter>,
-        fallbackKey: String
-    ): String {
-        return when {
-            filters.any { it.key == currentKey } -> currentKey
-            filters.any { it.key == fallbackKey } -> fallbackKey
-            else -> filters.firstOrNull()?.key ?: currentKey
-        }
+    private fun selectedTypeFilterValue(): String =
+        state.value.typeFilters.firstOrNull { it.key == state.value.selectedTypeFilter }?.value ?: "all"
+
+    private fun resolveSelectedKey(currentKey: String, filters: List<EventFilter>, fallbackKey: String): String = when {
+        filters.isEmpty() -> currentKey
+        filters.any { it.key == currentKey } -> currentKey
+        filters.any { it.key == fallbackKey } -> fallbackKey
+        else -> filters.first().key
+    }
+
+    private companion object {
+        val LOAD_FAILED = UiText { it.states.couldntLoadEvents }
     }
 }

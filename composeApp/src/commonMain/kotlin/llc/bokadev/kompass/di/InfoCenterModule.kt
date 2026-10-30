@@ -13,6 +13,6 @@ val infoCenterModule = module {
     single<InfoCenterRepository> { InfoCenterRepositoryImpl(get(), get()) }
     factory { GetCurrentInfoNoticesUseCase(get()) }
     factory { GetInfoNoticeByIdUseCase(get()) }
-    viewModel { InfoCenterViewModel(get()) }
-    viewModel { (id: String) -> InfoCenterDetailViewModel(id, get()) }
+    viewModel { InfoCenterViewModel(get(), get(), get()) }
+    viewModel { (id: String) -> InfoCenterDetailViewModel(id, get(), get()) }
 }

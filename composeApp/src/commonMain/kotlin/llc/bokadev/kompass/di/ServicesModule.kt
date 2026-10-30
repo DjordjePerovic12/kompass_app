@@ -13,6 +13,6 @@ val servicesModule = module {
     single<ServiceRepository> { ServiceRepositoryImpl(get()) }
     factory { GetServicesUseCase(get()) }
     factory { GetServiceByIdUseCase(get()) }
-    viewModel { ServicesViewModel(get()) }
-    viewModel { (id: String) -> ServiceDetailViewModel(id, get()) }
+    viewModel { ServicesViewModel(get(), get(), get()) }
+    viewModel { (id: String) -> ServiceDetailViewModel(id, get(), get(), get()) }
 }

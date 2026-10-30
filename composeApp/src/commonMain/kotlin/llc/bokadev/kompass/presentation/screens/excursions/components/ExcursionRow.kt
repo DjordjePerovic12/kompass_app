@@ -1,0 +1,71 @@
+package llc.bokadev.kompass.presentation.screens.excursions.components
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
+import llc.bokadev.kompass.core.util.buildPhotoUrl
+import llc.bokadev.kompass.core.util.currentAppLanguage
+import llc.bokadev.kompass.core.util.rememberAppStrings
+import llc.bokadev.kompass.domain.model.BestTime
+import llc.bokadev.kompass.domain.model.Excursion
+import llc.bokadev.kompass.domain.model.Place
+import llc.bokadev.kompass.domain.model.PlaceCategory
+import llc.bokadev.kompass.presentation.screens.home.components.BookmarkIcon
+import llc.bokadev.kompass.presentation.theme.LamplightTheme
+import llc.bokadev.kompass.presentation.theme.LamplightType
+
+/** One Worth the Drive (or related-activity) row: photo, type, name, outing metadata and a save button. */
+@Composable
+fun ExcursionRow(entry: Excursion, saved: Boolean, onFavorite: () -> Unit, onClick: () -> Unit) {
+    val colors = LamplightTheme.colors
+    val app = rememberAppStrings()
+    val strings = app.excursions
+    val language = currentAppLanguage()
+    val name = entry.place?.localizedName(language) ?: entry.activity!!.localizedName(language)
+    Column(Modifier.fillMaxWidth()) {
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(Modifier.weight(1f).clickable(onClick = onClick).padding(vertical = 8.dp), horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+                entry.photo?.let { photo ->
+                    AsyncImage(buildPhotoUrl(photo), contentDescription = null, contentScale = ContentScale.Crop,
+                        modifier = Modifier.size(width = 96.dp, height = 112.dp).background(colors.surfaceMuted))
+                }
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(if (entry.place != null) strings.place else strings.activity, color = colors.lamp, style = LamplightType.body())
+                    Text(name, color = colors.textPrimary, style = LamplightType.sectionTitleS())
+                    val metadata = listOfNotNull(entry.timeBand, entry.planningLevel).map(strings::label).filter(String::isNotBlank)
+                    if (metadata.isNotEmpty()) Text(metadata.joinToString(" · "), color = colors.textSecondary, style = LamplightType.body())
+                }
+            }
+            val saveLabel = (if (saved) app.redesign.removeTitleFromSaved else app.redesign.saveTitle).replace("{title}", name)
+            IconButton(onClick = onFavorite, modifier = Modifier.size(48.dp).semantics { contentDescription = saveLabel }) {
+                BookmarkIcon(filled = saved, color = if (saved) colors.lamp else colors.textSecondary, size = 20.dp)
+            }
+        }
+        HorizontalDivider(color = colors.divider, modifier = Modifier.padding(top = 14.dp))
+    }
+}
+
+@Preview
+@Composable
+private fun ExcursionRowPreview() {
+    val lovcen = Place(
+        id = "lovcen", cityId = "kotor", name = mapOf("en" to "Lovćen Mausoleum"), description = emptyMap(),
+        longDescription = emptyMap(), localsTip = emptyMap(), category = PlaceCategory.SEE_AND_VISIT, subCategory = null,
+        priceIndicator = null, latitude = 42.3995, longitude = 18.8378, zone = "lovcen", tags = emptyList(),
+        bestTime = BestTime.MORNING, estimatedDuration = null, openingHours = null, menuUrl = null, bookingPhone = null,
+        photos = emptyList(), audioFile = null, audioAccessTier = "free", detailAccessTier = "free",
+        isMustSee = false, isActive = true, sortOrder = 0
+    )
+    ExcursionRow(Excursion("lovcen", place = lovcen, timeBand = "half_day"), saved = false, onFavorite = {}, onClick = {})
+}

@@ -1,48 +1,52 @@
 package llc.bokadev.kompass.presentation.screens.services
 
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import llc.bokadev.kompass.core.presentation.base.BaseEvent
-import llc.bokadev.kompass.core.presentation.base.BaseState
-import llc.bokadev.kompass.core.presentation.base.BaseViewModel
-import llc.bokadev.kompass.domain.model.Service
+import llc.bokadev.kompass.core.presentation.mvi.BaseViewModel
+import llc.bokadev.kompass.core.presentation.mvi.Navigator
+import llc.bokadev.kompass.core.presentation.mvi.UiText
+import llc.bokadev.kompass.domain.repository.AnalyticsRepository
 import llc.bokadev.kompass.domain.usecase.GetServicesUseCase
-
-data class ServicesState(
-    override val isLoading: Boolean = true,
-    override val error: String? = null,
-    val services: List<Service> = emptyList()
-) : BaseState()
-
-sealed interface ServicesEvent : BaseEvent {
-    data object Retry : ServicesEvent
-}
+import llc.bokadev.kompass.presentation.navigation.Route
 
 class ServicesViewModel(
-    private val getServices: GetServicesUseCase
-) : BaseViewModel<ServicesState, ServicesEvent>() {
+    private val getServices: GetServicesUseCase,
+    private val navigator: Navigator,
+    private val analytics: AnalyticsRepository
+) : BaseViewModel<ServicesState, ServicesAction, Nothing>(ServicesState()) {
 
-    override val initialState = ServicesState()
+    private var loadJob: Job? = null
 
-    init { load() }
+    override suspend fun onFirstStart() {
+        analytics.trackScreenView("services")
+        load()
+    }
 
-    override fun onIntent(event: ServicesEvent) {
-        when (event) {
-            ServicesEvent.Retry -> load()
+    override fun onAction(action: ServicesAction) {
+        when (action) {
+            ServicesAction.Retry -> load()
+            ServicesAction.Back -> navigator.navigateUp()
+            is ServicesAction.OpenService -> navigator.navigateTo(Route.ServiceDetail(action.id))
         }
     }
 
+    /** Keeps what's on screen while retrying; a newer load cancels an older one. */
     private fun load() {
-        viewModelScope.launch {
-            _state.update { it.copy(isLoading = true, error = null) }
+        loadJob?.cancel()
+        loadJob = viewModelScope.launch {
+            updateState { it.copy(isLoading = it.services.isEmpty(), error = null, refreshFailed = false) }
             getServices()
-                .onSuccess { services ->
-                    _state.update { it.copy(isLoading = false, services = services) }
-                }
-                .onFailure { err ->
-                    _state.update { it.copy(isLoading = false, error = err.message) }
+                .onSuccess { items -> updateState { it.copy(isLoading = false, services = items) } }
+                .onFailure {
+                    updateState {
+                        it.copy(isLoading = false, error = if (it.services.isEmpty()) LOAD_FAILED else null, refreshFailed = it.services.isNotEmpty())
+                    }
                 }
         }
+    }
+
+    private companion object {
+        val LOAD_FAILED = UiText { it.states.couldntLoadServices }
     }
 }

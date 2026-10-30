@@ -15,20 +15,26 @@ class GetNearbyPlacesUseCase(
 ) {
     suspend operator fun invoke(
         origin: GeoPoint,
-        limit: Int? = null
+        limit: Int? = null,
+        category: PlaceCategory? = null,
+        maxDistanceKm: Double? = null
     ): Result<List<NearbyPlace>> = repository.getActivePlaces().mapCatching { places ->
-        val sorted = places
+        val filtered = places
             .asSequence()
+            .filter { category == null || it.category == category }
+            // Destination overviews are editorial introductions, not nearby attractions.
+            .filterNot { it.isDestinationOverview }
             .map { place ->
                 NearbyPlace(
                     place = place,
                     distanceKm = haversineDistanceKm(origin, GeoPoint(place.latitude, place.longitude))
                 )
             }
-            .sortedBy { it.distanceKm }
+            .filter { maxDistanceKm == null || it.distanceKm <= maxDistanceKm }
+            .sortedWith(compareBy<NearbyPlace> { it.distanceKm }.thenBy { it.place.id })
             .toList()
 
-        if (limit == null) sorted else sorted.take(limit)
+        if (limit == null) filtered else filtered.take(limit)
     }
 
     private fun haversineDistanceKm(from: GeoPoint, to: GeoPoint): Double {

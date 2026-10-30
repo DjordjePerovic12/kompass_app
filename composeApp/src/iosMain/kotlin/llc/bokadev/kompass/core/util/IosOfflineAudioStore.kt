@@ -28,13 +28,26 @@ class IosOfflineAudioStore : OfflineAudioStore {
 
     override fun persist(cacheKey: String, bytes: ByteArray): Result<String> = runCatching {
         val path = filePath(cacheKey)
-        val file = fopen(path, "wb") ?: error("Audio could not be cached.")
-        bytes.usePinned {
-            val written = fwrite(it.addressOf(0), 1.convert(), bytes.size.convert(), file)
-            check(written.toLong() == bytes.size.toLong()) { "Audio could not be cached." }
+        val partial = "$path.part"
+        val file = fopen(partial, "wb") ?: error("Audio could not be cached.")
+        try {
+            if (bytes.isNotEmpty()) bytes.usePinned {
+                val written = fwrite(it.addressOf(0), 1.convert(), bytes.size.convert(), file)
+                check(written.toLong() == bytes.size.toLong()) { "Audio could not be cached." }
+            }
+        } finally {
+            fclose(file)
         }
-        fclose(file)
+        val manager = NSFileManager.defaultManager
+        if (manager.fileExistsAtPath(path)) manager.removeItemAtPath(path, null)
+        check(manager.moveItemAtPath(partial, path, null)) { "Audio could not be cached." }
         NSURL.fileURLWithPath(path).absoluteString ?: path
+    }
+
+    override fun remove(cacheKey: String): Boolean {
+        val path = filePath(cacheKey)
+        val manager = NSFileManager.defaultManager
+        return !manager.fileExistsAtPath(path) || manager.removeItemAtPath(path, null)
     }
 
     private fun filePath(cacheKey: String): String {

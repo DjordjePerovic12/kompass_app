@@ -1,46 +1,57 @@
 package llc.bokadev.kompass.presentation.screens.infocenter
 
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import llc.bokadev.kompass.core.presentation.base.BaseEvent
-import llc.bokadev.kompass.core.presentation.base.BaseState
-import llc.bokadev.kompass.core.presentation.base.BaseViewModel
-import llc.bokadev.kompass.domain.model.InfoNotice
+import llc.bokadev.kompass.core.presentation.mvi.BaseViewModel
+import llc.bokadev.kompass.core.presentation.mvi.Navigator
+import llc.bokadev.kompass.core.presentation.mvi.UiText
+import llc.bokadev.kompass.domain.repository.AnalyticsRepository
 import llc.bokadev.kompass.domain.usecase.GetCurrentInfoNoticesUseCase
-
-data class InfoCenterState(
-    override val isLoading: Boolean = true,
-    override val error: String? = null,
-    val notices: List<InfoNotice> = emptyList()
-) : BaseState()
-
-sealed interface InfoCenterEvent : BaseEvent {
-    data object Retry : InfoCenterEvent
-}
+import llc.bokadev.kompass.presentation.navigation.Route
 
 class InfoCenterViewModel(
-    private val getCurrentInfoNotices: GetCurrentInfoNoticesUseCase
-) : BaseViewModel<InfoCenterState, InfoCenterEvent>() {
+    private val getCurrentInfoNotices: GetCurrentInfoNoticesUseCase,
+    private val navigator: Navigator,
+    private val analytics: AnalyticsRepository
+) : BaseViewModel<InfoCenterState, InfoCenterAction, Nothing>(InfoCenterState()) {
 
-    override val initialState = InfoCenterState()
+    private var loadJob: Job? = null
 
-    init {
+    override suspend fun onFirstStart() {
+        analytics.trackScreenView("info_center")
         load()
     }
 
-    override fun onIntent(event: InfoCenterEvent) {
-        when (event) {
-            InfoCenterEvent.Retry -> load()
+    override fun onAction(action: InfoCenterAction) {
+        when (action) {
+            InfoCenterAction.Retry -> load()
+            InfoCenterAction.Back -> navigator.navigateUp()
+            is InfoCenterAction.OpenNotice -> {
+                state.value.notices.firstOrNull { it.id == action.id }?.let {
+                    analytics.trackInfoNoticeView(noticeId = it.id, cityId = it.cityId, contentOrigin = "info_center")
+                }
+                navigator.navigateTo(Route.InfoCenterDetail(action.id))
+            }
         }
     }
 
+    /** Keeps what's on screen while retrying; a newer load cancels an older one. */
     private fun load() {
-        viewModelScope.launch {
-            _state.update { it.copy(isLoading = true, error = null) }
+        loadJob?.cancel()
+        loadJob = viewModelScope.launch {
+            updateState { it.copy(isLoading = it.notices.isEmpty(), error = null, refreshFailed = false) }
             getCurrentInfoNotices()
-                .onSuccess { notices -> _state.update { it.copy(isLoading = false, notices = notices) } }
-                .onFailure { err -> _state.update { it.copy(isLoading = false, error = err.message) } }
+                .onSuccess { items -> updateState { it.copy(isLoading = false, notices = items) } }
+                .onFailure {
+                    updateState {
+                        it.copy(isLoading = false, error = if (it.notices.isEmpty()) LOAD_FAILED else null, refreshFailed = it.notices.isNotEmpty())
+                    }
+                }
         }
+    }
+
+    private companion object {
+        val LOAD_FAILED = UiText { it.states.couldntLoadUpdates }
     }
 }

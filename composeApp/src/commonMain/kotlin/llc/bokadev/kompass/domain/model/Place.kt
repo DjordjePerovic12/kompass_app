@@ -33,6 +33,12 @@ data class Place(
     val isActive: Boolean,
     val sortOrder: Int
 ) {
+    /**
+     * An editorial introduction to a whole destination (e.g. Kotor, Perast), marked in the CMS by
+     * `sub_category = destination_overview`. Never a nearby attraction with a proximity label.
+     */
+    val isDestinationOverview: Boolean get() = subCategory?.trim()?.lowercase() == DESTINATION_OVERVIEW
+
     fun localizedName(lang: String): String = name[lang] ?: name["en"] ?: ""
     fun localizedDescription(lang: String): String = description[lang] ?: description["en"] ?: ""
     fun localizedLongDescription(lang: String): String = longDescription[lang] ?: longDescription["en"] ?: ""
@@ -45,3 +51,5 @@ data class Place(
             !localizedDeepAudioFile(lang).isNullOrBlank() ||
             deepPhotos.isNotEmpty()
 }
+
+const val DESTINATION_OVERVIEW = "destination_overview"
