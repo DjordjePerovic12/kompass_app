@@ -36,6 +36,7 @@ val appModule = module {
     }
     includes(
         platformModule,
+        stringProviderModule,
         networkModule,
         placeModule,
         excursionModule,

@@ -152,6 +152,7 @@ Top-level: Eat & Drink, See & Visit, Activities, Hidden Gems, Practical. Sub-fil
 - All DTOs in data/remote/, mapped to domain via extension functions in data/mapper/
 - Never expose Supabase types above data layer
 - All user-visible strings from translations jsonb, never hardcoded English
+- UI strings live in `composeResources/values{,-fr,-de,-es,-tr}/strings.xml` (keys `<group>_<field>`, `%1$s` args named in an `<!-- args: -->` comment); read them with `stringResource(Res.string.x)` in UI and `StringProvider` in ViewModels. The Kotlin `AppStrings` tables in `core/utils/*Strings.kt` remain only until every screen is migrated; never add to them
 - Repository interfaces in domain/, implementations in data/
 - Use cases: single-purpose, `operator fun invoke()`
 - Koin modules per feature, registered in root appModule

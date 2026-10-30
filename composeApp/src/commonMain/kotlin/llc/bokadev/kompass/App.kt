@@ -19,6 +19,9 @@ fun App() {
         }
     }
 
+    // AppEnvironment (core/utils/AppLocale.kt) gets wired here with the first screen that reads
+    // Res.string: the template version re-creates the UI on a language change, which would reset
+    // the selected tab; until then strings come from AppStrings and need no locale override.
     KompassTheme {
         KompassAppNavigation(isFirstLaunch = prefs.isFirstLaunch())
     }

@@ -15,8 +15,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import llc.bokadev.kompass.core.utils.rememberAppStrings
 import llc.bokadev.kompass.presentation.shared.StateMessage
+import kompass.composeapp.generated.resources.Res
+import kompass.composeapp.generated.resources.retry
 import org.jetbrains.compose.resources.stringResource
 import llc.bokadev.kompass.ui.theme.KompassTheme
 
@@ -95,7 +96,7 @@ fun BaseContentView(
                 ) {
                     StateMessage(
                         text = stringResource(error.messageRes),
-                        actionLabel = rememberAppStrings().retry,
+                        actionLabel = stringResource(Res.string.retry),
                         onAction = onRetry
                     )
                 }
