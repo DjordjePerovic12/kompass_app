@@ -2,33 +2,11 @@ package llc.bokadev.kompass.testutil
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
-import llc.bokadev.kompass.core.presentation.mvi.NavigationCommand
-import llc.bokadev.kompass.core.presentation.mvi.Navigator
 import llc.bokadev.kompass.domain.repository.AnalyticsRepository
 import llc.bokadev.kompass.core.components.BottomTab
 import llc.bokadev.kompass.core.navigation.Screen
 import androidx.navigation.NavOptionsBuilder
 import llc.bokadev.kompass.core.navigation.utils.NavType
-
-/** Records what a ViewModel asked the Navigator to do, synchronously. */
-class RecordingNavigator : Navigator {
-    val recorded = mutableListOf<NavigationCommand>()
-
-    override fun navigateTo(route: Screen, popUpToRoute: Screen?, popUpToInclusive: Boolean, isSingleTop: Boolean, restoreState: Boolean) {
-        recorded += NavigationCommand.NavigateTo(route, popUpToRoute, popUpToInclusive, isSingleTop, restoreState)
-    }
-
-    override fun navigateUp() {
-        recorded += NavigationCommand.NavigateUp
-    }
-
-    override fun switchTab(tab: BottomTab) {
-        recorded += NavigationCommand.SwitchTab(tab)
-    }
-
-    /** Routes from navigateTo, in order. */
-    val routes: List<Screen> get() = recorded.filterIsInstance<NavigationCommand.NavigateTo>().map { it.route }
-}
 
 /** Records calls to the template Navigator (core.navigation.utils) in order. */
 class FakeNavigator : llc.bokadev.kompass.core.navigation.utils.Navigator {
