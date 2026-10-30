@@ -1,9 +1,8 @@
 @file:OptIn(ExperimentalTime::class)
 
-package llc.bokadev.kompass.presentation.screens.eventdetail
+package llc.bokadev.kompass.presentation.eventdetail
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,14 +19,22 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kompass.composeapp.generated.resources.Res
+import kompass.composeapp.generated.resources.detail_back
+import kompass.composeapp.generated.resources.detail_open_in_maps
+import kompass.composeapp.generated.resources.detail_where_it_is
+import kompass.composeapp.generated.resources.events_price
+import kompass.composeapp.generated.resources.events_tickets
+import kompass.composeapp.generated.resources.events_time
+import kompass.composeapp.generated.resources.events_until
+import kompass.composeapp.generated.resources.events_venue
 import kotlinx.datetime.toLocalDateTime
-import llc.bokadev.kompass.core.presentation.mvi.BaseContentView
-import llc.bokadev.kompass.core.utils.AppStrings
 import llc.bokadev.kompass.core.utils.buildPhotoUrl
-import llc.bokadev.kompass.core.utils.currentAppLanguage
-import llc.bokadev.kompass.core.utils.rememberAppStrings
+import llc.bokadev.kompass.core.utils.LocalAppLocale
+import llc.bokadev.kompass.core.utils.appStringsFor
 import llc.bokadev.kompass.core.utils.toDayLabel
 import llc.bokadev.kompass.core.utils.toTitleCaseLabel
 import llc.bokadev.kompass.core.utils.uppercaseFor
@@ -37,59 +44,55 @@ import llc.bokadev.kompass.domain.model.GeoPoint
 import llc.bokadev.kompass.domain.model.window
 import llc.bokadev.kompass.presentation.screens.placedetail.components.DetailGlyph
 import llc.bokadev.kompass.presentation.screens.placedetail.components.DetailHero
-import llc.bokadev.kompass.presentation.screens.placedetail.components.DetailLoadState
 import llc.bokadev.kompass.presentation.screens.placedetail.components.DetailPillButton
 import llc.bokadev.kompass.presentation.screens.placedetail.components.DetailPracticalRow
 import llc.bokadev.kompass.presentation.screens.placedetail.components.DetailPracticalRows
 import llc.bokadev.kompass.presentation.screens.placedetail.components.DetailTextSection
 import llc.bokadev.kompass.presentation.screens.placedetail.components.DetailWhereItIs
-import llc.bokadev.kompass.presentation.shared.StatusBarIconsEffect
-import kotlin.time.ExperimentalTime
 import llc.bokadev.kompass.ui.theme.KompassTheme
 import llc.bokadev.kompass.ui.theme.pageGradientBackground
+import org.jetbrains.compose.resources.stringResource
+import kotlin.time.ExperimentalTime
 
 /**
  * Event detail in the shared detail language: when, where and price first, then the official
  * ticket link, then the description and map. Times are Kotor time; sections show only with data.
+ * The shared detail components still take the AppStrings tables until they are migrated.
  */
-@Composable
-fun EventDetailScreenContent(state: EventDetailState, currentLocation: GeoPoint?, onAction: (EventDetailAction) -> Unit) {
-    StatusBarIconsEffect(lightIcons = true)
-    val strings = rememberAppStrings()
-    val retry = { onAction(EventDetailAction.Retry) }
-    val back = { onAction(EventDetailAction.Back) }
-    BaseContentView(
-        state = state,
-        onRetry = retry,
-        modifier = Modifier.pageGradientBackground(),
-        loading = { DetailLoadState(null, strings.retry, strings.detail.back, retry, back) },
-        error = { message -> DetailLoadState(message, strings.retry, strings.detail.back, retry, back) }
-    ) {
-        state.event?.let { Body(it, currentLocation, strings, onAction) }
-    }
-}
-
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-private fun Body(event: Event, currentLocation: GeoPoint?, strings: AppStrings, onAction: (EventDetailAction) -> Unit) {
+fun EventDetailScreenContent(
+    modifier: Modifier = Modifier,
+    state: EventDetailState,
+    currentLocation: GeoPoint?,
+    onBackClick: () -> Unit,
+    onTicketsClick: () -> Unit,
+    onMapsClick: () -> Unit
+) {
+    val event = state.event ?: return
+    // Language from the composition (AppEnvironment), not Koin, so the content stays previewable.
+    val lang = LocalAppLocale.current.substringBefore('-')
+    val strings = appStringsFor(lang)
     val colors = KompassTheme.colors
-    val lang = currentAppLanguage()
     val density = LocalDensity.current
     val name = event.localizedName(lang)
     val venue = event.localizedVenue(lang).trim().takeIf { it.isNotBlank() }
-    val e = strings.events
+    val timeLabel = stringResource(Res.string.events_time)
+    val venueLabel = stringResource(Res.string.events_venue)
+    val priceLabel = stringResource(Res.string.events_price)
+    val untilTemplate = stringResource(Res.string.events_until, "{date}")
     val screenHeight = with(density) { LocalWindowInfo.current.containerSize.height.toDp() }
 
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
+    Column(modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
         DetailHero(
             photoUrls = event.photos.map(::buildPhotoUrl),
             height = (screenHeight * 0.36f).coerceIn(240.dp, 380.dp),
             isSaved = false,
-            backLabel = strings.detail.back,
+            backLabel = stringResource(Res.string.detail_back),
             saveLabel = "",
             savedStateLabel = "",
             photoOfLabel = strings.detail.photoOf,
-            onBack = { onAction(EventDetailAction.Back) },
+            onBack = onBackClick,
             onToggleSave = null
         )
         Column(
@@ -108,33 +111,33 @@ private fun Body(event: Event, currentLocation: GeoPoint?, strings: AppStrings, 
         }
         DetailPracticalRows(
             fullWidth = listOfNotNull(
-                event.whenLabel(lang, e.until)?.let { DetailPracticalRow(DetailGlyph.Clock, e.time, it) },
-                venue?.let { DetailPracticalRow(DetailGlyph.Landmark, e.venue, it) },
-                event.price?.trim()?.takeIf { it.isNotBlank() }?.let { DetailPracticalRow(DetailGlyph.Price, e.price, it) }
+                event.whenLabel(lang, untilTemplate)?.let { DetailPracticalRow(DetailGlyph.Clock, timeLabel, it) },
+                venue?.let { DetailPracticalRow(DetailGlyph.Landmark, venueLabel, it) },
+                event.price?.trim()?.takeIf { it.isNotBlank() }?.let { DetailPracticalRow(DetailGlyph.Price, priceLabel, it) }
             ),
             paired = emptyList(),
             lang = lang
         )
         event.ticketUrl?.trim()?.takeIf { it.isNotBlank() }?.let {
             DetailPillButton(
-                label = e.tickets,
+                label = stringResource(Res.string.events_tickets),
                 glyph = DetailGlyph.ArrowUpRight,
                 filled = true,
                 height = 56.dp,
-                onClick = { onAction(EventDetailAction.OpenTickets) },
+                onClick = onTicketsClick,
                 modifier = Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, top = 20.dp)
             )
         }
         DetailTextSection(event.localizedDescription(lang).trim(), strings.detail)
         if (event.latitude != 0.0 || event.longitude != 0.0) {
             DetailWhereItIs(
-                title = strings.detail.whereItIs,
+                title = stringResource(Res.string.detail_where_it_is),
                 name = venue ?: name,
                 destination = GeoPoint(event.latitude, event.longitude),
                 currentLocation = currentLocation,
                 areaLabel = venue,
-                openInMapsLabel = strings.detail.openInMaps,
-                onOpenMaps = { onAction(EventDetailAction.OpenMaps) }
+                openInMapsLabel = stringResource(Res.string.detail_open_in_maps),
+                onOpenMaps = onMapsClick
             )
         }
         Spacer(Modifier.height(26.dp))
@@ -160,3 +163,34 @@ internal fun Event.whenLabel(lang: String, untilTemplate: String): String? {
 
 private fun kotlinx.datetime.LocalTime.clock() = "${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}"
 
+@Preview
+@Composable
+private fun EventDetailScreenContentPreview() {
+    KompassTheme {
+        EventDetailScreenContent(
+            modifier = Modifier.pageGradientBackground(),
+            state = EventDetailState(
+                isLoading = false,
+                event = Event(
+                    id = "preview",
+                    name = mapOf("en" to "Cetinje Outdoor Festival"),
+                    description = mapOf("en" to "Challenge yourself in the Montenegrin national parks."),
+                    venue = mapOf("en" to "Ivanova Korita"),
+                    latitude = 42.39,
+                    longitude = 18.91,
+                    category = "sport",
+                    startTime = "2026-10-05T11:00:00Z",
+                    endTime = "2026-11-25T14:00:00Z",
+                    price = "30 € - 50 €",
+                    ticketUrl = "https://example.com",
+                    isRecurring = false,
+                    photos = emptyList()
+                )
+            ),
+            currentLocation = null,
+            onBackClick = {},
+            onTicketsClick = {},
+            onMapsClick = {}
+        )
+    }
+}

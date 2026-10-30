@@ -7,6 +7,8 @@ import llc.bokadev.kompass.core.presentation.mvi.Navigator
 import llc.bokadev.kompass.domain.repository.AnalyticsRepository
 import llc.bokadev.kompass.core.components.BottomTab
 import llc.bokadev.kompass.core.navigation.Screen
+import androidx.navigation.NavOptionsBuilder
+import llc.bokadev.kompass.core.navigation.utils.NavType
 
 /** Records what a ViewModel asked the Navigator to do, synchronously. */
 class RecordingNavigator : Navigator {
@@ -26,6 +28,27 @@ class RecordingNavigator : Navigator {
 
     /** Routes from navigateTo, in order. */
     val routes: List<Screen> get() = recorded.filterIsInstance<NavigationCommand.NavigateTo>().map { it.route }
+}
+
+/** Records calls to the template Navigator (core.navigation.utils) in order. */
+class FakeNavigator : llc.bokadev.kompass.core.navigation.utils.Navigator {
+    val recorded = mutableListOf<NavType>()
+    override val navigationFlow: Flow<NavType> = emptyFlow()
+
+    override suspend fun navigateTo(destination: Screen, navOptions: NavOptionsBuilder.() -> Unit) {
+        recorded += NavType.NavigateToRoute(destination, navOptions)
+    }
+
+    override suspend fun navigateUp() {
+        recorded += NavType.NavigateUp
+    }
+
+    override suspend fun switchTab(tab: BottomTab) {
+        recorded += NavType.SwitchTab(tab)
+    }
+
+    /** Destinations from navigateTo, in order. */
+    val destinations: List<Screen> get() = recorded.filterIsInstance<NavType.NavigateToRoute>().map { it.destination }
 }
 
 class NoOpAnalytics : AnalyticsRepository {

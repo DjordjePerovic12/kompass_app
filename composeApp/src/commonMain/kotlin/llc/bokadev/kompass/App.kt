@@ -2,6 +2,9 @@ package llc.bokadev.kompass
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import llc.bokadev.kompass.core.utils.AppEnvironment
 import llc.bokadev.kompass.core.utils.AppPreferences
 import llc.bokadev.kompass.core.utils.PilotFeatures
 import llc.bokadev.kompass.domain.repository.DeepPurchaseRepository
@@ -19,10 +22,11 @@ fun App() {
         }
     }
 
-    // AppEnvironment (core/utils/AppLocale.kt) gets wired here with the first screen that reads
-    // Res.string: the template version re-creates the UI on a language change, which would reset
-    // the selected tab; until then strings come from AppStrings and need no locale override.
-    KompassTheme {
-        KompassAppNavigation(isFirstLaunch = prefs.isFirstLaunch())
+    val language by prefs.selectedLanguageFlow.collectAsState()
+
+    AppEnvironment(languageTag = language) {
+        KompassTheme {
+            KompassAppNavigation(isFirstLaunch = prefs.isFirstLaunch())
+        }
     }
 }

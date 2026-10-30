@@ -36,6 +36,8 @@ import llc.bokadev.kompass.ui.theme.KompassTheme
     @param modifier The [Modifier] to be applied to the layout.
     @param viewState The current state of the screen.
     @param onRetry Called by the default error view's retry action; `null` hides the error view.
+    @param loading Replaces the default loading indicator (e.g. detail screens keep their back button).
+    @param error Replaces the default error view; receives the resolved error message.
     @param applySystemBarsPadding If `true`, applies padding for system bars.
     @param topBar A composable lambda function for defining the top app bar (default: empty).
     @param fab A composable lambda function for defining the floating action button (FAB) (default: empty).
@@ -47,6 +49,8 @@ fun BaseContentView(
     modifier: Modifier = Modifier,
     viewState: BaseViewState,
     onRetry: (() -> Unit)? = null,
+    loading: (@Composable () -> Unit)? = null,
+    error: (@Composable (message: String) -> Unit)? = null,
     applySystemBarsPadding: Boolean = false,
     topBar: @Composable () -> Unit = {},
     fab: @Composable () -> Unit = {},
@@ -79,8 +83,10 @@ fun BaseContentView(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            val error = viewState.error
+            val failure = viewState.error
             when {
+                viewState.isLoading && loading != null -> loading()
+
                 viewState.isLoading -> CircularProgressIndicator(
                     modifier = Modifier.align(
                         alignment = Alignment.Center
@@ -88,14 +94,16 @@ fun BaseContentView(
                     color = KompassTheme.colors.lampYellow
                 )
 
-                error != null && onRetry != null -> Box(
+                failure != null && error != null -> error(stringResource(failure.messageRes))
+
+                failure != null && onRetry != null -> Box(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(24.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     StateMessage(
-                        text = stringResource(error.messageRes),
+                        text = stringResource(failure.messageRes),
                         actionLabel = stringResource(Res.string.retry),
                         onAction = onRetry
                     )
