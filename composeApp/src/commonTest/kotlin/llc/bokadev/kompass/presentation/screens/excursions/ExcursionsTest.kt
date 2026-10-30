@@ -1,5 +1,7 @@
 package llc.bokadev.kompass.presentation.screens.excursions
 
+import llc.bokadev.kompass.core.utils.networking.NetworkError
+import llc.bokadev.kompass.core.utils.networking.Resource
 import llc.bokadev.kompass.presentation.screens.favorites.FavoritesViewModelTest
 import llc.bokadev.kompass.testutil.RecordingNavigator
 import androidx.lifecycle.SavedStateHandle
@@ -56,7 +58,7 @@ class ExcursionsTest {
     @Test fun filtersRestoreAcrossViewModelRecreationAndReset() = runTest {
         Dispatchers.setMain(StandardTestDispatcher(testScheduler))
         val saved = SavedStateHandle()
-        val repo = fake(Result.success(ExcursionResult(listOf(entry()), true)))
+        val repo = fake(Resource.Success(ExcursionResult(listOf(entry()), true)))
         val first = ExcursionsViewModel(repo, saved, FavoritesViewModelTest.FakeFavorites(emptyList()), RecordingNavigator())
         val filter = ExcursionFilter(setOf("culture", "water"), "half_day", "arrange_ahead")
         first.onAction(ExcursionsAction.Filter(filter))
@@ -75,8 +77,8 @@ class ExcursionsTest {
         Dispatchers.setMain(StandardTestDispatcher(testScheduler))
         var fail = true
         val repo = object : ExcursionRepository {
-            override suspend fun getCollection() = if (fail) Result.failure(IllegalStateException("offline")) else Result.success(ExcursionResult(listOf(entry())))
-            override suspend fun getRelatedActivities(placeId: String) = Result.success(ExcursionResult<Experience>(emptyList()))
+            override suspend fun getCollection() = if (fail) Resource.Error(NetworkError.UNKNOWN, "offline") else Resource.Success(ExcursionResult(listOf(entry())))
+            override suspend fun getRelatedActivities(placeId: String) = Resource.Success(ExcursionResult<Experience>(emptyList()))
         }
         val vm = ExcursionsViewModel(repo, SavedStateHandle(), FavoritesViewModelTest.FakeFavorites(emptyList()), RecordingNavigator())
         try {
@@ -92,8 +94,8 @@ class ExcursionsTest {
         } finally { vm.viewModelScope.cancel(); Dispatchers.resetMain() }
     }
 
-    private fun fake(result: Result<ExcursionResult<Excursion>>) = object : ExcursionRepository {
+    private fun fake(result: Resource<ExcursionResult<Excursion>, NetworkError, String?>) = object : ExcursionRepository {
         override suspend fun getCollection() = result
-        override suspend fun getRelatedActivities(placeId: String) = Result.success(ExcursionResult<Experience>(emptyList()))
+        override suspend fun getRelatedActivities(placeId: String) = Resource.Success(ExcursionResult<Experience>(emptyList()))
     }
 }

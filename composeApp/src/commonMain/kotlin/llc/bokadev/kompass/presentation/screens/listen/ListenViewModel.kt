@@ -9,6 +9,10 @@ import kotlinx.coroutines.launch
 import llc.bokadev.kompass.core.presentation.mvi.BaseViewModel
 import llc.bokadev.kompass.core.presentation.mvi.Navigator
 import llc.bokadev.kompass.core.presentation.mvi.UiText
+import llc.bokadev.kompass.core.utils.networking.NetworkError
+import llc.bokadev.kompass.core.utils.networking.Resource
+import llc.bokadev.kompass.core.utils.networking.onError
+import llc.bokadev.kompass.core.utils.networking.onSuccess
 import llc.bokadev.kompass.domain.repository.AnalyticsRepository
 import llc.bokadev.kompass.core.navigation.Screen
 import llc.bokadev.kompass.core.audio.AudioTrack
@@ -101,7 +105,7 @@ class ListenViewModel(
                     val current = currentAreaKey(area, location.await(), tracks)
                     updateState { it.copy(isLoading = false, tracks = orderTracks(tracks, current), isIncomplete = catalog.failedSources.isNotEmpty()) }
                 }
-                .onFailure {
+                .onError { _, _ ->
                     updateState { it.copy(isLoading = false, error = if (it.tracks.isEmpty()) UiText { s -> s.categoryList.couldntRefresh } else null) }
                 }
         }
@@ -130,18 +134,18 @@ class ListenViewModel(
             DownloadState.NotDownloaded -> {
                 setDownload(trackId, DownloadState.Downloading(null))
                 downloadJobs[trackId] = viewModelScope.launch {
-                    val result = try {
+                    val result: Resource<Unit, NetworkError, String?> = try {
                         audioRepository.download(item.track.audioPath) { progress ->
                             if (downloadJobs[trackId]?.isActive == true) setDownload(trackId, DownloadState.Downloading(progress))
                         }
                     } catch (cancelled: CancellationException) {
                         throw cancelled
                     } catch (error: Exception) {
-                        Result.failure(error)
+                        Resource.Error(NetworkError.UNKNOWN, error.message)
                     }
                     downloadJobs.remove(trackId)
                     // "Downloaded" only once the store confirms the file is there.
-                    if (result.isSuccess && audioRepository.isAvailableOffline(item.track.audioPath)) {
+                    if (result is Resource.Success && audioRepository.isAvailableOffline(item.track.audioPath)) {
                         setDownload(trackId, DownloadState.Downloaded)
                     } else {
                         setDownload(trackId, DownloadState.NotDownloaded)

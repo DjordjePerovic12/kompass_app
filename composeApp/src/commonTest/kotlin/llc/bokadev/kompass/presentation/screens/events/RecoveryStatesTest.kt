@@ -6,6 +6,8 @@ import kotlin.test.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.test.*
 import llc.bokadev.kompass.core.utils.appStringsFor
+import llc.bokadev.kompass.core.utils.networking.NetworkError
+import llc.bokadev.kompass.core.utils.networking.Resource
 import llc.bokadev.kompass.domain.model.*
 import llc.bokadev.kompass.domain.repository.*
 import llc.bokadev.kompass.domain.usecase.*
@@ -93,8 +95,8 @@ class RecoveryStatesTest {
         var fail = false
         val vm = InfoCenterViewModel(GetCurrentInfoNoticesUseCase(object : InfoCenterRepository {
             override suspend fun getCurrentNotices() =
-                if (fail) Result.failure(IllegalStateException("x")) else Result.success(listOf(InfoNotice("n", "kotor", mapOf("en" to "Road closed"), emptyMap())))
-            override suspend fun getNoticeById(id: String): Result<InfoNotice> = error("unused")
+                if (fail) Resource.Error(NetworkError.UNKNOWN, "x") else Resource.Success(listOf(InfoNotice("n", "kotor", mapOf("en" to "Road closed"), emptyMap())))
+            override suspend fun getNoticeById(id: String): Resource<InfoNotice, NetworkError, String?> = error("unused")
         }), RecordingNavigator(), NoOpAnalytics())
         runCurrent()
         fail = true
@@ -110,8 +112,8 @@ class RecoveryStatesTest {
         var fail = true
         val vm = ServicesViewModel(GetServicesUseCase(object : ServiceRepository {
             override suspend fun getServices() =
-                if (fail) Result.failure(IllegalStateException("x")) else Result.success(emptyList<Service>())
-            override suspend fun getServiceById(id: String): Result<Service> = error("unused")
+                if (fail) Resource.Error(NetworkError.UNKNOWN, "x") else Resource.Success(emptyList<Service>())
+            override suspend fun getServiceById(id: String): Resource<Service, NetworkError, String?> = error("unused")
         }), RecordingNavigator(), NoOpAnalytics())
         runCurrent()
         assertNotNull(vm.state.value.error)
@@ -125,14 +127,14 @@ class RecoveryStatesTest {
 
     private class FakeEvents(val all: List<Event>, val filters: List<EventFilter>?, var fail: Boolean) : EventRepository {
         var delayFor: Map<String, Long> = emptyMap()
-        override suspend fun getEvents(dateFilter: String, eventType: String): Result<List<Event>> {
+        override suspend fun getEvents(dateFilter: String, eventType: String): Resource<List<Event>, NetworkError, String?> {
             delay(delayFor[eventType] ?: 0)
-            if (fail) return Result.failure(IllegalStateException("offline"))
-            return Result.success(all.filter { (eventType == "all" || it.category == eventType) && dateFilter != "today" })
+            if (fail) return Resource.Error(NetworkError.UNKNOWN, "offline")
+            return Resource.Success(all.filter { (eventType == "all" || it.category == eventType) && dateFilter != "today" })
         }
-        override suspend fun getEventFilters() = filters?.let { Result.success(it) } ?: Result.failure(IllegalStateException("no filters"))
-        override suspend fun getUpcomingEvents() = Result.success(all)
-        override suspend fun getEventById(id: String): Result<Event> = error("unused")
+        override suspend fun getEventFilters() = filters?.let { Resource.Success(it) } ?: Resource.Error(NetworkError.UNKNOWN, "no filters")
+        override suspend fun getUpcomingEvents() = Resource.Success(all)
+        override suspend fun getEventById(id: String): Resource<Event, NetworkError, String?> = error("unused")
     }
 
     private fun events(

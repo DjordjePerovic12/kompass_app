@@ -6,6 +6,11 @@ import io.github.jan.supabase.postgrest.query.Order
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import llc.bokadev.kompass.core.utils.AppPreferences
+import llc.bokadev.kompass.core.utils.networking.NetworkError
+import llc.bokadev.kompass.core.utils.networking.Resource
+import llc.bokadev.kompass.core.utils.networking.mapCatching
+import llc.bokadev.kompass.core.utils.networking.recover
+import llc.bokadev.kompass.core.utils.networking.safeSupabaseCall
 import llc.bokadev.kompass.data.mapper.toDomain
 import llc.bokadev.kompass.data.remote.dto.LocalFindDto
 import llc.bokadev.kompass.domain.model.LocalFind
@@ -18,30 +23,25 @@ class LocalFindRepositoryImpl(
 
     private val json = Json { ignoreUnknownKeys = true }
 
-    override suspend fun getLocalFinds(): Result<List<LocalFind>> = runCatching {
-        runCatching {
+    override suspend fun getLocalFinds(): Resource<List<LocalFind>, NetworkError, String?> =
+        safeSupabaseCall {
             supabase.from("local_finds")
                 .select {
                     filter { eq("is_active", true) }
                     order(column = "sort_order", order = Order.ASCENDING)
                 }
                 .decodeList<LocalFindDto>()
-        }.fold(
-            onSuccess = { remote ->
-                cacheLocalFinds(remote)
-                remote
-            },
-            onFailure = { remoteError ->
-                val cached = readCachedLocalFinds()
-                if (cached.isNotEmpty()) cached else throw remoteError
-            }
-        ).map { it.toDomain() }
-    }
+                .also { remote -> cacheLocalFinds(remote) }
+        }.recover { _, _ ->
+            readCachedLocalFinds().ifEmpty { null }
+        }.mapCatching { finds -> finds.map { it.toDomain() } }
 
-    override suspend fun getLocalFindById(id: String): Result<LocalFind> = runCatching {
-        getLocalFinds().getOrThrow().firstOrNull { it.id == id }
-            ?: throw IllegalArgumentException("Local find not found: $id")
-    }
+    override suspend fun getLocalFindById(id: String): Resource<LocalFind, NetworkError, String?> =
+        when (val finds = getLocalFinds()) {
+            is Resource.Error -> finds
+            is Resource.Success -> finds.data.firstOrNull { it.id == id }?.let { Resource.Success(it) }
+                ?: Resource.Error(NetworkError.NOT_FOUND, "Local find not found: $id")
+        }
 
     private fun cacheLocalFinds(dtos: List<LocalFindDto>) {
         appPreferences.setString(

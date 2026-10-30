@@ -7,6 +7,8 @@ import kotlinx.coroutines.launch
 import llc.bokadev.kompass.core.presentation.mvi.BaseViewModel
 import llc.bokadev.kompass.core.presentation.mvi.Navigator
 import llc.bokadev.kompass.core.presentation.mvi.UiText
+import llc.bokadev.kompass.core.utils.networking.onError
+import llc.bokadev.kompass.core.utils.networking.onSuccess
 import llc.bokadev.kompass.domain.model.ExcursionFilter
 import llc.bokadev.kompass.domain.model.FavoriteItemType
 import llc.bokadev.kompass.domain.model.FavoriteKey
@@ -56,10 +58,9 @@ class ExcursionsViewModel(
         job?.cancel()
         job = viewModelScope.launch {
             updateState { it.copy(isLoading = it.items.isEmpty(), error = null) }
-            repository.getCollection().fold(
-                onSuccess = { result -> updateState { it.copy(items = result.items, cached = result.isCached, isLoading = false) } },
-                onFailure = { updateState { it.copy(isLoading = false, error = if (it.items.isEmpty()) LOAD_FAILED else null) } }
-            )
+            repository.getCollection()
+                .onSuccess { result -> updateState { it.copy(items = result.items, cached = result.isCached, isLoading = false) } }
+                .onError { _, _ -> updateState { it.copy(isLoading = false, error = if (it.items.isEmpty()) LOAD_FAILED else null) } }
         }
     }
 

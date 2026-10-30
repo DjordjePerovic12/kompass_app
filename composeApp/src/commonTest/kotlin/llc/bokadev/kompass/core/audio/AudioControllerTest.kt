@@ -1,5 +1,7 @@
 package llc.bokadev.kompass.core.audio
 
+import llc.bokadev.kompass.core.utils.networking.NetworkError
+import llc.bokadev.kompass.core.utils.networking.Resource
 import llc.bokadev.kompass.domain.model.AudioSource
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -34,37 +36,37 @@ class AudioControllerTest {
     }
 
     @Test fun leavingBeforeTheSlowLoadFinishesNeverPlays() = runTest {
-        val slow = CompletableDeferred<Result<String>>()
+        val slow = CompletableDeferred<Resource<String, NetworkError, String?>>()
         val env = env(resolve = { slow.await() })
         env.controller.play(cathedral, owner = "a")
         runCurrent()
         env.controller.stopIfOwner("a")
-        slow.complete(Result.success("url:cathedral"))
+        slow.complete(Resource.Success("url:cathedral"))
         runCurrent()
         assertTrue(env.player.prepared.isEmpty())
         assertEquals(AudioState.Idle, env.controller.state.value)
     }
 
     @Test fun navigationInvalidatingTheGuardDropsAPendingLoad() = runTest {
-        val slow = CompletableDeferred<Result<String>>()
+        val slow = CompletableDeferred<Resource<String, NetworkError, String?>>()
         val env = env(resolve = { slow.await() })
         env.controller.play(cathedral, owner = "a")
         runCurrent()
         env.guard.invalidate() // what MainShell does on any destination change / tab switch
-        slow.complete(Result.success("url:cathedral"))
+        slow.complete(Resource.Success("url:cathedral"))
         runCurrent()
         assertTrue(env.player.prepared.isEmpty())
         assertEquals(AudioState.Idle, env.controller.state.value)
     }
 
     @Test fun onlyTheSecondTrackPlaysWhenTheFirstLoadIsStillPending() = runTest {
-        val first = CompletableDeferred<Result<String>>()
-        val env = env(resolve = { path -> if (path == "cathedral.mp3") first.await() else Result.success("url:church") })
+        val first = CompletableDeferred<Resource<String, NetworkError, String?>>()
+        val env = env(resolve = { path -> if (path == "cathedral.mp3") first.await() else Resource.Success("url:church") })
         env.controller.play(cathedral, owner = "a")
         runCurrent()
         env.controller.play(church, owner = "b")
         runCurrent()
-        first.complete(Result.success("url:cathedral"))
+        first.complete(Resource.Success("url:cathedral"))
         runCurrent()
         assertEquals(listOf("url:church"), env.player.prepared)
     }
@@ -97,7 +99,7 @@ class AudioControllerTest {
     }
 
     @Test fun resolveFailureAndPlayerErrorBothSurfaceAsFailed() = runTest {
-        val env = env(resolve = { Result.failure(IllegalStateException("offline")) })
+        val env = env(resolve = { Resource.Error(NetworkError.UNKNOWN, "offline") })
         env.controller.play(cathedral, owner = "a")
         runCurrent()
         assertEquals(AudioState.Reason.Network, assertIs<AudioState.Failed>(env.controller.state.value).reason)
@@ -173,12 +175,12 @@ class AudioControllerTest {
     }
 
     @Test fun toggleWhileLoadingCancelsAndNothingPlaysLater() = runTest {
-        val slow = CompletableDeferred<Result<String>>()
+        val slow = CompletableDeferred<Resource<String, NetworkError, String?>>()
         val env = env(resolve = { slow.await() })
         env.controller.toggle(cathedral, owner = "lib")
         runCurrent()
         env.controller.toggle(cathedral, owner = "lib")
-        slow.complete(Result.success("url:cathedral"))
+        slow.complete(Resource.Success("url:cathedral"))
         runCurrent()
         assertTrue(env.player.prepared.isEmpty())
         assertEquals(AudioState.Idle, env.controller.state.value)
@@ -201,7 +203,7 @@ class AudioControllerTest {
     }
 
     private fun TestScope.env(
-        resolve: suspend (String) -> Result<String> = { path -> Result.success("url:" + path.removeSuffix(".mp3")) }
+        resolve: suspend (String) -> Resource<String, NetworkError, String?> = { path -> Resource.Success("url:" + path.removeSuffix(".mp3")) }
     ): Env {
         val player = FakePlayer()
         val guard = PlaybackRequestGuard()

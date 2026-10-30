@@ -6,6 +6,11 @@ import io.github.jan.supabase.postgrest.query.Order
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import llc.bokadev.kompass.core.utils.AppPreferences
+import llc.bokadev.kompass.core.utils.networking.NetworkError
+import llc.bokadev.kompass.core.utils.networking.Resource
+import llc.bokadev.kompass.core.utils.networking.mapCatching
+import llc.bokadev.kompass.core.utils.networking.recover
+import llc.bokadev.kompass.core.utils.networking.safeSupabaseCall
 import llc.bokadev.kompass.data.mapper.toDomain
 import llc.bokadev.kompass.data.remote.dto.InfoNoticeDto
 import llc.bokadev.kompass.domain.model.InfoNotice
@@ -20,51 +25,40 @@ class InfoCenterRepositoryImpl(
 
     private val json = Json { ignoreUnknownKeys = true }
 
-    override suspend fun getCurrentNotices(): Result<List<InfoNotice>> = runCatching {
-        getActiveNoticeDtos()
-            .map { it.toDomain() }
-            .filter { it.isCurrent() }
-            .sortedWith(
-                compareByDescending<InfoNotice> { it.recencyKey() }
-                    .thenBy { it.priorityRank() }
-                    .thenBy { it.sortOrder }
-            )
-    }
+    override suspend fun getCurrentNotices(): Resource<List<InfoNotice>, NetworkError, String?> =
+        getActiveNoticeDtos().mapCatching { notices ->
+            notices
+                .map { it.toDomain() }
+                .filter { it.isCurrent() }
+                .sortedWith(
+                    compareByDescending<InfoNotice> { it.recencyKey() }
+                        .thenBy { it.priorityRank() }
+                        .thenBy { it.sortOrder }
+                )
+        }
 
-    override suspend fun getNoticeById(id: String): Result<InfoNotice> = runCatching {
-        runCatching {
+    override suspend fun getNoticeById(id: String): Resource<InfoNotice, NetworkError, String?> =
+        safeSupabaseCall {
             supabase.from("info_center")
                 .select { filter { eq("id", id) } }
                 .decodeSingle<InfoNoticeDto>()
-        }.fold(
-            onSuccess = { remoteNotice ->
-                mergeNoticeIntoCache(remoteNotice)
-                remoteNotice
-            },
-            onFailure = { remoteError ->
-                readCachedNotices().firstOrNull { it.id == id } ?: throw remoteError
-            }
-        ).toDomain()
-    }
+                .also { remoteNotice -> mergeNoticeIntoCache(remoteNotice) }
+        }.recover { _, _ ->
+            readCachedNotices().firstOrNull { it.id == id }
+        }.mapCatching { it.toDomain() }
 
-    private suspend fun getActiveNoticeDtos(): List<InfoNoticeDto> =
-        runCatching {
+    private suspend fun getActiveNoticeDtos(): Resource<List<InfoNoticeDto>, NetworkError, String?> =
+        safeSupabaseCall {
             supabase.from("info_center")
                 .select {
                     filter { eq("is_active", true) }
                     order(column = "created_at", order = Order.DESCENDING)
                 }
                 .decodeList<InfoNoticeDto>()
-        }.fold(
-            onSuccess = { remoteNotices ->
-                cacheNotices(remoteNotices)
-                remoteNotices
-            },
-            onFailure = { remoteError ->
-                val cachedNotices = readCachedNotices()
-                if (cachedNotices.isNotEmpty()) cachedNotices else throw remoteError
-            }
-        )
+                .also { remoteNotices -> cacheNotices(remoteNotices) }
+        }.recover { _, _ ->
+            readCachedNotices().ifEmpty { null }
+        }
 
     private fun cacheNotices(dtos: List<InfoNoticeDto>) {
         appPreferences.setString(

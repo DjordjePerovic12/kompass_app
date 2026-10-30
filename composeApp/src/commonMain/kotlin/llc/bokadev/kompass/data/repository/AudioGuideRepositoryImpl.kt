@@ -10,6 +10,10 @@ import io.ktor.http.isSuccess
 import kotlin.time.Duration.Companion.minutes
 import llc.bokadev.kompass.BuildKonfig
 import llc.bokadev.kompass.core.utils.OfflineAudioStore
+import llc.bokadev.kompass.core.utils.networking.NetworkError
+import llc.bokadev.kompass.core.utils.networking.Resource
+import llc.bokadev.kompass.core.utils.networking.getOrNull
+import llc.bokadev.kompass.core.utils.networking.safeSupabaseCall
 import llc.bokadev.kompass.domain.repository.AudioGuideRepository
 
 class AudioGuideRepositoryImpl(
@@ -18,42 +22,40 @@ class AudioGuideRepositoryImpl(
     private val offlineAudioStore: OfflineAudioStore
 ) : AudioGuideRepository {
 
-    override suspend fun getSignedAudioUrl(path: String): Result<String> = runCatching {
+    override suspend fun getSignedAudioUrl(path: String): Resource<String, NetworkError, String?> = safeSupabaseCall {
         val normalizedPath = normalizeAudioPath(path)
         val cacheKey = buildCacheKey(normalizedPath)
 
         cachedUri(normalizedPath)?.let { cachedUri ->
-            return@runCatching cachedUri
+            return@safeSupabaseCall cachedUri
         }
 
         val remoteUrl = if (normalizedPath.startsWith("http://") || normalizedPath.startsWith("https://")) {
             normalizedPath
         } else {
-            runCatching {
+            safeSupabaseCall {
                 supabase.storage
                     .from("audio")
                     .createSignedUrl(path = normalizedPath, expiresIn = 30.minutes)
-            }.getOrElse {
-                "${BuildKonfig.SUPABASE_URL}/storage/v1/object/public/audio/$normalizedPath"
-            }
+            }.getOrNull() ?: "${BuildKonfig.SUPABASE_URL}/storage/v1/object/public/audio/$normalizedPath"
         }
 
-        val downloadedBytes = runCatching { httpClient.get(remoteUrl).body<ByteArray>() }.getOrNull()
+        val downloadedBytes = safeSupabaseCall { httpClient.get(remoteUrl).body<ByteArray>() }.getOrNull()
         if (downloadedBytes != null) {
             offlineAudioStore.persist(cacheKey, downloadedBytes).getOrNull()?.let { localUri ->
-                return@runCatching localUri
+                return@safeSupabaseCall localUri
             }
         }
 
         remoteUrl
     }
 
-    override suspend fun streamUrl(path: String): Result<String> = runCatching {
+    override suspend fun streamUrl(path: String): Resource<String, NetworkError, String?> = safeSupabaseCall {
         val normalizedPath = normalizeAudioPath(path)
         cachedUri(normalizedPath) ?: remoteUrl(normalizedPath)
     }
 
-    override suspend fun download(path: String, onProgress: (Float?) -> Unit): Result<Unit> = runCatching {
+    override suspend fun download(path: String, onProgress: (Float?) -> Unit): Resource<Unit, NetworkError, String?> = safeSupabaseCall {
         val normalizedPath = normalizeAudioPath(path)
         val url = remoteUrl(normalizedPath)
         var expected: Long? = null
@@ -81,11 +83,9 @@ class AudioGuideRepositoryImpl(
         if (normalizedPath.startsWith("http://") || normalizedPath.startsWith("https://")) {
             normalizedPath
         } else {
-            runCatching {
+            safeSupabaseCall {
                 supabase.storage.from("audio").createSignedUrl(path = normalizedPath, expiresIn = 30.minutes)
-            }.getOrElse {
-                "${BuildKonfig.SUPABASE_URL}/storage/v1/object/public/audio/$normalizedPath"
-            }
+            }.getOrNull() ?: "${BuildKonfig.SUPABASE_URL}/storage/v1/object/public/audio/$normalizedPath"
         }
 
     override fun isAvailableOffline(path: String): Boolean =

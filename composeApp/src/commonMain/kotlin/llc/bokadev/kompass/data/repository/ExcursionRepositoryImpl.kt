@@ -3,11 +3,15 @@ package llc.bokadev.kompass.data.repository
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.query.Columns
-import kotlinx.coroutines.CancellationException
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import llc.bokadev.kompass.core.utils.AppPreferences
+import llc.bokadev.kompass.core.utils.networking.NetworkError
+import llc.bokadev.kompass.core.utils.networking.Resource
+import llc.bokadev.kompass.core.utils.networking.map
+import llc.bokadev.kompass.core.utils.networking.recover
+import llc.bokadev.kompass.core.utils.networking.safeSupabaseCall
 import llc.bokadev.kompass.data.mapper.toDomain
 import llc.bokadev.kompass.data.remote.dto.ExcursionDto
 import llc.bokadev.kompass.data.remote.dto.PlaceActivityDto
@@ -38,20 +42,18 @@ class ExcursionRepositoryImpl(
             .mapNotNull { it.activity?.takeIf { activity -> activity.isActive }?.toDomain() }, result.isCached)
     }
 
-    private suspend fun <T> cached(key: String, serializer: KSerializer<T>, fetch: suspend () -> List<T>): Result<ExcursionResult<T>> {
+    private suspend fun <T> cached(key: String, serializer: KSerializer<T>, fetch: suspend () -> List<T>): Resource<ExcursionResult<T>, NetworkError, String?> {
         val cacheKey = "excursions_v1_${citySlug}_$key"
         val listSerializer = ListSerializer(serializer)
-        return try {
+        return safeSupabaseCall {
             val data = fetch()
             preferences.setString(cacheKey, json.encodeToString(listSerializer, data))
-            Result.success(ExcursionResult(data))
-        } catch (cancelled: CancellationException) {
-            throw cancelled
-        } catch (error: Exception) {
+            ExcursionResult(data)
+        }.recover { _, _ ->
             val cached = preferences.getString(cacheKey)?.let { raw ->
                 runCatching { json.decodeFromString(listSerializer, raw) }.getOrNull()
             }
-            if (cached != null) Result.success(ExcursionResult(cached, isCached = true)) else Result.failure(error)
+            cached?.let { ExcursionResult(it, isCached = true) }
         }
     }
 }

@@ -5,6 +5,11 @@ import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.query.Order
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
+import llc.bokadev.kompass.core.utils.networking.NetworkError
+import llc.bokadev.kompass.core.utils.networking.Resource
+import llc.bokadev.kompass.core.utils.networking.mapCatching
+import llc.bokadev.kompass.core.utils.networking.recover
+import llc.bokadev.kompass.core.utils.networking.safeSupabaseCall
 import llc.bokadev.kompass.data.mapper.toDomain
 import llc.bokadev.kompass.data.remote.dto.PlaceDto
 import llc.bokadev.kompass.core.utils.AppPreferences
@@ -41,8 +46,8 @@ class PlaceRepositoryImpl(
         }.getOrElse { emptyList() }
     }
 
-    override suspend fun getActivePlaces(): Result<List<Place>> = runCatching {
-        runCatching {
+    override suspend fun getActivePlaces(): Resource<List<Place>, NetworkError, String?> =
+        safeSupabaseCall {
             supabase.from("places")
                 .select {
                     filter {
@@ -51,42 +56,31 @@ class PlaceRepositoryImpl(
                     order(column = "sort_order", order = Order.ASCENDING)
                 }
                 .decodeList<PlaceDto>()
-        }.fold(
-            onSuccess = { remotePlaces ->
-                cachePlaces(remotePlaces)
-                remotePlaces
-            },
-            onFailure = { remoteError ->
-                val cachedPlaces = readCachedPlaces()
-                if (cachedPlaces.isNotEmpty()) {
-                    cachedPlaces
-                } else {
-                    throw remoteError
-                }
-            }
-        ).map { it.toDomain() }
-    }
+                .also { remotePlaces -> cachePlaces(remotePlaces) }
+        }.recover { _, _ ->
+            readCachedPlaces().ifEmpty { null }
+        }.mapCatching { places -> places.map { it.toDomain() } }
 
-    override suspend fun getMustSeePlaces(): Result<List<Place>> = runCatching {
-        getActivePlaces()
-            .getOrThrow()
-            .filter { it.isMarkedMustSee() }
-            .sortedBy { it.sortOrder }
-    }
+    override suspend fun getMustSeePlaces(): Resource<List<Place>, NetworkError, String?> =
+        getActivePlaces().mapCatching { places ->
+            places
+                .filter { it.isMarkedMustSee() }
+                .sortedBy { it.sortOrder }
+        }
 
-    override suspend fun getPlacesByCategory(category: PlaceCategory): Result<List<Place>> = runCatching {
-        getActivePlaces()
-            .getOrThrow()
-            .filter { it.category == category }
-            .sortedBy { it.sortOrder }
-    }
+    override suspend fun getPlacesByCategory(category: PlaceCategory): Resource<List<Place>, NetworkError, String?> =
+        getActivePlaces().mapCatching { places ->
+            places
+                .filter { it.category == category }
+                .sortedBy { it.sortOrder }
+        }
 
-    override suspend fun getPlaceById(id: String): Result<Place> = runCatching {
-        getActivePlaces()
-            .getOrThrow()
-            .firstOrNull { it.id == id }
-            ?: throw IllegalArgumentException("Place not found")
-    }
+    override suspend fun getPlaceById(id: String): Resource<Place, NetworkError, String?> =
+        when (val places = getActivePlaces()) {
+            is Resource.Error -> places
+            is Resource.Success -> places.data.firstOrNull { it.id == id }?.let { Resource.Success(it) }
+                ?: Resource.Error(NetworkError.NOT_FOUND, "Place not found")
+        }
 
     private companion object {
         const val CACHE_KEY_ACTIVE_PLACES = "offline_cache_active_places_v1"

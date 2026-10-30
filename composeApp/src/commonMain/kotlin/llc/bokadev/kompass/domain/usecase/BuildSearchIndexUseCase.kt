@@ -2,6 +2,10 @@ package llc.bokadev.kompass.domain.usecase
 
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import llc.bokadev.kompass.core.utils.networking.NetworkError
+import llc.bokadev.kompass.core.utils.networking.Resource
+import llc.bokadev.kompass.core.utils.networking.getOrNull
+import llc.bokadev.kompass.core.utils.networking.map
 import llc.bokadev.kompass.domain.model.SearchIndex
 import llc.bokadev.kompass.domain.model.SearchIndexItem
 import llc.bokadev.kompass.domain.model.SearchKind
@@ -29,7 +33,7 @@ class BuildSearchIndexUseCase(
     private val getCurrentNotices: GetCurrentInfoNoticesUseCase,
     private val vocabulary: SearchVocabulary
 ) {
-    suspend operator fun invoke(lang: String): Result<SearchIndex> = coroutineScope {
+    suspend operator fun invoke(lang: String): Resource<SearchIndex, NetworkError, String?> = coroutineScope {
         fun terms(vararg tags: SearchTag?) = tags.filterNotNull().flatMap { vocabulary.terms(it, lang) }.distinct()
 
         val places = async {
@@ -117,7 +121,7 @@ class BuildSearchIndexUseCase(
             }
         }
 
-        val results: Map<SearchSource, Result<List<SearchIndexItem>>> = mapOf(
+        val results: Map<SearchSource, Resource<List<SearchIndexItem>, NetworkError, String?>> = mapOf(
             SearchSource.PLACES to places.await(),
             SearchSource.ACTIVITIES to activities.await(),
             SearchSource.STORIES to stories.await(),
@@ -127,12 +131,12 @@ class BuildSearchIndexUseCase(
             SearchSource.SERVICES to services.await(),
             SearchSource.NOTICES to notices.await()
         )
-        val failed = results.filterValues { it.isFailure }.keys
+        val failed = results.filterValues { it is Resource.Error }.keys
         if (failed.size == results.size) {
-            Result.failure(results.values.first().exceptionOrNull() ?: IllegalStateException("No content"))
+            results.values.first() as? Resource.Error<NetworkError, String?> ?: Resource.Error(NetworkError.UNKNOWN, "No content")
         } else {
             val items = results.values.mapNotNull { it.getOrNull() }.flatten().filter { it.name.isNotBlank() }
-            Result.success(SearchIndex(items, vocabulary.related(lang), failed))
+            Resource.Success(SearchIndex(items, vocabulary.related(lang), failed))
         }
     }
 

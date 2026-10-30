@@ -6,6 +6,11 @@ import io.github.jan.supabase.postgrest.query.Order
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import llc.bokadev.kompass.core.utils.AppPreferences
+import llc.bokadev.kompass.core.utils.networking.NetworkError
+import llc.bokadev.kompass.core.utils.networking.Resource
+import llc.bokadev.kompass.core.utils.networking.mapCatching
+import llc.bokadev.kompass.core.utils.networking.recover
+import llc.bokadev.kompass.core.utils.networking.safeSupabaseCall
 import llc.bokadev.kompass.data.mapper.toDomain
 import llc.bokadev.kompass.data.remote.dto.UtilityDto
 import llc.bokadev.kompass.domain.model.Utility
@@ -18,28 +23,21 @@ class UtilityRepositoryImpl(
 
     private val json = Json { ignoreUnknownKeys = true }
 
-    override suspend fun getUtilities(): Result<List<Utility>> = runCatching {
-        getUtilityDtos().map { it.toDomain() }
-    }
+    override suspend fun getUtilities(): Resource<List<Utility>, NetworkError, String?> =
+        getUtilityDtos().mapCatching { utilities -> utilities.map { it.toDomain() } }
 
-    private suspend fun getUtilityDtos(): List<UtilityDto> =
-        runCatching {
+    private suspend fun getUtilityDtos(): Resource<List<UtilityDto>, NetworkError, String?> =
+        safeSupabaseCall {
             supabase.from("utilities")
                 .select {
                     filter { eq("is_active", true) }
                     order(column = "sort_order", order = Order.ASCENDING)
                 }
                 .decodeList<UtilityDto>()
-        }.fold(
-            onSuccess = { remoteUtilities ->
-                cacheUtilities(remoteUtilities)
-                remoteUtilities
-            },
-            onFailure = { remoteError ->
-                val cachedUtilities = readCachedUtilities()
-                if (cachedUtilities.isNotEmpty()) cachedUtilities else throw remoteError
-            }
-        )
+                .also { remoteUtilities -> cacheUtilities(remoteUtilities) }
+        }.recover { _, _ ->
+            readCachedUtilities().ifEmpty { null }
+        }
 
     private fun cacheUtilities(dtos: List<UtilityDto>) {
         appPreferences.setString(

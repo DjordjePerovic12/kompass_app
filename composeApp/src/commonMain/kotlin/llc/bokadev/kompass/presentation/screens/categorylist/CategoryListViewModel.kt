@@ -9,6 +9,9 @@ import llc.bokadev.kompass.core.presentation.mvi.BaseViewModel
 import llc.bokadev.kompass.core.presentation.mvi.Navigator
 import llc.bokadev.kompass.core.presentation.mvi.UiText
 import llc.bokadev.kompass.core.navigation.Screen
+import llc.bokadev.kompass.core.utils.networking.map
+import llc.bokadev.kompass.core.utils.networking.onError
+import llc.bokadev.kompass.core.utils.networking.onSuccess
 import llc.bokadev.kompass.domain.location.UserLocationProvider
 import llc.bokadev.kompass.domain.model.Experience
 import llc.bokadev.kompass.domain.model.FavoriteItemType
@@ -114,7 +117,7 @@ class CategoryListViewModel(
                     all = items
                     updateState { it.copy(isLoading = false, refreshFailed = false) }
                 }
-                .onFailure {
+                .onError { _, _ ->
                     updateState { it.copy(isLoading = false, refreshFailed = all.isNotEmpty(), error = if (all.isEmpty()) LOAD_FAILED else null) }
                 }
             rebuild()

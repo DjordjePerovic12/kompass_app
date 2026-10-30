@@ -7,6 +7,8 @@ import kotlinx.coroutines.launch
 import llc.bokadev.kompass.core.presentation.mvi.BaseViewModel
 import llc.bokadev.kompass.core.presentation.mvi.Navigator
 import llc.bokadev.kompass.core.presentation.mvi.UiText
+import llc.bokadev.kompass.core.utils.networking.onError
+import llc.bokadev.kompass.core.utils.networking.onSuccess
 import llc.bokadev.kompass.domain.model.EventFilter
 import llc.bokadev.kompass.domain.model.EventFilterKind
 import llc.bokadev.kompass.domain.repository.AnalyticsRepository
@@ -107,7 +109,7 @@ class EventsViewModel(
             .onSuccess { events ->
                 updateState { it.copy(isLoading = false, isRefreshing = false, error = null, refreshFailed = false, events = events) }
             }
-            .onFailure {
+            .onError { _, _ ->
                 updateState {
                     val hasEvents = it.events.isNotEmpty()
                     it.copy(

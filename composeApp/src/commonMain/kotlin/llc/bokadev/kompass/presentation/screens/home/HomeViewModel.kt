@@ -7,6 +7,9 @@ import kotlinx.coroutines.withTimeoutOrNull
 import llc.bokadev.kompass.core.presentation.mvi.BaseViewModel
 import llc.bokadev.kompass.core.presentation.mvi.Navigator
 import llc.bokadev.kompass.core.utils.AppPreferences
+import llc.bokadev.kompass.core.utils.networking.Resource
+import llc.bokadev.kompass.core.utils.networking.getOrNull
+import llc.bokadev.kompass.core.utils.networking.onSuccess
 import llc.bokadev.kompass.domain.location.UserLocationProvider
 import llc.bokadev.kompass.domain.model.FavoriteItemType
 import llc.bokadev.kompass.domain.model.PlaceCategory
@@ -146,22 +149,16 @@ class HomeViewModel(
         jobs[section] = viewModelScope.launch {
             updateState { it.withStatus(section, SectionStatus.LOADING) }
             try {
-                when (section) {
-                    HomeSection.HIGHLIGHTS -> {
-                        val result = getMustSeePlaces().getOrThrow()
-                        updateState { it.copy(mustSeePlaces = result) }
-                    }
-                    HomeSection.EVENTS -> {
-                        val result = getUpcomingEvents().getOrThrow()
-                        updateState { it.copy(upcomingEvents = result) }
-                    }
-                    HomeSection.NOTICES -> {
-                        val result = getCurrentInfoNotices().getOrThrow()
-                        updateState { it.copy(infoCenterNotices = result.take(NOTICES_LIMIT)) }
-                    }
+                val loaded = when (section) {
+                    HomeSection.HIGHLIGHTS -> getMustSeePlaces()
+                        .onSuccess { result -> updateState { it.copy(mustSeePlaces = result) } } is Resource.Success
+                    HomeSection.EVENTS -> getUpcomingEvents()
+                        .onSuccess { result -> updateState { it.copy(upcomingEvents = result) } } is Resource.Success
+                    HomeSection.NOTICES -> getCurrentInfoNotices()
+                        .onSuccess { result -> updateState { it.copy(infoCenterNotices = result.take(NOTICES_LIMIT)) } } is Resource.Success
                     HomeSection.NEARBY -> loadSuggestions()
                 }
-                updateState { it.withStatus(section, SectionStatus.READY) }
+                updateState { it.withStatus(section, if (loaded) SectionStatus.READY else SectionStatus.FAILED) }
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (_: Exception) {
@@ -170,7 +167,8 @@ class HomeViewModel(
         }
     }
 
-    private suspend fun loadSuggestions() {
+    /** False when the suggestions could not be loaded. */
+    private suspend fun loadSuggestions(): Boolean {
         val area = state.value.area
         val location = if (area == HomeArea.DEVICE && userLocationProvider.hasPermission()) {
             try {
@@ -182,21 +180,21 @@ class HomeViewModel(
             }
         } else null
 
-        val suggestions = if (location != null) {
+        val suggestions = (if (location != null) {
             getNearbyPlaces(
                 origin = location,
                 limit = NEARBY_LIMIT,
                 category = PlaceCategory.SEE_AND_VISIT,
                 maxDistanceKm = NEARBY_RADIUS_KM
-            ).getOrThrow()
+            ).getOrNull()
         } else {
             val effectiveArea = if (area == HomeArea.DEVICE) HomeArea.OLD_TOWN else area
             getNearbyFallbackPlaces(
                 category = PlaceCategory.SEE_AND_VISIT,
                 matchesZone = effectiveArea::matchesZone,
                 limit = NEARBY_LIMIT
-            ).getOrThrow()
-        }
+            ).getOrNull()
+        }) ?: return false
         // The area's editorial introduction; its absence or failure never fails the suggestions.
         val overviewArea = if (area == HomeArea.DEVICE) HomeArea.OLD_TOWN.takeIf { location == null } else area
         val overview = getDestinationOverview(
@@ -205,5 +203,6 @@ class HomeViewModel(
             maxDistanceKm = NEARBY_RADIUS_KM
         ).getOrNull()
         updateState { it.copy(nearbyPlaces = suggestions, areaOverview = overview, isUsingCurrentLocation = location != null) }
+        return true
     }
 }

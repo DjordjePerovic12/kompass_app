@@ -1,5 +1,7 @@
 package llc.bokadev.kompass.presentation.screens.localfinds
 
+import llc.bokadev.kompass.core.utils.networking.onError
+import llc.bokadev.kompass.core.utils.networking.onSuccess
 import llc.bokadev.kompass.domain.model.AudioSource
 import kotlinx.coroutines.flow.drop
 import androidx.lifecycle.viewModelScope
@@ -68,7 +70,7 @@ class LocalFindDetailViewModel(
                         updateState { it.copy(next = nextStory(all, id, kind, lang)) }
                     }
                 }
-                .onFailure { updateState { it.copy(isLoading = false, error = if (it.find == null) UiText { s -> s.stories.storyLoadError } else null) } }
+                .onError { _, _ -> updateState { it.copy(isLoading = false, error = if (it.find == null) UiText { s -> s.stories.storyLoadError } else null) } }
         }
     }
 

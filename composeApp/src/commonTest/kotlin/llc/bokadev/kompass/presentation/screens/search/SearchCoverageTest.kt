@@ -3,6 +3,9 @@ package llc.bokadev.kompass.presentation.screens.search
 import kotlin.test.*
 import kotlinx.coroutines.test.runTest
 import llc.bokadev.kompass.core.utils.SearchVocabularyTable
+import llc.bokadev.kompass.core.utils.networking.NetworkError
+import llc.bokadev.kompass.core.utils.networking.Resource
+import llc.bokadev.kompass.core.utils.networking.getOrNull
 import llc.bokadev.kompass.domain.model.*
 import llc.bokadev.kompass.domain.repository.*
 import llc.bokadev.kompass.domain.usecase.*
@@ -17,7 +20,7 @@ class SearchCoverageTest {
     // --- Real builder over fake repositories (CMS-shaped content, Oct 2026) ---
 
     @Test fun aRestaurantQueryFindsEatAndDrinkPlacesWithoutTheWordInTheirTitle() = runTest {
-        val index = build().getOrThrow()
+        val index = build().getOrNull()!!
         val hits = searchIndex("restaurant", index)
         assertEquals(setOf("galion", "pub"), hits.map { it.item.id }.toSet())
         assertTrue(hits.all { it.score == 4 && it.start == -1 }, "category words never highlight the title")
@@ -27,14 +30,14 @@ class SearchCoverageTest {
     }
 
     @Test fun categoryWordsAreLocalizedAndEnglishStillWorks() = runTest {
-        val fr = build(lang = "fr").getOrThrow()
+        val fr = build(lang = "fr").getOrNull()!!
         assertEquals(listOf("tryphon"), searchIndex("eglise", fr).map { it.item.id }, "accent-insensitive French subtype")
         assertEquals(listOf("tryphon"), searchIndex("cathedral", fr).map { it.item.id }, "English typed in a French app")
         assertEquals(setOf("galion", "pub"), searchIndex("restaurant", fr).map { it.item.id }.toSet())
     }
 
     @Test fun practicalQueriesReachExistingContent() = runTest {
-        val index = build().getOrThrow()
+        val index = build().getOrNull()!!
         // "bus": the title itself (word prefix) beats the transport category word on taxi.
         assertEquals(listOf("bus_routes", "taxi"), searchIndex("bus", index).map { it.item.id })
         // "airport": no airport content; the vocabulary leads to taxi and the bus station.
@@ -52,7 +55,7 @@ class SearchCoverageTest {
     }
 
     @Test fun newTypesOpenTheirOwnDestinationsById() = runTest {
-        val index = build().getOrThrow()
+        val index = build().getOrNull()!!
         val atm = searchIndex("nlb", index).single().item
         assertEquals(SearchKind.UTILITY, atm.kind)
         assertEquals(Screen.UtilityMapScreen(UtilityCategory.ATM.name, "atm-nlb"), routeFor(atm))
@@ -69,27 +72,27 @@ class SearchCoverageTest {
     }
 
     @Test fun aFailedSourceIsReportedNotHidden() = runTest {
-        val index = build(utilitiesFail = true).getOrThrow()
+        val index = build(utilitiesFail = true).getOrNull()!!
         assertEquals(setOf(SearchSource.UTILITIES), index.failedSources)
         assertFalse(index.isComplete)
         assertTrue(searchIndex("nlb", index).isEmpty())
-        assertTrue(build().getOrThrow().isComplete)
+        assertTrue(build().getOrNull()!!.isComplete)
     }
 
     @Test fun everySourceFailingIsNotReady() = runTest {
-        assertTrue(build(allFail = true).isFailure)
+        assertTrue(build(allFail = true) is Resource.Error)
     }
 
     @Test fun rankingIsDeterministicAcrossBuilds() = runTest {
-        val a = searchIndex("ta", build().getOrThrow()).map { it.item.id to it.score }
-        val b = searchIndex("ta", build().getOrThrow()).map { it.item.id to it.score }
+        val a = searchIndex("ta", build().getOrNull()!!).map { it.item.id to it.score }
+        val b = searchIndex("ta", build().getOrNull()!!).map { it.item.id to it.score }
         assertEquals(a, b)
     }
 
     // --- Fixtures ---
 
-    private suspend fun build(lang: String = "en", utilitiesFail: Boolean = false, allFail: Boolean = false): Result<SearchIndex> {
-        fun <T> r(value: T): Result<T> = if (allFail) Result.failure(IllegalStateException("offline")) else Result.success(value)
+    private suspend fun build(lang: String = "en", utilitiesFail: Boolean = false, allFail: Boolean = false): Resource<SearchIndex, NetworkError, String?> {
+        fun <T> r(value: T): Resource<T, NetworkError, String?> = if (allFail) Resource.Error(NetworkError.UNKNOWN, "offline") else Resource.Success(value)
         val places = object : PlaceRepository {
             override suspend fun getActivePlaces() = r(listOf(
                 place("galion", "Galion", PlaceCategory.EAT_AND_DRINK, "seafood"),
@@ -99,15 +102,15 @@ class SearchCoverageTest {
             ))
             override suspend fun getMustSeePlaces() = r(emptyList<Place>())
             override suspend fun getPlacesByCategory(category: PlaceCategory) = r(emptyList<Place>())
-            override suspend fun getPlaceById(id: String) = Result.failure<Place>(NotImplementedError())
+            override suspend fun getPlaceById(id: String): Resource<Place, NetworkError, String?> = Resource.Error(NetworkError.UNKNOWN, "Not implemented")
         }
         val experiences = object : ExperienceRepository {
             override suspend fun getActivities() = r(emptyList<Experience>())
-            override suspend fun getActivityById(id: String) = Result.failure<Experience>(NotImplementedError())
+            override suspend fun getActivityById(id: String): Resource<Experience, NetworkError, String?> = Resource.Error(NetworkError.UNKNOWN, "Not implemented")
         }
         val stories = object : LocalFindRepository {
             override suspend fun getLocalFinds() = r(emptyList<LocalFind>())
-            override suspend fun getLocalFindById(id: String) = Result.failure<LocalFind>(NotImplementedError())
+            override suspend fun getLocalFindById(id: String): Resource<LocalFind, NetworkError, String?> = Resource.Error(NetworkError.UNKNOWN, "Not implemented")
         }
         val essentials = object : EssentialRepository {
             override suspend fun getEssentials() = r(listOf(
@@ -120,21 +123,21 @@ class SearchCoverageTest {
             override suspend fun getEvents(dateFilter: String, eventType: String) = r(emptyList<Event>())
             override suspend fun getEventFilters() = r(emptyList<EventFilter>())
             override suspend fun getUpcomingEvents() = r(emptyList<Event>())
-            override suspend fun getEventById(id: String) = Result.failure<Event>(NotImplementedError())
+            override suspend fun getEventById(id: String): Resource<Event, NetworkError, String?> = Resource.Error(NetworkError.UNKNOWN, "Not implemented")
         }
         val utilities = object : UtilityRepository {
-            override suspend fun getUtilities() = if (utilitiesFail) Result.failure(IllegalStateException("offline")) else r(listOf(
+            override suspend fun getUtilities() = if (utilitiesFail) Resource.Error(NetworkError.UNKNOWN, "offline") else r(listOf(
                 Utility("atm-nlb", "NLB Banka", UtilityCategory.ATM, 42.42, 18.77, "Stari grad", null),
                 Utility("ph-1", "Benu", UtilityCategory.PHARMACY, 42.43, 18.77, "Škaljari", null)
             ))
         }
         val services = object : ServiceRepository {
             override suspend fun getServices() = r(listOf(Service("svc", mapOf("en" to "Green Motion Car Rental"), emptyMap(), mapOf("en" to "Kotor"))))
-            override suspend fun getServiceById(id: String) = Result.failure<Service>(NotImplementedError())
+            override suspend fun getServiceById(id: String): Resource<Service, NetworkError, String?> = Resource.Error(NetworkError.UNKNOWN, "Not implemented")
         }
         val notices = object : InfoCenterRepository {
             override suspend fun getCurrentNotices() = r(listOf(InfoNotice("water", "kotor", mapOf("en" to "Water outage"), emptyMap())))
-            override suspend fun getNoticeById(id: String) = Result.failure<InfoNotice>(NotImplementedError())
+            override suspend fun getNoticeById(id: String): Resource<InfoNotice, NetworkError, String?> = Resource.Error(NetworkError.UNKNOWN, "Not implemented")
         }
         return BuildSearchIndexUseCase(
             places, GetActivitiesUseCase(experiences), GetLocalFindsUseCase(stories), GetEssentialsUseCase(essentials),

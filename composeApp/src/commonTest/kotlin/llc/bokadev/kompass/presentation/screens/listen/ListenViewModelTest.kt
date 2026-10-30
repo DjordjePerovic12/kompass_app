@@ -1,5 +1,7 @@
 package llc.bokadev.kompass.presentation.screens.listen
 
+import llc.bokadev.kompass.core.utils.networking.NetworkError
+import llc.bokadev.kompass.core.utils.networking.Resource
 import llc.bokadev.kompass.testutil.NoOpAnalytics
 import llc.bokadev.kompass.testutil.RecordingNavigator
 import androidx.lifecycle.viewModelScope
@@ -128,20 +130,20 @@ class ListenViewModelTest {
         val vm = ListenViewModel(
             getCatalog = GetAudioCatalogUseCase(
                 object : PlaceRepository {
-                    override suspend fun getActivePlaces() = Result.success(listOf(cathedral, nicholas, rocks, silent))
-                    override suspend fun getMustSeePlaces() = Result.success(emptyList<Place>())
-                    override suspend fun getPlacesByCategory(category: PlaceCategory) = Result.success(emptyList<Place>())
-                    override suspend fun getPlaceById(id: String): Result<Place> = error("unused")
+                    override suspend fun getActivePlaces() = Resource.Success(listOf(cathedral, nicholas, rocks, silent))
+                    override suspend fun getMustSeePlaces() = Resource.Success(emptyList<Place>())
+                    override suspend fun getPlacesByCategory(category: PlaceCategory) = Resource.Success(emptyList<Place>())
+                    override suspend fun getPlaceById(id: String): Resource<Place, NetworkError, String?> = error("unused")
                 },
                 GetActivitiesUseCase(object : ExperienceRepository {
                     override suspend fun getActivities() =
-                        if (activitiesFail) Result.failure(IllegalStateException("offline"))
-                        else Result.success(listOf(Experience(id = "boat", cityId = "kotor", name = mapOf("en" to "Boat"), description = emptyMap(), audioFile = mapOf("en" to "boat-en.mp3"), latitude = 42.49, longitude = 18.69, photos = emptyList())))
-                    override suspend fun getActivityById(id: String): Result<Experience> = error("unused")
+                        if (activitiesFail) Resource.Error(NetworkError.UNKNOWN, "offline")
+                        else Resource.Success(listOf(Experience(id = "boat", cityId = "kotor", name = mapOf("en" to "Boat"), description = emptyMap(), audioFile = mapOf("en" to "boat-en.mp3"), latitude = 42.49, longitude = 18.69, photos = emptyList())))
+                    override suspend fun getActivityById(id: String): Resource<Experience, NetworkError, String?> = error("unused")
                 }),
                 GetLocalFindsUseCase(object : LocalFindRepository {
-                    override suspend fun getLocalFinds() = Result.success(listOf(story("legend", mapOf("en" to "legend-en.mp3")), story("rocks", mapOf("en" to "rocks-story-en.mp3")), story("frenchOnly", mapOf("fr" to "fo-fr.mp3"))))
-                    override suspend fun getLocalFindById(id: String): Result<LocalFind> = error("unused")
+                    override suspend fun getLocalFinds() = Resource.Success(listOf(story("legend", mapOf("en" to "legend-en.mp3")), story("rocks", mapOf("en" to "rocks-story-en.mp3")), story("frenchOnly", mapOf("fr" to "fo-fr.mp3"))))
+                    override suspend fun getLocalFindById(id: String): Resource<LocalFind, NetworkError, String?> = error("unused")
                 })
             ),
             audioRepository = audio,
@@ -174,13 +176,13 @@ class ListenViewModelTest {
 
     class FakeAudio(val stored: MutableSet<String>) : AudioGuideRepository {
         val gate = CompletableDeferred<Unit>()
-        override suspend fun getSignedAudioUrl(path: String) = Result.success("url:$path")
-        override suspend fun streamUrl(path: String) = Result.success("url:$path")
-        override suspend fun download(path: String, onProgress: (Float?) -> Unit): Result<Unit> {
+        override suspend fun getSignedAudioUrl(path: String) = Resource.Success("url:$path")
+        override suspend fun streamUrl(path: String) = Resource.Success("url:$path")
+        override suspend fun download(path: String, onProgress: (Float?) -> Unit): Resource<Unit, NetworkError, String?> {
             onProgress(0.5f)
             gate.await()
             stored += path
-            return Result.success(Unit)
+            return Resource.Success(Unit)
         }
         override fun removeDownload(path: String): Boolean { stored -= path; return true }
         override fun isAvailableOffline(path: String) = path in stored

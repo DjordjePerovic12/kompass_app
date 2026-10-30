@@ -6,6 +6,11 @@ import io.github.jan.supabase.postgrest.query.Order
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import llc.bokadev.kompass.core.utils.AppPreferences
+import llc.bokadev.kompass.core.utils.networking.NetworkError
+import llc.bokadev.kompass.core.utils.networking.Resource
+import llc.bokadev.kompass.core.utils.networking.mapCatching
+import llc.bokadev.kompass.core.utils.networking.recover
+import llc.bokadev.kompass.core.utils.networking.safeSupabaseCall
 import llc.bokadev.kompass.data.mapper.toDomain
 import llc.bokadev.kompass.data.remote.dto.EventDto
 import llc.bokadev.kompass.data.remote.dto.EventFilterDto
@@ -26,83 +31,67 @@ class EventRepositoryImpl(
 
     private val json = Json { ignoreUnknownKeys = true }
 
-    override suspend fun getEvents(dateFilter: String, eventType: String): Result<List<Event>> = runCatching {
+    override suspend fun getEvents(dateFilter: String, eventType: String): Resource<List<Event>, NetworkError, String?> {
         val normalizedEventType = eventType.normalizedFilterValue()
         val dateRule = EventDateFilter.fromKey(dateFilter)
         val now = Clock.System.now()
-        getActiveEventDtos()
-            .map { it.toDomain() }
-            .filter { event ->
-                event.isCurrentOrUpcoming(now) &&
-                event.matches(dateRule, now) &&
-                (normalizedEventType == "all" || event.category.normalizedFilterValue() == normalizedEventType)
-            }
+        return getActiveEventDtos().mapCatching { events ->
+            events
+                .map { it.toDomain() }
+                .filter { event ->
+                    event.isCurrentOrUpcoming(now) &&
+                    event.matches(dateRule, now) &&
+                    (normalizedEventType == "all" || event.category.normalizedFilterValue() == normalizedEventType)
+                }
+        }
     }
 
-    override suspend fun getEventFilters(): Result<List<EventFilter>> = runCatching {
+    override suspend fun getEventFilters(): Resource<List<EventFilter>, NetworkError, String?> =
         getEventFilterDtos()
-            .map { it.toDomain() }
-    }
+            .mapCatching { filters -> filters.map { it.toDomain() } }
 
-    override suspend fun getUpcomingEvents(): Result<List<Event>> = runCatching {
-        getActiveEventDtos()
-            .map { it.toDomain() }
-            .filter { it.isCurrentOrUpcoming(Clock.System.now()) }
-    }
+    override suspend fun getUpcomingEvents(): Resource<List<Event>, NetworkError, String?> =
+        getActiveEventDtos().mapCatching { events ->
+            events
+                .map { it.toDomain() }
+                .filter { it.isCurrentOrUpcoming(Clock.System.now()) }
+        }
 
-    override suspend fun getEventById(id: String): Result<Event> = runCatching {
-        runCatching {
+    override suspend fun getEventById(id: String): Resource<Event, NetworkError, String?> =
+        safeSupabaseCall {
             supabase.from("events")
                 .select { filter { eq("id", id) } }
                 .decodeSingle<EventDto>()
-        }.fold(
-            onSuccess = { remoteEvent ->
-                mergeEventIntoCache(remoteEvent)
-                remoteEvent
-            },
-            onFailure = { remoteError ->
-                readCachedEvents().firstOrNull { it.id == id } ?: throw remoteError
-            }
-        ).toDomain()
-    }
+                .also { remoteEvent -> mergeEventIntoCache(remoteEvent) }
+        }.recover { _, _ ->
+            readCachedEvents().firstOrNull { it.id == id }
+        }.mapCatching { it.toDomain() }
 
-    private suspend fun getActiveEventDtos(): List<EventDto> =
-        runCatching {
+    private suspend fun getActiveEventDtos(): Resource<List<EventDto>, NetworkError, String?> =
+        safeSupabaseCall {
             supabase.from("events")
                 .select {
                     filter { eq("is_active", true) }
                     order(column = "start_time", order = Order.ASCENDING)
                 }
                 .decodeList<EventDto>()
-        }.fold(
-            onSuccess = { remoteEvents ->
-                cacheEvents(remoteEvents)
-                remoteEvents
-            },
-            onFailure = { remoteError ->
-                val cachedEvents = readCachedEvents()
-                if (cachedEvents.isNotEmpty()) cachedEvents else throw remoteError
-            }
-        )
+                .also { remoteEvents -> cacheEvents(remoteEvents) }
+        }.recover { _, _ ->
+            readCachedEvents().ifEmpty { null }
+        }
 
-    private suspend fun getEventFilterDtos(): List<EventFilterDto> =
-        runCatching {
+    private suspend fun getEventFilterDtos(): Resource<List<EventFilterDto>, NetworkError, String?> =
+        safeSupabaseCall {
             supabase.from("event_filters")
                 .select {
                     filter { eq("is_active", true) }
                     order(column = "sort_order", order = Order.ASCENDING)
                 }
                 .decodeList<EventFilterDto>()
-        }.fold(
-            onSuccess = { remoteFilters ->
-                cacheEventFilters(remoteFilters)
-                remoteFilters
-            },
-            onFailure = { remoteError ->
-                val cachedFilters = readCachedEventFilters()
-                if (cachedFilters.isNotEmpty()) cachedFilters else throw remoteError
-            }
-        )
+                .also { remoteFilters -> cacheEventFilters(remoteFilters) }
+        }.recover { _, _ ->
+            readCachedEventFilters().ifEmpty { null }
+        }
 
     private fun cacheEvents(dtos: List<EventDto>) {
         appPreferences.setString(

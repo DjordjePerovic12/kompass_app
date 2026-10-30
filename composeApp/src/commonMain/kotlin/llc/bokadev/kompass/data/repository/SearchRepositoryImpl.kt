@@ -1,13 +1,9 @@
 package llc.bokadev.kompass.data.repository
 
 import io.ktor.client.HttpClient
-import io.ktor.client.call.body
-import io.ktor.client.statement.bodyAsText
-import io.ktor.client.plugins.ResponseException
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
-import io.ktor.http.isSuccess
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.serialization.SerialName
@@ -15,6 +11,11 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import llc.bokadev.kompass.BuildKonfig
 import llc.bokadev.kompass.core.utils.AppPreferences
+import llc.bokadev.kompass.core.utils.networking.NetworkError
+import llc.bokadev.kompass.core.utils.networking.Resource
+import llc.bokadev.kompass.core.utils.networking.mapCatching
+import llc.bokadev.kompass.core.utils.networking.recover
+import llc.bokadev.kompass.core.utils.networking.retrieveAPIResponse
 import llc.bokadev.kompass.domain.model.SearchCachePayload
 import llc.bokadev.kompass.domain.model.SearchFilterType
 import llc.bokadev.kompass.domain.model.SearchResponse
@@ -36,18 +37,20 @@ class SearchRepositoryImpl(
         query: String,
         language: String,
         type: SearchFilterType
-    ): Result<SearchResponse> = runCatching {
+    ): Resource<SearchResponse, NetworkError, String?> {
         val normalizedQuery = query.trim()
         if (normalizedQuery.isBlank()) {
-            return@runCatching SearchResponse(
-                results = getCachedSearch(language)?.results.orEmpty(),
-                fromCache = true,
-                offlineRequiresInternet = false
+            return Resource.Success(
+                SearchResponse(
+                    results = getCachedSearch(language)?.results.orEmpty(),
+                    fromCache = true,
+                    offlineRequiresInternet = false
+                )
             )
         }
 
-        runCatching {
-            val httpResponse = client.post("${functionsBaseUrl().trimEnd('/')}/search-content") {
+        return retrieveAPIResponse<SearchResponseDto> {
+            client.post("${functionsBaseUrl().trimEnd('/')}/search-content") {
                 contentType(ContentType.Application.Json)
                 header("Authorization", "Bearer ${supabaseAnonKey()}")
                 header("apikey", supabaseAnonKey())
@@ -59,15 +62,7 @@ class SearchRepositoryImpl(
                     )
                 )
             }
-            if (!httpResponse.status.isSuccess()) {
-                throw SearchServiceException(
-                    IllegalStateException(
-                        "Search endpoint returned ${httpResponse.status.value}: ${httpResponse.bodyAsText()}"
-                    )
-                )
-            }
-            val response = httpResponse.body<SearchResponseDto>()
-
+        }.mapCatching { response ->
             val results = response.results.map { it.toDomain() }
             cacheSearch(
                 SearchCachePayload(
@@ -83,7 +78,7 @@ class SearchRepositoryImpl(
                 fromCache = false,
                 offlineRequiresInternet = false
             )
-        }.getOrElse { remoteError ->
+        }.recover { _, _ ->
             val cached = getCachedSearch(language)
             val filtered = cached?.results.orEmpty().filter { it.matchesQueryLocally(normalizedQuery) }
             if (filtered.isNotEmpty()) {
@@ -93,10 +88,7 @@ class SearchRepositoryImpl(
                     offlineRequiresInternet = false
                 )
             } else {
-                if (remoteError is ResponseException || remoteError is SearchServiceException) {
-                    throw SearchServiceException(remoteError)
-                }
-                throw SearchOfflineMissException(remoteError)
+                null
             }
         }
     }
@@ -133,10 +125,6 @@ class SearchRepositoryImpl(
         const val CACHE_KEY_SEARCH_RESULTS = "offline_cache_last_search_results_v1"
     }
 }
-
-class SearchOfflineMissException(cause: Throwable) : Exception(cause)
-
-class SearchServiceException(cause: Throwable) : Exception(cause)
 
 private val SearchFilterType.apiValue: String
     get() = when (this) {

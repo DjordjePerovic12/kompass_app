@@ -1,5 +1,7 @@
 package llc.bokadev.kompass.presentation.screens.categories
 
+import llc.bokadev.kompass.core.utils.networking.NetworkError
+import llc.bokadev.kompass.core.utils.networking.Resource
 import llc.bokadev.kompass.presentation.shared.LanguageSheetHost
 import llc.bokadev.kompass.testutil.NoOpAnalytics
 import llc.bokadev.kompass.testutil.RecordingNavigator
@@ -59,7 +61,7 @@ class CategoriesViewModelTest {
     ) = runTest {
         Dispatchers.setMain(StandardTestDispatcher(testScheduler))
         try {
-            fun <T> result(value: T): Result<T> = if (fail) Result.failure(IllegalStateException("offline")) else Result.success(value)
+            fun <T> result(value: T): Resource<T, NetworkError, String?> = if (fail) Resource.Error(NetworkError.UNKNOWN, "offline") else Resource.Success(value)
             val placeRepo = object : PlaceRepository {
                 override suspend fun getActivePlaces() = result(places)
                 override suspend fun getMustSeePlaces() = result(places)
@@ -70,21 +72,21 @@ class CategoriesViewModelTest {
                 GetMustSeePlacesUseCase(placeRepo),
                 object : ExcursionRepository {
                     override suspend fun getCollection() = result(ExcursionResult(collection))
-                    override suspend fun getRelatedActivities(placeId: String): Result<ExcursionResult<Experience>> = error("unused")
+                    override suspend fun getRelatedActivities(placeId: String): Resource<ExcursionResult<Experience>, NetworkError, String?> = error("unused")
                 },
                 GetLocalFindsUseCase(object : LocalFindRepository {
                     override suspend fun getLocalFinds() = result(finds)
-                    override suspend fun getLocalFindById(id: String): Result<LocalFind> = error("unused")
+                    override suspend fun getLocalFindById(id: String): Resource<LocalFind, NetworkError, String?> = error("unused")
                 }),
                 GetUpcomingEventsUseCase(object : EventRepository {
                     override suspend fun getEvents(dateFilter: String, eventType: String) = result(events)
                     override suspend fun getEventFilters() = result(emptyList<EventFilter>())
                     override suspend fun getUpcomingEvents() = result(events)
-                    override suspend fun getEventById(id: String): Result<Event> = error("unused")
+                    override suspend fun getEventById(id: String): Resource<Event, NetworkError, String?> = error("unused")
                 }),
                 GetCurrentInfoNoticesUseCase(object : InfoCenterRepository {
                     override suspend fun getCurrentNotices() = result(notices)
-                    override suspend fun getNoticeById(id: String): Result<InfoNotice> = error("unused")
+                    override suspend fun getNoticeById(id: String): Resource<InfoNotice, NetworkError, String?> = error("unused")
                 }),
                 RecordingNavigator(),
                 LanguageSheetHost(),

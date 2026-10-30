@@ -6,6 +6,11 @@ import io.github.jan.supabase.postgrest.query.Order
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import llc.bokadev.kompass.core.utils.AppPreferences
+import llc.bokadev.kompass.core.utils.networking.NetworkError
+import llc.bokadev.kompass.core.utils.networking.Resource
+import llc.bokadev.kompass.core.utils.networking.mapCatching
+import llc.bokadev.kompass.core.utils.networking.recover
+import llc.bokadev.kompass.core.utils.networking.safeSupabaseCall
 import llc.bokadev.kompass.data.mapper.toDomain
 import llc.bokadev.kompass.data.remote.dto.ExperienceDto
 import llc.bokadev.kompass.domain.model.Experience
@@ -18,45 +23,32 @@ class ExperienceRepositoryImpl(
 
     private val json = Json { ignoreUnknownKeys = true }
 
-    override suspend fun getActivities(): Result<List<Experience>> = runCatching {
+    override suspend fun getActivities(): Resource<List<Experience>, NetworkError, String?> =
         getActiveExperienceDtos()
-            .map { it.toDomain() }
-    }
+            .mapCatching { experiences -> experiences.map { it.toDomain() } }
 
-    override suspend fun getActivityById(id: String): Result<Experience> = runCatching {
-        runCatching {
+    override suspend fun getActivityById(id: String): Resource<Experience, NetworkError, String?> =
+        safeSupabaseCall {
             supabase.from("experiences")
                 .select { filter { eq("id", id) } }
                 .decodeSingle<ExperienceDto>()
-        }.fold(
-            onSuccess = { remoteActivity ->
-                mergeExperienceIntoCache(remoteActivity)
-                remoteActivity
-            },
-            onFailure = { remoteError ->
-                readCachedExperiences().firstOrNull { it.id == id } ?: throw remoteError
-            }
-        ).toDomain()
-    }
+                .also { remoteActivity -> mergeExperienceIntoCache(remoteActivity) }
+        }.recover { _, _ ->
+            readCachedExperiences().firstOrNull { it.id == id }
+        }.mapCatching { it.toDomain() }
 
-    private suspend fun getActiveExperienceDtos(): List<ExperienceDto> =
-        runCatching {
+    private suspend fun getActiveExperienceDtos(): Resource<List<ExperienceDto>, NetworkError, String?> =
+        safeSupabaseCall {
             supabase.from("experiences")
                 .select {
                     filter { eq("is_active", true) }
                     order(column = "sort_order", order = Order.ASCENDING)
                 }
                 .decodeList<ExperienceDto>()
-        }.fold(
-            onSuccess = { remoteExperiences ->
-                cacheExperiences(remoteExperiences)
-                remoteExperiences
-            },
-            onFailure = { remoteError ->
-                val cachedExperiences = readCachedExperiences()
-                if (cachedExperiences.isNotEmpty()) cachedExperiences else throw remoteError
-            }
-        )
+                .also { remoteExperiences -> cacheExperiences(remoteExperiences) }
+        }.recover { _, _ ->
+            readCachedExperiences().ifEmpty { null }
+        }
 
     private fun cacheExperiences(dtos: List<ExperienceDto>) {
         appPreferences.setString(

@@ -10,6 +10,10 @@ import kotlinx.coroutines.launch
 import llc.bokadev.kompass.core.utils.AudioGuidePlaybackState
 import llc.bokadev.kompass.core.utils.AudioGuidePlayer
 import llc.bokadev.kompass.core.utils.PlaybackRequestGuard
+import llc.bokadev.kompass.core.utils.networking.NetworkError
+import llc.bokadev.kompass.core.utils.networking.Resource
+import llc.bokadev.kompass.core.utils.networking.onError
+import llc.bokadev.kompass.core.utils.networking.onSuccess
 
 /**
  * The single app-wide owner of center-button playback (place detail spec §2.5). Wraps the
@@ -25,7 +29,7 @@ import llc.bokadev.kompass.core.utils.PlaybackRequestGuard
 class AudioController(
     private val player: AudioGuidePlayer,
     private val guard: PlaybackRequestGuard,
-    private val resolveUrl: suspend (audioPath: String) -> Result<String>,
+    private val resolveUrl: suspend (audioPath: String) -> Resource<String, NetworkError, String?>,
     private val scope: CoroutineScope
 ) {
     private val _state = MutableStateFlow<AudioState>(AudioState.Idle)
@@ -59,12 +63,12 @@ class AudioController(
         }
         _state.value = AudioState.Loading(track, requestId)
         loadJob = scope.launch {
-            val result = try {
+            val result: Resource<String, NetworkError, String?> = try {
                 resolveUrl(track.audioPath)
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (error: Exception) {
-                Result.failure(error)
+                Resource.Error(NetworkError.UNKNOWN, error.message)
             }
             // Stale guard: a newer intent, a navigation, or another owner superseded this load.
             if (!guard.isCurrent(requestId) || ownerKey != owner) {
@@ -72,13 +76,12 @@ class AudioController(
                 if (state is AudioState.Loading && state.requestId == requestId) _state.value = AudioState.Idle
                 return@launch
             }
-            result.fold(
-                onSuccess = { url ->
+            result
+                .onSuccess { url ->
                     active = Active(track, url, requestId)
                     player.prepare(url = url, title = track.title, subtitle = track.subtitle)
-                },
-                onFailure = { _state.value = AudioState.Failed(track, AudioState.Reason.Network) }
-            )
+                }
+                .onError { _, _ -> _state.value = AudioState.Failed(track, AudioState.Reason.Network) }
         }
     }
 

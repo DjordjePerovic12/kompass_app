@@ -9,6 +9,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.*
 import kotlinx.coroutines.flow.first
 import llc.bokadev.kompass.core.presentation.mvi.NavigationCommand
+import llc.bokadev.kompass.core.utils.networking.NetworkError
+import llc.bokadev.kompass.core.utils.networking.Resource
+import llc.bokadev.kompass.core.utils.networking.getOrNull
 import llc.bokadev.kompass.testutil.RecordingNavigator
 import llc.bokadev.kompass.core.utils.*
 import llc.bokadev.kompass.domain.location.UserLocationProvider
@@ -103,7 +106,7 @@ class HomeRedesignTest {
             origin = GeoPoint(42.4246, 18.7712),
             category = PlaceCategory.SEE_AND_VISIT,
             maxDistanceKm = 1.0
-        ).getOrThrow()
+        ).getOrNull()!!
         // "restaurant" is EAT_AND_DRINK (filtered by category) and "perast" is >1km away
         // (filtered by radius) — only the two SEE_AND_VISIT old-town places remain, sorted.
         assertEquals(listOf("nearest", "second"), result.map { it.place.id })
@@ -115,7 +118,7 @@ class HomeRedesignTest {
             category = PlaceCategory.SEE_AND_VISIT,
             matchesZone = HomeArea.PERAST::matchesZone,
             limit = 4
-        ).getOrThrow()
+        ).getOrNull()!!
         assertEquals(listOf("perast"), result.map { it.place.id })
         assertTrue(result.all { it.distanceKm == 0.0 })
     }
@@ -212,8 +215,8 @@ class HomeRedesignTest {
             getMustSeePlaces = GetMustSeePlacesUseCase(places),
             getUpcomingEvents = GetUpcomingEventsUseCase(events),
             getCurrentInfoNotices = GetCurrentInfoNoticesUseCase(object : InfoCenterRepository {
-                override suspend fun getCurrentNotices() = Result.success(emptyList<InfoNotice>())
-                override suspend fun getNoticeById(id: String): Result<InfoNotice> = error("Unused")
+                override suspend fun getCurrentNotices() = Resource.Success(emptyList<InfoNotice>())
+                override suspend fun getNoticeById(id: String): Resource<InfoNotice, NetworkError, String?> = error("Unused")
             }),
             getNearbyPlaces = GetNearbyPlacesUseCase(places),
             getNearbyFallbackPlaces = GetNearbyFallbackPlacesUseCase(places),
@@ -268,19 +271,19 @@ class HomeRedesignTest {
             place("kotor_overview", "kotor", 42.4247).copy(subCategory = DESTINATION_OVERVIEW),
             place("perast_overview", "perast", 42.4861).copy(subCategory = DESTINATION_OVERVIEW)
         )
-        override suspend fun getActivePlaces(): Result<List<Place>> { activeCalls++; return Result.success(items) }
-        override suspend fun getMustSeePlaces() = Result.success(items.take(1))
-        override suspend fun getPlacesByCategory(category: PlaceCategory) = Result.success(items.filter { it.category == category })
-        override suspend fun getPlaceById(id: String) = Result.success(items.first { it.id == id })
+        override suspend fun getActivePlaces(): Resource<List<Place>, NetworkError, String?> { activeCalls++; return Resource.Success(items) }
+        override suspend fun getMustSeePlaces() = Resource.Success(items.take(1))
+        override suspend fun getPlacesByCategory(category: PlaceCategory) = Resource.Success(items.filter { it.category == category })
+        override suspend fun getPlaceById(id: String) = Resource.Success(items.first { it.id == id })
     }
 
     private class TestEvents : EventRepository {
         var fail = true
-        override suspend fun getUpcomingEvents(): Result<List<Event>> =
-            if (fail) Result.failure(IllegalStateException("Offline")) else Result.success(emptyList())
+        override suspend fun getUpcomingEvents(): Resource<List<Event>, NetworkError, String?> =
+            if (fail) Resource.Error(NetworkError.UNKNOWN, "Offline") else Resource.Success(emptyList())
         override suspend fun getEvents(dateFilter: String, eventType: String) = getUpcomingEvents()
-        override suspend fun getEventFilters() = Result.success(emptyList<EventFilter>())
-        override suspend fun getEventById(id: String): Result<Event> = error("Unused")
+        override suspend fun getEventFilters() = Resource.Success(emptyList<EventFilter>())
+        override suspend fun getEventById(id: String): Resource<Event, NetworkError, String?> = error("Unused")
     }
 
     private class TestPreferences : AppPreferences {

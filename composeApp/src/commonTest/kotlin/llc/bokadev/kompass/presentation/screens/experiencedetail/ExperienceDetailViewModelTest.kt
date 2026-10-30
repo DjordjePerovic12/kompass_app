@@ -1,6 +1,8 @@
 package llc.bokadev.kompass.presentation.screens.experiencedetail
 
 import llc.bokadev.kompass.core.audio.NavAudioHost
+import llc.bokadev.kompass.core.utils.networking.NetworkError
+import llc.bokadev.kompass.core.utils.networking.Resource
 import llc.bokadev.kompass.domain.model.FavoriteKey
 import llc.bokadev.kompass.domain.model.SavedSnapshot
 import llc.bokadev.kompass.domain.repository.SavedSnapshotRepository
@@ -26,7 +28,7 @@ class ExperienceDetailViewModelTest {
         audioFile = mapOf("en" to "kayak-en.mp3"), photos = emptyList()
     )
 
-    @Test fun loadsTheActivityWithAnEnglishFallbackTrack() = run(result = Result.success(kayak), lang = "de", offline = setOf("kayak-en.mp3")) { vm ->
+    @Test fun loadsTheActivityWithAnEnglishFallbackTrack() = run(result = Resource.Success(kayak), lang = "de", offline = setOf("kayak-en.mp3")) { vm ->
         val state = vm.state.value
         assertFalse(state.isLoading)
         assertEquals("kayak", state.activity?.id)
@@ -37,13 +39,13 @@ class ExperienceDetailViewModelTest {
         assertTrue(track.isDownloaded)
     }
 
-    @Test fun noAudioMeansNoTrack() = run(result = Result.success(kayak.copy(audioFile = mapOf("en" to " ")))) { vm ->
+    @Test fun noAudioMeansNoTrack() = run(result = Resource.Success(kayak.copy(audioFile = mapOf("en" to " ")))) { vm ->
         assertNull(vm.state.value.audioTrack)
     }
 
     @Test fun failureShowsAnErrorAndRetryReloads() {
         var calls = 0
-        run(result = null, onCall = { calls++; if (calls == 1) Result.failure(IllegalStateException("offline")) else Result.success(kayak) }) { vm ->
+        run(result = null, onCall = { calls++; if (calls == 1) Resource.Error(NetworkError.UNKNOWN, "offline") else Resource.Success(kayak) }) { vm ->
             assertNotNull(vm.state.value.error)
             assertNull(vm.state.value.activity)
             vm.onAction(ExperienceDetailAction.Retry)
@@ -54,23 +56,23 @@ class ExperienceDetailViewModelTest {
     }
 
     private fun run(
-        result: Result<Experience>?,
+        result: Resource<Experience, NetworkError, String?>?,
         lang: String = "en",
         offline: Set<String> = emptySet(),
-        onCall: () -> Result<Experience> = { result!! },
+        onCall: () -> Resource<Experience, NetworkError, String?> = { result!! },
         assertions: TestScope.(ExperienceDetailViewModel) -> Unit
     ) = runTest {
         Dispatchers.setMain(StandardTestDispatcher(testScheduler))
         val vm = ExperienceDetailViewModel(
             id = "kayak",
             getActivityById = GetActivityByIdUseCase(object : ExperienceRepository {
-                override suspend fun getActivities() = Result.success(emptyList<Experience>())
+                override suspend fun getActivities() = Resource.Success(emptyList<Experience>())
                 override suspend fun getActivityById(id: String) = onCall()
             }),
             audioGuideRepository = object : AudioGuideRepository {
-                override suspend fun getSignedAudioUrl(path: String) = Result.success(path)
-                override suspend fun streamUrl(path: String) = Result.success(path)
-                override suspend fun download(path: String, onProgress: (Float?) -> Unit) = Result.success(Unit)
+                override suspend fun getSignedAudioUrl(path: String) = Resource.Success(path)
+                override suspend fun streamUrl(path: String) = Resource.Success(path)
+                override suspend fun download(path: String, onProgress: (Float?) -> Unit) = Resource.Success(Unit)
                 override fun removeDownload(path: String) = true
                 override fun isAvailableOffline(path: String) = path in offline
             },

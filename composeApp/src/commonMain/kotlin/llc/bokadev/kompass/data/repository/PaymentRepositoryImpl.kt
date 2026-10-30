@@ -1,7 +1,6 @@
 package llc.bokadev.kompass.data.repository
 
 import io.ktor.client.HttpClient
-import io.ktor.client.call.body
 import io.ktor.client.request.accept
 import io.ktor.client.request.headers
 import io.ktor.client.request.post
@@ -9,6 +8,10 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import llc.bokadev.kompass.BuildKonfig
+import llc.bokadev.kompass.core.utils.networking.NetworkError
+import llc.bokadev.kompass.core.utils.networking.Resource
+import llc.bokadev.kompass.core.utils.networking.map
+import llc.bokadev.kompass.core.utils.networking.retrieveAPIResponse
 import llc.bokadev.kompass.data.remote.dto.CreateCheckoutSessionRequest
 import llc.bokadev.kompass.data.remote.dto.PaymentCheckoutSessionDto
 import llc.bokadev.kompass.data.remote.dto.PaymentVerificationResultDto
@@ -26,38 +29,48 @@ class PaymentRepositoryImpl(
         product: PremiumProduct,
         locale: String,
         platform: String
-    ): Result<PaymentCheckoutSession> = runCatching {
+    ): Resource<PaymentCheckoutSession, NetworkError, String?> {
         val baseUrl = BuildKonfig.PAYMENT_BACKEND_BASE_URL.trimEnd('/')
-        require(baseUrl.isNotBlank()) {
-            "Payment backend is not configured yet. Set PAYMENT_BACKEND_BASE_URL in local.properties."
+        if (baseUrl.isBlank()) {
+            return Resource.Error(
+                NetworkError.UNKNOWN,
+                "Payment backend is not configured yet. Set PAYMENT_BACKEND_BASE_URL in local.properties."
+            )
         }
 
-        client.post("$baseUrl/payments/checkout-sessions") {
-            accept(ContentType.Application.Json)
-            headers {
-                append(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-            }
-            setBody(
-                CreateCheckoutSessionRequest(
-                    productId = product.id,
-                    locale = locale,
-                    platform = platform
+        return retrieveAPIResponse<PaymentCheckoutSessionDto> {
+            client.post("$baseUrl/payments/checkout-sessions") {
+                accept(ContentType.Application.Json)
+                headers {
+                    append(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                }
+                setBody(
+                    CreateCheckoutSessionRequest(
+                        productId = product.id,
+                        locale = locale,
+                        platform = platform
+                    )
                 )
-            )
-        }.body<PaymentCheckoutSessionDto>().toDomain()
+            }
+        }.map { it.toDomain() }
     }
 
-    override suspend fun verifyCheckout(sessionId: String): Result<PaymentVerificationResult> = runCatching {
+    override suspend fun verifyCheckout(sessionId: String): Resource<PaymentVerificationResult, NetworkError, String?> {
         val baseUrl = BuildKonfig.PAYMENT_BACKEND_BASE_URL.trimEnd('/')
-        require(baseUrl.isNotBlank()) {
-            "Payment backend is not configured yet. Set PAYMENT_BACKEND_BASE_URL in local.properties."
+        if (baseUrl.isBlank()) {
+            return Resource.Error(
+                NetworkError.UNKNOWN,
+                "Payment backend is not configured yet. Set PAYMENT_BACKEND_BASE_URL in local.properties."
+            )
         }
 
-        client.post("$baseUrl/payments/checkout-sessions/$sessionId/verify") {
-            accept(ContentType.Application.Json)
-            headers {
-                append(HttpHeaders.CacheControl, "no-cache")
+        return retrieveAPIResponse<PaymentVerificationResultDto> {
+            client.post("$baseUrl/payments/checkout-sessions/$sessionId/verify") {
+                accept(ContentType.Application.Json)
+                headers {
+                    append(HttpHeaders.CacheControl, "no-cache")
+                }
             }
-        }.body<PaymentVerificationResultDto>().toDomain()
+        }.map { it.toDomain() }
     }
 }

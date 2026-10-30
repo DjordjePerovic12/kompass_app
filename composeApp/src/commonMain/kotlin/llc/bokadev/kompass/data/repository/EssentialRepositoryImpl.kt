@@ -6,6 +6,11 @@ import io.github.jan.supabase.postgrest.query.Order
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import llc.bokadev.kompass.core.utils.AppPreferences
+import llc.bokadev.kompass.core.utils.networking.NetworkError
+import llc.bokadev.kompass.core.utils.networking.Resource
+import llc.bokadev.kompass.core.utils.networking.mapCatching
+import llc.bokadev.kompass.core.utils.networking.recover
+import llc.bokadev.kompass.core.utils.networking.safeSupabaseCall
 import llc.bokadev.kompass.data.mapper.toDomain
 import llc.bokadev.kompass.data.remote.dto.CityEssentialDto
 import llc.bokadev.kompass.domain.model.CityEssential
@@ -18,29 +23,22 @@ class EssentialRepositoryImpl(
 
     private val json = Json { ignoreUnknownKeys = true }
 
-    override suspend fun getEssentials(): Result<List<CityEssential>> = runCatching {
+    override suspend fun getEssentials(): Resource<List<CityEssential>, NetworkError, String?> =
         getEssentialDtos()
-            .map { it.toDomain() }
-    }
+            .mapCatching { essentials -> essentials.map { it.toDomain() } }
 
-    private suspend fun getEssentialDtos(): List<CityEssentialDto> =
-        runCatching {
+    private suspend fun getEssentialDtos(): Resource<List<CityEssentialDto>, NetworkError, String?> =
+        safeSupabaseCall {
             supabase.from("city_essentials")
                 .select {
                     filter { eq("is_active", true) }
                     order(column = "sort_order", order = Order.ASCENDING)
                 }
                 .decodeList<CityEssentialDto>()
-        }.fold(
-            onSuccess = { remoteEssentials ->
-                cacheEssentials(remoteEssentials)
-                remoteEssentials
-            },
-            onFailure = { remoteError ->
-                val cachedEssentials = readCachedEssentials()
-                if (cachedEssentials.isNotEmpty()) cachedEssentials else throw remoteError
-            }
-        )
+                .also { remoteEssentials -> cacheEssentials(remoteEssentials) }
+        }.recover { _, _ ->
+            readCachedEssentials().ifEmpty { null }
+        }
 
     private fun cacheEssentials(dtos: List<CityEssentialDto>) {
         appPreferences.setString(

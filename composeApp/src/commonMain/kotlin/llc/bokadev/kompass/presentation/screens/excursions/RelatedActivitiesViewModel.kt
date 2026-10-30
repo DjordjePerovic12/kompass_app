@@ -6,6 +6,8 @@ import kotlinx.coroutines.launch
 import llc.bokadev.kompass.core.presentation.mvi.BaseViewModel
 import llc.bokadev.kompass.core.presentation.mvi.Navigator
 import llc.bokadev.kompass.core.presentation.mvi.UiText
+import llc.bokadev.kompass.core.utils.networking.onError
+import llc.bokadev.kompass.core.utils.networking.onSuccess
 import llc.bokadev.kompass.domain.model.FavoriteItemType
 import llc.bokadev.kompass.domain.repository.ExcursionRepository
 import llc.bokadev.kompass.domain.repository.FavoritesRepository
@@ -43,10 +45,9 @@ class RelatedActivitiesViewModel(
         job?.cancel()
         updateState { it.copy(items = emptyList(), cached = false, error = null, isLoading = true) }
         job = viewModelScope.launch {
-            repository.getRelatedActivities(id).fold(
-                onSuccess = { result -> updateState { it.copy(items = result.items, cached = result.isCached, isLoading = false) } },
-                onFailure = { updateState { it.copy(isLoading = false, error = UiText { s -> s.redesign.sectionError }) } }
-            )
+            repository.getRelatedActivities(id)
+                .onSuccess { result -> updateState { it.copy(items = result.items, cached = result.isCached, isLoading = false) } }
+                .onError { _, _ -> updateState { it.copy(isLoading = false, error = UiText { s -> s.redesign.sectionError }) } }
         }
     }
 }

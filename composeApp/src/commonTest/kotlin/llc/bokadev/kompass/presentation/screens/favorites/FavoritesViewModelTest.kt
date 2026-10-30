@@ -1,5 +1,7 @@
 package llc.bokadev.kompass.presentation.screens.favorites
 
+import llc.bokadev.kompass.core.utils.networking.NetworkError
+import llc.bokadev.kompass.core.utils.networking.Resource
 import llc.bokadev.kompass.presentation.shared.LanguageSheetHost
 import llc.bokadev.kompass.testutil.RecordingNavigator
 import androidx.lifecycle.viewModelScope
@@ -125,17 +127,17 @@ class FavoritesViewModelTest {
         val favs = FakeFavorites(favorites)
         val vm = FavoritesViewModel(
             placeRepository = object : PlaceRepository {
-                override suspend fun getActivePlaces(): Result<List<Place>> {
+                override suspend fun getActivePlaces(): Resource<List<Place>, NetworkError, String?> {
                     delay(placesDelayMs)
-                    return places?.let { Result.success(it) } ?: Result.failure(IllegalStateException("offline"))
+                    return places?.let { Resource.Success(it) } ?: Resource.Error(NetworkError.UNKNOWN, "offline")
                 }
-                override suspend fun getMustSeePlaces() = Result.success(emptyList<Place>())
-                override suspend fun getPlacesByCategory(category: PlaceCategory) = Result.success(emptyList<Place>())
-                override suspend fun getPlaceById(id: String): Result<Place> = error("unused")
+                override suspend fun getMustSeePlaces() = Resource.Success(emptyList<Place>())
+                override suspend fun getPlacesByCategory(category: PlaceCategory) = Resource.Success(emptyList<Place>())
+                override suspend fun getPlaceById(id: String): Resource<Place, NetworkError, String?> = error("unused")
             },
             getActivities = GetActivitiesUseCase(object : ExperienceRepository {
-                override suspend fun getActivities() = Result.success(emptyList<Experience>())
-                override suspend fun getActivityById(id: String): Result<Experience> = error("unused")
+                override suspend fun getActivities() = Resource.Success(emptyList<Experience>())
+                override suspend fun getActivityById(id: String): Resource<Experience, NetworkError, String?> = error("unused")
             }),
             favoritesRepository = favs,
             userLocationProvider = object : UserLocationProvider {

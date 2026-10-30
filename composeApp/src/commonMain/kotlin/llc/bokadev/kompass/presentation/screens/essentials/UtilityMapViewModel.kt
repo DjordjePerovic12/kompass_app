@@ -8,6 +8,8 @@ import kotlinx.coroutines.launch
 import llc.bokadev.kompass.core.presentation.mvi.BaseViewModel
 import llc.bokadev.kompass.core.presentation.mvi.Navigator
 import llc.bokadev.kompass.core.presentation.mvi.UiText
+import llc.bokadev.kompass.core.utils.networking.Resource
+import llc.bokadev.kompass.core.utils.networking.getOrNull
 import llc.bokadev.kompass.domain.location.UserLocationProvider
 import llc.bokadev.kompass.domain.model.GeoPoint
 import llc.bokadev.kompass.domain.model.Utility
@@ -74,7 +76,7 @@ class UtilityMapViewModel(
             val previousSelection = state.value.selectedUtilityId ?: requestedSelection
             val items = utilityMapItems(state.value.category, state.value.showAll, cachedUtilities, origin, previousSelection)
             val selection = resolveSelection(previousSelection, items)
-            val failed = utilitiesResult.isFailure
+            val failed = utilitiesResult is Resource.Error
 
             updateState {
                 it.copy(

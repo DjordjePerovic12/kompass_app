@@ -2,6 +2,10 @@ package llc.bokadev.kompass.domain.usecase
 
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import llc.bokadev.kompass.core.utils.networking.NetworkError
+import llc.bokadev.kompass.core.utils.networking.Resource
+import llc.bokadev.kompass.core.utils.networking.getOrNull
+import llc.bokadev.kompass.core.utils.networking.map
 import llc.bokadev.kompass.domain.model.AudioCatalog
 import llc.bokadev.kompass.domain.model.AudioCatalogEntry
 import llc.bokadev.kompass.domain.model.AudioSource
@@ -16,7 +20,7 @@ class GetAudioCatalogUseCase(
     private val getActivities: GetActivitiesUseCase,
     private val getLocalFinds: GetLocalFindsUseCase
 ) {
-    suspend operator fun invoke(): Result<AudioCatalog> = coroutineScope {
+    suspend operator fun invoke(): Resource<AudioCatalog, NetworkError, String?> = coroutineScope {
         val places = async {
             placeRepository.getActivePlaces().map { list ->
                 list.map { p ->
@@ -49,12 +53,12 @@ class GetAudioCatalogUseCase(
             }
         }
         val results = mapOf(AudioSource.PLACE to places.await(), AudioSource.ACTIVITY to activities.await(), AudioSource.STORY to stories.await())
-        val failed = results.filterValues { it.isFailure }.keys
+        val failed = results.filterValues { it is Resource.Error }.keys
         if (failed.size == results.size) {
-            Result.failure(results.values.first().exceptionOrNull() ?: IllegalStateException("No content"))
+            results.values.first() as? Resource.Error<NetworkError, String?> ?: Resource.Error(NetworkError.UNKNOWN, "No content")
         } else {
             val entries = results.values.mapNotNull { it.getOrNull() }.flatten().filter { it.languages.isNotEmpty() }
-            Result.success(AudioCatalog(entries, failed))
+            Resource.Success(AudioCatalog(entries, failed))
         }
     }
 }

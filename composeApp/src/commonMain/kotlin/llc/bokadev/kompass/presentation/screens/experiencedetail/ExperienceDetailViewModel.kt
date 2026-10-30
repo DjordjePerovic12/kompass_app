@@ -1,5 +1,7 @@
 package llc.bokadev.kompass.presentation.screens.experiencedetail
 
+import llc.bokadev.kompass.core.utils.networking.onError
+import llc.bokadev.kompass.core.utils.networking.onSuccess
 import llc.bokadev.kompass.domain.model.AudioSource
 import kotlinx.coroutines.flow.drop
 import androidx.lifecycle.viewModelScope
@@ -79,7 +81,7 @@ class ExperienceDetailViewModel(
         updateState { it.copy(isLoading = it.activity == null, error = null) }
         getActivityById(id)
             .onSuccess { activity -> updateState { it.copy(isLoading = false, activity = activity, audioTrack = activity.toAudioTrack()) } }
-            .onFailure { updateState { it.copy(isLoading = false, error = if (it.activity == null) LOAD_FAILED else null) } }
+            .onError { _, _ -> updateState { it.copy(isLoading = false, error = if (it.activity == null) LOAD_FAILED else null) } }
     }
 
     /** Same rule as places: the app-language track, else English (flagged for the control). */

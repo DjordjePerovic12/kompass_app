@@ -2,7 +2,6 @@ package llc.bokadev.kompass.data.repository
 
 import co.touchlab.kermit.Logger
 import io.ktor.client.HttpClient
-import io.ktor.client.call.body
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -15,6 +14,8 @@ import kotlinx.coroutines.launch
 import llc.bokadev.kompass.BuildKonfig
 import llc.bokadev.kompass.getPlatform
 import llc.bokadev.kompass.core.utils.AppPreferences
+import llc.bokadev.kompass.core.utils.networking.onError
+import llc.bokadev.kompass.core.utils.networking.retrieveAPIResponse
 import llc.bokadev.kompass.domain.model.AnalyticsEvent
 import llc.bokadev.kompass.domain.repository.AnalyticsRepository
 import kotlin.random.Random
@@ -154,15 +155,15 @@ class AnalyticsRepositoryImpl(
 
     private fun sendEvent(event: AnalyticsEvent) {
         scope.launch {
-            runCatching {
+            retrieveAPIResponse<String> {
                 httpClient.post("${analyticsBaseUrl().trimEnd('/')}/analytics-ingest") {
                     contentType(ContentType.Application.Json)
                     header("Authorization", "Bearer ${supabaseAnonKey()}")
                     header("apikey", supabaseAnonKey())
                     setBody(event)
-                }.body<String>()
-            }.onFailure {
-                Logger.w { "Analytics event failed: ${event.eventName} - ${it.message}" }
+                }
+            }.onError { _, message ->
+                Logger.w { "Analytics event failed: ${event.eventName} - $message" }
             }
         }
     }

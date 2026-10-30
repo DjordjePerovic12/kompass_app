@@ -6,6 +6,8 @@ import kotlinx.coroutines.launch
 import llc.bokadev.kompass.core.presentation.mvi.BaseViewModel
 import llc.bokadev.kompass.core.presentation.mvi.Navigator
 import llc.bokadev.kompass.core.presentation.mvi.UiText
+import llc.bokadev.kompass.core.utils.networking.onError
+import llc.bokadev.kompass.core.utils.networking.onSuccess
 import llc.bokadev.kompass.domain.repository.AnalyticsRepository
 import llc.bokadev.kompass.domain.usecase.GetCurrentInfoNoticesUseCase
 import llc.bokadev.kompass.core.navigation.Screen
@@ -43,7 +45,7 @@ class InfoCenterViewModel(
             updateState { it.copy(isLoading = it.notices.isEmpty(), error = null, refreshFailed = false) }
             getCurrentInfoNotices()
                 .onSuccess { items -> updateState { it.copy(isLoading = false, notices = items) } }
-                .onFailure {
+                .onError { _, _ ->
                     updateState {
                         it.copy(isLoading = false, error = if (it.notices.isEmpty()) LOAD_FAILED else null, refreshFailed = it.notices.isNotEmpty())
                     }

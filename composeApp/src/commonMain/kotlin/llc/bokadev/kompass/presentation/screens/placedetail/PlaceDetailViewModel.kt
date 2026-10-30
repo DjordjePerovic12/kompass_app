@@ -1,5 +1,7 @@
 package llc.bokadev.kompass.presentation.screens.placedetail
 
+import llc.bokadev.kompass.core.utils.networking.onError
+import llc.bokadev.kompass.core.utils.networking.onSuccess
 import llc.bokadev.kompass.domain.model.AudioSource
 import kotlinx.coroutines.flow.drop
 import androidx.lifecycle.viewModelScope
@@ -78,7 +80,7 @@ class PlaceDetailViewModel(
         updateState { it.copy(isLoading = it.place == null, error = null) }
         getPlaceById(id)
             .onSuccess { place -> updateState { it.copy(isLoading = false, place = place, audioTrack = place.toAudioTrack()) } }
-            .onFailure { updateState { it.copy(isLoading = false, error = if (it.place == null) LOAD_FAILED else null) } }
+            .onError { _, _ -> updateState { it.copy(isLoading = false, error = if (it.place == null) LOAD_FAILED else null) } }
     }
 
     /** The app-language track, else English (flagged so the control can say "English audio"). */

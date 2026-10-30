@@ -10,6 +10,8 @@ import kotlinx.coroutines.launch
 import llc.bokadev.kompass.core.presentation.mvi.BaseViewModel
 import llc.bokadev.kompass.core.presentation.mvi.Navigator
 import llc.bokadev.kompass.core.utils.AppPreferences
+import llc.bokadev.kompass.core.utils.networking.Resource
+import llc.bokadev.kompass.core.utils.networking.getOrNull
 import llc.bokadev.kompass.domain.repository.AnalyticsRepository
 import llc.bokadev.kompass.core.navigation.ALL_CATEGORIES
 import llc.bokadev.kompass.core.navigation.Screen
@@ -99,7 +101,7 @@ class EssentialsViewModel(
             val currentLocation = location.await()
             val essentialsResult = essentials.await()
             val utilitiesResult = utilities.await()
-            cachedUtilities = utilitiesResult.getOrDefault(cachedUtilities)
+            cachedUtilities = utilitiesResult.getOrNull() ?: cachedUtilities
             val lang = appPreferences.getSelectedLanguage()
 
             val loaded = essentialsResult.getOrNull()
@@ -110,7 +112,7 @@ class EssentialsViewModel(
                     isLoading = false,
                     essentialsFailed = loaded == null,
                     sections = sectionsFor(currentLocation),
-                    utilitiesFailed = utilitiesResult.isFailure && cachedUtilities.isEmpty(),
+                    utilitiesFailed = utilitiesResult is Resource.Error && cachedUtilities.isEmpty(),
                     currentLocation = currentLocation
                 )
             }

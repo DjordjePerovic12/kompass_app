@@ -1,5 +1,7 @@
 package llc.bokadev.kompass.domain.usecase
 
+import llc.bokadev.kompass.core.utils.networking.NetworkError
+import llc.bokadev.kompass.core.utils.networking.Resource
 import llc.bokadev.kompass.domain.model.PaymentCheckoutSession
 import llc.bokadev.kompass.domain.model.PremiumProduct
 import llc.bokadev.kompass.domain.repository.PaymentRepository
@@ -11,5 +13,5 @@ class StartPremiumCheckoutUseCase(
         product: PremiumProduct,
         locale: String,
         platform: String
-    ): Result<PaymentCheckoutSession> = paymentRepository.startCheckout(product, locale, platform)
+    ): Resource<PaymentCheckoutSession, NetworkError, String?> = paymentRepository.startCheckout(product, locale, platform)
 }

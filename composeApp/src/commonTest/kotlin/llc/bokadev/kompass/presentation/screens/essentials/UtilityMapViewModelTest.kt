@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import kotlin.test.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.test.*
+import llc.bokadev.kompass.core.utils.networking.NetworkError
+import llc.bokadev.kompass.core.utils.networking.Resource
 import llc.bokadev.kompass.domain.location.UserLocationProvider
 import llc.bokadev.kompass.domain.model.*
 import llc.bokadev.kompass.domain.repository.UtilityRepository
@@ -54,10 +56,10 @@ class UtilityMapViewModelTest {
     }
 
     @Test fun selectionRemovedFromDataIsExplainedNotSwapped() {
-        val repo = FakeRepo(Result.success(listOf(euronetGate, euronetSquare)))
+        val repo = FakeRepo(Resource.Success(listOf(euronetGate, euronetSquare)))
         run(repo = repo) { vm, _, scope ->
             vm.onAction(UtilityMapAction.SelectUtility("euronet-square"))
-            repo.result = Result.success(listOf(euronetGate))
+            repo.result = Resource.Success(listOf(euronetGate))
             vm.onAction(UtilityMapAction.Retry)
             scope.runCurrent()
             assertNull(vm.state.value.selectedUtilityId)
@@ -66,10 +68,10 @@ class UtilityMapViewModelTest {
     }
 
     @Test fun failedRetryKeepsTheLoadedPoints() {
-        val repo = FakeRepo(Result.success(listOf(euronetGate, euronetSquare)))
+        val repo = FakeRepo(Resource.Success(listOf(euronetGate, euronetSquare)))
         run(repo = repo) { vm, _, scope ->
             vm.onAction(UtilityMapAction.SelectUtility("euronet-square"))
-            repo.result = Result.failure(IllegalStateException("offline"))
+            repo.result = Resource.Error(NetworkError.UNKNOWN, "offline")
             vm.onAction(UtilityMapAction.Retry)
             scope.runCurrent()
             val state = vm.state.value
@@ -81,7 +83,7 @@ class UtilityMapViewModelTest {
     }
 
     @Test fun firstLoadFailureShowsNoPoints() =
-        run(repo = FakeRepo(Result.failure(IllegalStateException("offline")))) { vm, _, _ ->
+        run(repo = FakeRepo(Resource.Error(NetworkError.UNKNOWN, "offline"))) { vm, _, _ ->
             assertNotNull(vm.state.value.error)
             assertTrue(vm.state.value.items.isEmpty())
             assertFalse(vm.state.value.isLoading)
@@ -111,7 +113,7 @@ class UtilityMapViewModelTest {
         assertEquals(UtilityMapCameraMove.Frame(listOf(GeoPoint(42.4560, 18.7640))), reframed)
     }
 
-    private class FakeRepo(var result: Result<List<Utility>>) : UtilityRepository {
+    private class FakeRepo(var result: Resource<List<Utility>, NetworkError, String?>) : UtilityRepository {
         override suspend fun getUtilities() = result
     }
 
@@ -124,7 +126,7 @@ class UtilityMapViewModelTest {
         utilities: List<Utility> = emptyList(),
         selectedId: String? = null,
         permission: Boolean = true,
-        repo: FakeRepo = FakeRepo(Result.success(utilities)),
+        repo: FakeRepo = FakeRepo(Resource.Success(utilities)),
         assertions: (UtilityMapViewModel, FakeLocation, TestScope) -> Unit
     ) = runTest {
         Dispatchers.setMain(StandardTestDispatcher(testScheduler))

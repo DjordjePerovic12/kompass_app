@@ -1,5 +1,7 @@
 package llc.bokadev.kompass.presentation.screens.essentials
 
+import llc.bokadev.kompass.core.utils.networking.NetworkError
+import llc.bokadev.kompass.core.utils.networking.Resource
 import llc.bokadev.kompass.presentation.shared.LanguageSheetHost
 import llc.bokadev.kompass.testutil.NoOpAnalytics
 import llc.bokadev.kompass.testutil.RecordingNavigator
@@ -86,9 +88,9 @@ class EssentialsViewModelTest {
         val frenchOnly = CityEssential(id = "taxi", key = "taxi", category = EssentialCategory.TRANSPORT, title = mapOf("fr" to "Taxi"), content = mapOf("fr" to "Prenez un taxi."))
         val vm = EssentialsViewModel(
             GetEssentialsUseCase(object : EssentialRepository {
-                override suspend fun getEssentials(): Result<List<CityEssential>> { loads++; return Result.success(listOf(frenchOnly)) }
+                override suspend fun getEssentials(): Resource<List<CityEssential>, NetworkError, String?> { loads++; return Resource.Success(listOf(frenchOnly)) }
             }),
-            GetUtilitiesUseCase(object : UtilityRepository { override suspend fun getUtilities() = Result.success(emptyList<Utility>()) }),
+            GetUtilitiesUseCase(object : UtilityRepository { override suspend fun getUtilities() = Resource.Success(emptyList<Utility>()) }),
             object : UserLocationProvider {
                 override fun hasPermission() = false
                 override suspend fun getCurrentLocation(): GeoPoint? = null
@@ -128,11 +130,11 @@ class EssentialsViewModelTest {
             val vm = EssentialsViewModel(
                 GetEssentialsUseCase(object : EssentialRepository {
                     override suspend fun getEssentials() =
-                        if (fail) Result.failure(IllegalStateException("offline")) else Result.success(essentials)
+                        if (fail) Resource.Error(NetworkError.UNKNOWN, "offline") else Resource.Success(essentials)
                 }),
                 GetUtilitiesUseCase(object : UtilityRepository {
                     override suspend fun getUtilities() =
-                        if (fail) Result.failure(IllegalStateException("offline")) else Result.success(utilities)
+                        if (fail) Resource.Error(NetworkError.UNKNOWN, "offline") else Resource.Success(utilities)
                 }),
                 object : UserLocationProvider {
                     override fun hasPermission() = permission

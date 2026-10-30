@@ -1,6 +1,8 @@
 package llc.bokadev.kompass.presentation.screens.categorylist
 
 import llc.bokadev.kompass.core.navigation.Screen
+import llc.bokadev.kompass.core.utils.networking.NetworkError
+import llc.bokadev.kompass.core.utils.networking.Resource
 import llc.bokadev.kompass.testutil.RecordingNavigator
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
@@ -109,14 +111,14 @@ class CategoryListViewModelTest {
         val navigator = RecordingNavigator().also { lastNavigator = it }
         val vm = CategoryListViewModel(
             placeRepository = object : PlaceRepository {
-                override suspend fun getActivePlaces() = Result.success(listOf(cathedral, nicholas, rocks))
-                override suspend fun getMustSeePlaces() = Result.success(emptyList<Place>())
-                override suspend fun getPlacesByCategory(category: PlaceCategory) = Result.success(emptyList<Place>())
-                override suspend fun getPlaceById(id: String): Result<Place> = error("unused")
+                override suspend fun getActivePlaces() = Resource.Success(listOf(cathedral, nicholas, rocks))
+                override suspend fun getMustSeePlaces() = Resource.Success(emptyList<Place>())
+                override suspend fun getPlacesByCategory(category: PlaceCategory) = Resource.Success(emptyList<Place>())
+                override suspend fun getPlaceById(id: String): Resource<Place, NetworkError, String?> = error("unused")
             },
             getActivities = GetActivitiesUseCase(object : ExperienceRepository {
-                override suspend fun getActivities() = Result.success(emptyList<Experience>())
-                override suspend fun getActivityById(id: String): Result<Experience> = error("unused")
+                override suspend fun getActivities() = Resource.Success(emptyList<Experience>())
+                override suspend fun getActivityById(id: String): Resource<Experience, NetworkError, String?> = error("unused")
             }),
             favoritesRepository = favorites,
             userLocationProvider = object : UserLocationProvider {

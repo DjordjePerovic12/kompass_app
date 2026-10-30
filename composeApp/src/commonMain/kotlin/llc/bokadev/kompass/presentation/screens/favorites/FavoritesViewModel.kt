@@ -8,6 +8,7 @@ import llc.bokadev.kompass.core.presentation.mvi.BaseViewModel
 import llc.bokadev.kompass.core.presentation.mvi.Navigator
 import llc.bokadev.kompass.core.components.BottomTab
 import llc.bokadev.kompass.core.navigation.Screen
+import llc.bokadev.kompass.core.utils.networking.onSuccess
 import llc.bokadev.kompass.presentation.shared.LanguageSheetHost
 import llc.bokadev.kompass.domain.location.UserLocationProvider
 import llc.bokadev.kompass.domain.model.Experience

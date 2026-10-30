@@ -4,6 +4,8 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.cancel
 import llc.bokadev.kompass.core.audio.NavAudioHost
 import llc.bokadev.kompass.core.presentation.mvi.NavigationCommand
+import llc.bokadev.kompass.core.utils.networking.NetworkError
+import llc.bokadev.kompass.core.utils.networking.Resource
 import llc.bokadev.kompass.domain.model.FavoriteItemType
 import llc.bokadev.kompass.domain.model.FavoriteKey
 import llc.bokadev.kompass.domain.model.SavedSnapshot
@@ -143,15 +145,15 @@ class PlaceDetailViewModelTest {
     }
 
     private class FakePlaceRepository(private val audio: Map<String, String>?, private var failFirst: Boolean = false) : PlaceRepository {
-        override suspend fun getActivePlaces(): Result<List<Place>> = Result.success(emptyList())
-        override suspend fun getMustSeePlaces(): Result<List<Place>> = Result.success(emptyList())
-        override suspend fun getPlacesByCategory(category: PlaceCategory): Result<List<Place>> = Result.success(emptyList())
-        override suspend fun getPlaceById(id: String): Result<Place> {
+        override suspend fun getActivePlaces(): Resource<List<Place>, NetworkError, String?> = Resource.Success(emptyList())
+        override suspend fun getMustSeePlaces(): Resource<List<Place>, NetworkError, String?> = Resource.Success(emptyList())
+        override suspend fun getPlacesByCategory(category: PlaceCategory): Resource<List<Place>, NetworkError, String?> = Resource.Success(emptyList())
+        override suspend fun getPlaceById(id: String): Resource<Place, NetworkError, String?> {
             if (failFirst) {
                 failFirst = false
-                return Result.failure(IllegalStateException("network"))
+                return Resource.Error(NetworkError.UNKNOWN, "network")
             }
-            return Result.success(place(audio))
+            return Resource.Success(place(audio))
         }
 
         companion object {
@@ -169,10 +171,10 @@ class PlaceDetailViewModelTest {
     }
 
     private class FakeAudioRepository(private val offline: Set<String>) : AudioGuideRepository {
-        override suspend fun getSignedAudioUrl(path: String): Result<String> = Result.success("https://signed/$path")
+        override suspend fun getSignedAudioUrl(path: String): Resource<String, NetworkError, String?> = Resource.Success("https://signed/$path")
         override fun isAvailableOffline(path: String): Boolean = path in offline
-        override suspend fun streamUrl(path: String): Result<String> = getSignedAudioUrl(path)
-        override suspend fun download(path: String, onProgress: (Float?) -> Unit): Result<Unit> = Result.success(Unit)
+        override suspend fun streamUrl(path: String): Resource<String, NetworkError, String?> = getSignedAudioUrl(path)
+        override suspend fun download(path: String, onProgress: (Float?) -> Unit): Resource<Unit, NetworkError, String?> = Resource.Success(Unit)
         override fun removeDownload(path: String): Boolean = true
     }
 

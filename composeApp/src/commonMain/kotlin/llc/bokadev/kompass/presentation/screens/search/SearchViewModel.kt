@@ -11,6 +11,10 @@ import llc.bokadev.kompass.core.components.BottomTab
 import llc.bokadev.kompass.core.navigation.ALL_CATEGORIES
 import llc.bokadev.kompass.core.navigation.Screen
 import llc.bokadev.kompass.core.utils.AppPreferences
+import llc.bokadev.kompass.core.utils.networking.NetworkError
+import llc.bokadev.kompass.core.utils.networking.Resource
+import llc.bokadev.kompass.core.utils.networking.onError
+import llc.bokadev.kompass.core.utils.networking.onSuccess
 import llc.bokadev.kompass.domain.model.SEARCH_LIMIT
 import llc.bokadev.kompass.domain.model.SEARCH_MIN_CHARS
 import llc.bokadev.kompass.domain.model.SearchHit
@@ -26,7 +30,7 @@ import llc.bokadev.kompass.domain.repository.RecentSearchesRepository
  */
 class SearchViewModel(
     /** [llc.bokadev.kompass.domain.usecase.BuildSearchIndexUseCase] in the app; a lambda so tests can hand in an index directly. */
-    private val buildIndex: suspend (language: String) -> Result<SearchIndex>,
+    private val buildIndex: suspend (language: String) -> Resource<SearchIndex, NetworkError, String?>,
     private val recentSearches: RecentSearchesRepository,
     private val preferences: AppPreferences,
     private val savedState: SavedStateHandle,
@@ -103,7 +107,7 @@ class SearchViewModel(
                 index = built
                 updateState { it.copy(indexStatus = SearchIndexStatus.READY, isIncomplete = !built.isComplete) }
             }
-            .onFailure {
+            .onError { _, _ ->
                 // Keep a previously built index (e.g. retry while offline); only an empty one is "not ready".
                 if (index.items.isEmpty()) updateState { it.copy(indexStatus = SearchIndexStatus.NOT_READY) }
             }

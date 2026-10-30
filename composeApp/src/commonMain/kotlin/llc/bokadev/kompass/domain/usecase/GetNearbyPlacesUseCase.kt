@@ -5,6 +5,9 @@ import kotlin.math.cos
 import kotlin.math.pow
 import kotlin.math.sin
 import kotlin.math.sqrt
+import llc.bokadev.kompass.core.utils.networking.NetworkError
+import llc.bokadev.kompass.core.utils.networking.Resource
+import llc.bokadev.kompass.core.utils.networking.mapCatching
 import llc.bokadev.kompass.domain.model.GeoPoint
 import llc.bokadev.kompass.domain.model.NearbyPlace
 import llc.bokadev.kompass.domain.model.PlaceCategory
@@ -18,7 +21,7 @@ class GetNearbyPlacesUseCase(
         limit: Int? = null,
         category: PlaceCategory? = null,
         maxDistanceKm: Double? = null
-    ): Result<List<NearbyPlace>> = repository.getActivePlaces().mapCatching { places ->
+    ): Resource<List<NearbyPlace>, NetworkError, String?> = repository.getActivePlaces().mapCatching { places ->
         val filtered = places
             .asSequence()
             .filter { category == null || it.category == category }

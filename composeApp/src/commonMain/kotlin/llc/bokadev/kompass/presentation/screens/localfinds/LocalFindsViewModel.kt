@@ -7,6 +7,8 @@ import kotlinx.coroutines.launch
 import llc.bokadev.kompass.core.presentation.mvi.BaseViewModel
 import llc.bokadev.kompass.core.presentation.mvi.Navigator
 import llc.bokadev.kompass.core.presentation.mvi.UiText
+import llc.bokadev.kompass.core.utils.networking.onError
+import llc.bokadev.kompass.core.utils.networking.onSuccess
 import llc.bokadev.kompass.domain.repository.AnalyticsRepository
 import llc.bokadev.kompass.core.navigation.Screen
 import llc.bokadev.kompass.core.utils.AppPreferences
@@ -57,7 +59,7 @@ class LocalFindsViewModel(
                     updateState { it.copy(isLoading = false) }
                     rebuild()
                 }
-                .onFailure {
+                .onError { _, _ ->
                     updateState { it.copy(isLoading = false, error = if (stories.isEmpty()) UiText { s -> s.stories.loadError } else null) }
                 }
         }

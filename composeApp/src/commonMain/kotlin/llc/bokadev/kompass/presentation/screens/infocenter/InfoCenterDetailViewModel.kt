@@ -5,6 +5,8 @@ import kotlinx.coroutines.launch
 import llc.bokadev.kompass.core.presentation.mvi.BaseViewModel
 import llc.bokadev.kompass.core.presentation.mvi.Navigator
 import llc.bokadev.kompass.core.presentation.mvi.UiText
+import llc.bokadev.kompass.core.utils.networking.onError
+import llc.bokadev.kompass.core.utils.networking.onSuccess
 import llc.bokadev.kompass.domain.usecase.GetInfoNoticeByIdUseCase
 import llc.bokadev.kompass.presentation.shared.ExternalLaunch
 
@@ -30,7 +32,7 @@ class InfoCenterDetailViewModel(
         updateState { it.copy(isLoading = it.notice == null, error = null) }
         getInfoNoticeById(id)
             .onSuccess { notice -> updateState { it.copy(isLoading = false, notice = notice) } }
-            .onFailure { updateState { it.copy(isLoading = false, error = if (it.notice == null) LOAD_FAILED else null) } }
+            .onError { _, _ -> updateState { it.copy(isLoading = false, error = if (it.notice == null) LOAD_FAILED else null) } }
     }
 
     private companion object {

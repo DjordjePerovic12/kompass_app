@@ -6,6 +6,11 @@ import io.github.jan.supabase.postgrest.query.Order
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import llc.bokadev.kompass.core.utils.AppPreferences
+import llc.bokadev.kompass.core.utils.networking.NetworkError
+import llc.bokadev.kompass.core.utils.networking.Resource
+import llc.bokadev.kompass.core.utils.networking.mapCatching
+import llc.bokadev.kompass.core.utils.networking.recover
+import llc.bokadev.kompass.core.utils.networking.safeSupabaseCall
 import llc.bokadev.kompass.data.mapper.toDomain
 import llc.bokadev.kompass.data.remote.dto.CategoryDto
 import llc.bokadev.kompass.domain.model.Category
@@ -18,25 +23,18 @@ class CategoryRepositoryImpl(
 
     private val json = Json { ignoreUnknownKeys = true }
 
-    override suspend fun getCategories(): Result<List<Category>> = runCatching {
-        runCatching {
+    override suspend fun getCategories(): Resource<List<Category>, NetworkError, String?> =
+        safeSupabaseCall {
             supabase.from("categories")
                 .select {
                     filter { eq("is_active", true) }
                     order(column = "sort_order", order = Order.ASCENDING)
                 }
                 .decodeList<CategoryDto>()
-        }.fold(
-            onSuccess = { remoteCategories ->
-                cacheCategories(remoteCategories)
-                remoteCategories
-            },
-            onFailure = { remoteError ->
-                val cachedCategories = readCachedCategories()
-                if (cachedCategories.isNotEmpty()) cachedCategories else throw remoteError
-            }
-        ).map { it.toDomain() }
-    }
+                .also { remoteCategories -> cacheCategories(remoteCategories) }
+        }.recover { _, _ ->
+            readCachedCategories().ifEmpty { null }
+        }.mapCatching { categories -> categories.map { it.toDomain() } }
 
     private fun cacheCategories(dtos: List<CategoryDto>) {
         appPreferences.setString(

@@ -1,5 +1,7 @@
 package llc.bokadev.kompass.presentation.screens.localfinds
 
+import llc.bokadev.kompass.core.utils.networking.NetworkError
+import llc.bokadev.kompass.core.utils.networking.Resource
 import llc.bokadev.kompass.testutil.NoOpAnalytics
 import llc.bokadev.kompass.testutil.RecordingNavigator
 import androidx.lifecycle.viewModelScope
@@ -87,8 +89,8 @@ class StoriesTest {
     }
 
     private fun repo(items: List<LocalFind>) = object : LocalFindRepository {
-        override suspend fun getLocalFinds() = Result.success(items)
-        override suspend fun getLocalFindById(id: String) = items.firstOrNull { it.id == id }?.let { Result.success(it) } ?: Result.failure(NoSuchElementException(id))
+        override suspend fun getLocalFinds() = Resource.Success(items)
+        override suspend fun getLocalFindById(id: String) = items.firstOrNull { it.id == id }?.let { Resource.Success(it) } ?: Resource.Error(NetworkError.NOT_FOUND, id)
     }
 
     private fun story(id: String, order: Int, photo: String?, body: String, location: String, audio: Boolean = false, active: Boolean = true) = LocalFind(

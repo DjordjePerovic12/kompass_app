@@ -6,6 +6,8 @@ import llc.bokadev.kompass.core.presentation.mvi.BaseViewModel
 import llc.bokadev.kompass.core.presentation.mvi.Navigator
 import llc.bokadev.kompass.core.presentation.mvi.UiText
 import llc.bokadev.kompass.core.utils.AppPreferences
+import llc.bokadev.kompass.core.utils.networking.onError
+import llc.bokadev.kompass.core.utils.networking.onSuccess
 import llc.bokadev.kompass.domain.usecase.GetServiceByIdUseCase
 import llc.bokadev.kompass.presentation.shared.ExternalLaunch
 
@@ -38,7 +40,7 @@ class ServiceDetailViewModel(
         updateState { it.copy(isLoading = it.service == null, error = null) }
         getServiceById(id)
             .onSuccess { service -> updateState { it.copy(isLoading = false, service = service) } }
-            .onFailure { updateState { it.copy(isLoading = false, error = if (it.service == null) LOAD_FAILED else null) } }
+            .onError { _, _ -> updateState { it.copy(isLoading = false, error = if (it.service == null) LOAD_FAILED else null) } }
     }
 
     private companion object {

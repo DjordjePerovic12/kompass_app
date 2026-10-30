@@ -2,6 +2,8 @@ package llc.bokadev.kompass.presentation.screens.search
 
 import llc.bokadev.kompass.core.presentation.mvi.NavigationCommand
 import llc.bokadev.kompass.core.components.BottomTab
+import llc.bokadev.kompass.core.utils.networking.NetworkError
+import llc.bokadev.kompass.core.utils.networking.Resource
 import llc.bokadev.kompass.testutil.RecordingNavigator
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
@@ -154,7 +156,7 @@ class SearchViewModelTest {
         val vm = SearchViewModel(
             buildIndex = { lang ->
                 builtLanguages += lang
-                if (this@SearchViewModelTest.fail) Result.failure(IllegalStateException("offline")) else Result.success(SearchIndex(index, failedSources = failedSources))
+                if (this@SearchViewModelTest.fail) Resource.Error(NetworkError.UNKNOWN, "offline") else Resource.Success(SearchIndex(index, failedSources = failedSources))
             },
             recentSearches = recent,
             preferences = prefs,

@@ -1,5 +1,8 @@
 package llc.bokadev.kompass.domain.usecase
 
+import llc.bokadev.kompass.core.utils.networking.NetworkError
+import llc.bokadev.kompass.core.utils.networking.Resource
+import llc.bokadev.kompass.core.utils.networking.mapCatching
 import llc.bokadev.kompass.domain.model.NearbyPlace
 import llc.bokadev.kompass.domain.model.PlaceCategory
 import llc.bokadev.kompass.domain.repository.PlaceRepository
@@ -17,7 +20,7 @@ class GetNearbyFallbackPlacesUseCase(
         category: PlaceCategory,
         matchesZone: (zone: String?) -> Boolean,
         limit: Int
-    ): Result<List<NearbyPlace>> = repository.getActivePlaces().mapCatching { places ->
+    ): Resource<List<NearbyPlace>, NetworkError, String?> = repository.getActivePlaces().mapCatching { places ->
         places
             .asSequence()
             .filter { it.category == category && matchesZone(it.zone) && !it.isDestinationOverview }

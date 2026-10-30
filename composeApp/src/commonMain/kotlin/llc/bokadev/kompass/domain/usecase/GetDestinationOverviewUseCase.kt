@@ -1,5 +1,8 @@
 package llc.bokadev.kompass.domain.usecase
 
+import llc.bokadev.kompass.core.utils.networking.NetworkError
+import llc.bokadev.kompass.core.utils.networking.Resource
+import llc.bokadev.kompass.core.utils.networking.mapCatching
 import llc.bokadev.kompass.domain.model.GeoPoint
 import llc.bokadev.kompass.domain.model.Place
 import llc.bokadev.kompass.domain.model.distanceKmTo
@@ -17,7 +20,7 @@ class GetDestinationOverviewUseCase(
         matchesZone: ((zone: String?) -> Boolean)?,
         origin: GeoPoint?,
         maxDistanceKm: Double
-    ): Result<Place?> = repository.getActivePlaces().mapCatching { places ->
+    ): Resource<Place?, NetworkError, String?> = repository.getActivePlaces().mapCatching { places ->
         val overviews = places.filter { it.isDestinationOverview }
         when {
             matchesZone != null -> overviews.firstOrNull { matchesZone(it.zone) }
