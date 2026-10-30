@@ -31,7 +31,7 @@ actual fun createKompassHttpClient(preferences: AppPreferences): HttpClient = Ht
 
     install(Logging) {
         logger = object : Logger {
-            override fun log(message: String) = println("Payment API: $message")
+            override fun log(message: String) = println("Kompass API: $message")
         }
         level = LogLevel.INFO
     }

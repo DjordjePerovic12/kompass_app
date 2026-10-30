@@ -6,5 +6,4 @@ sealed class ExploreEvent : BaseEvent {
     data class OnDestinationClick(val destination: ExploreDestination) : ExploreEvent()
     data object OnSearchClick : ExploreEvent()
     data object OnLanguageClick : ExploreEvent()
-    data object OnRefresh : ExploreEvent()
 }

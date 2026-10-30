@@ -30,6 +30,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
+import kompass.composeapp.generated.resources.Res
+import kompass.composeapp.generated.resources.header_language_description
+import org.jetbrains.compose.resources.stringResource
 import llc.bokadev.kompass.core.utils.LocalAppLocale
 import llc.bokadev.kompass.presentation.shared.icons.GlobeIcon
 import llc.bokadev.kompass.presentation.shared.icons.SearchIcon
@@ -54,6 +57,7 @@ fun LamplightHeader(
 ) {
     val colors = KompassTheme.colors
     val languageCode = LocalAppLocale.current.substringBefore('-').uppercase()
+    val languageDescription = stringResource(Res.string.header_language_description, languageCode)
 
     Box(modifier = modifier.fillMaxWidth().background(colors.lampYellow)) {
         Canvas(
@@ -88,7 +92,7 @@ fun LamplightHeader(
                         .heightIn(min = 44.dp)
                         .clip(KompassShapes.pill)
                         .background(colors.nightBlack.copy(alpha = 0.1f))
-                        .semantics { contentDescription = "Language: $languageCode" }
+                        .semantics { contentDescription = languageDescription }
                         .clickable(onClick = onLanguageClick)
                         .padding(horizontal = 14.dp, vertical = 8.dp),
                     horizontalArrangement = Arrangement.spacedBy(6.dp),

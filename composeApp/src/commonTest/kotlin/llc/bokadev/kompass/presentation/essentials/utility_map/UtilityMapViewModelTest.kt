@@ -131,9 +131,48 @@ class UtilityMapViewModelTest {
         override suspend fun getUtilities() = result
     }
 
+    @Test fun locationPollingRunsOnlyWhileTheStateIsCollected() = runTest {
+        Dispatchers.setMain(StandardTestDispatcher(testScheduler))
+        try {
+            val location = FakeLocation(oldTown, permission = true)
+            val vm = UtilityMapViewModel(
+                SavedStateHandle(mapOf("category" to UtilityCategory.ATM.name)),
+                GetUtilitiesUseCase(FakeRepo(Resource.Success(listOf(euronetGate)))),
+                location,
+                FakeNavigator(),
+                NoOpAnalytics()
+            )
+            advanceTimeBy(20_000)
+            runCurrent()
+            assertEquals(0, location.calls, "no GPS reads before the screen subscribes")
+
+            val collector = backgroundScope.launch { vm.utilityMapState.collect {} }
+            runCurrent()
+            val afterLoad = location.calls
+            advanceTimeBy(10_100)
+            runCurrent()
+            assertEquals(afterLoad + 2, location.calls, "polls every 5 s while subscribed")
+
+            collector.cancel()
+            advanceTimeBy(5_100) // WhileSubscribed stop timeout
+            runCurrent()
+            val afterStop = location.calls
+            advanceTimeBy(30_000)
+            runCurrent()
+            assertEquals(afterStop, location.calls, "polling stops once nobody collects")
+            vm.viewModelScope.cancel()
+        } finally {
+            Dispatchers.resetMain()
+        }
+    }
+
     private class FakeLocation(var point: GeoPoint?, val permission: Boolean) : UserLocationProvider {
+        var calls = 0
         override fun hasPermission() = permission
-        override suspend fun getCurrentLocation() = if (permission) point else null
+        override suspend fun getCurrentLocation(): GeoPoint? {
+            calls++
+            return if (permission) point else null
+        }
     }
 
     private fun run(
@@ -160,7 +199,7 @@ class UtilityMapViewModelTest {
             try {
                 assertions(vm, location, this, navigator)
             } finally {
-                // The ViewModel refreshes location every 5s forever; stop it before Main is reset.
+                // The subscribed state (and its 5 s location polling) lives in viewModelScope; stop it before Main is reset.
                 vm.viewModelScope.cancel()
                 advanceUntilIdle()
             }

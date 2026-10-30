@@ -129,6 +129,45 @@ class EssentialsViewModelTest {
         )
     }
 
+    @Test fun locationPollingRunsOnlyWhileTheStateIsCollected() = runTest {
+        Dispatchers.setMain(StandardTestDispatcher(testScheduler))
+        try {
+            var reads = 0
+            val vm = EssentialsViewModel(
+                GetEssentialsUseCase(object : EssentialRepository {
+                    override suspend fun getEssentials() = Resource.Success(emptyList<CityEssential>())
+                }),
+                GetUtilitiesUseCase(object : UtilityRepository { override suspend fun getUtilities() = Resource.Success(emptyList<Utility>()) }),
+                object : UserLocationProvider {
+                    override fun hasPermission() = true
+                    override suspend fun getCurrentLocation(): GeoPoint? { reads++; return GeoPoint(42.4247, 18.7712) }
+                },
+                FakePreferences(), SavedStateHandle(), FakeNavigator(), LanguageSheetHost(), NoOpAnalytics()
+            )
+            advanceTimeBy(20_000)
+            runCurrent()
+            assertEquals(0, reads, "no GPS reads before the screen subscribes")
+
+            val collector = backgroundScope.launch { vm.essentialsState.collect {} }
+            runCurrent()
+            val afterLoad = reads
+            advanceTimeBy(10_100)
+            runCurrent()
+            assertEquals(afterLoad + 2, reads, "polls every 5 s while subscribed")
+
+            collector.cancel()
+            advanceTimeBy(5_100) // WhileSubscribed stop timeout
+            runCurrent()
+            val afterStop = reads
+            advanceTimeBy(30_000)
+            runCurrent()
+            assertEquals(afterStop, reads, "polling stops once nobody collects")
+            vm.viewModelScope.cancel()
+        } finally {
+            Dispatchers.resetMain()
+        }
+    }
+
     @Test fun aLanguageChangeReLocalizesTheGroupsWithoutReloading() = runTest {
         Dispatchers.setMain(StandardTestDispatcher(testScheduler))
         val prefs = FakePreferences()
@@ -214,7 +253,7 @@ class EssentialsViewModelTest {
             try {
                 assertions(vm.essentialsState.value, vm, navigator)
             } finally {
-                // The ViewModel refreshes location every 5s forever; stop it before Main is reset.
+                // The subscribed state (and its 5 s location polling) lives in viewModelScope; stop it before Main is reset.
                 vm.viewModelScope.cancel()
                 advanceUntilIdle()
             }

@@ -57,7 +57,6 @@ class ExploreViewModel(
 
     fun onEvent(event: ExploreEvent) {
         when (event) {
-            ExploreEvent.OnRefresh -> loadAll()
             ExploreEvent.OnSearchClick -> viewModelScope.launch {
                 navigator.navigateTo(Screen.SearchScreen)
             }

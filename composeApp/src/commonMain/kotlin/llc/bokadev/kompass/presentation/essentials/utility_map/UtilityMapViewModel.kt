@@ -6,7 +6,10 @@ import kompass.composeapp.generated.resources.Res
 import kompass.composeapp.generated.resources.essentials_couldnt_load_utilities
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -50,15 +53,22 @@ class UtilityMapViewModel(
     private var loadJob: Job? = null
     private val requestedSelection = savedStateHandle.get<String>("selectedId")
 
-    init {
-        startLocationRefresh()
-    }
-
     override fun dismissError() {
         state.update { it.copy(error = null) }
     }
 
-    val utilityMapState = state
+    /**
+     * Re-reads the location every 5 s. Merged into [utilityMapState], so it polls only while the
+     * screen collects the state (and stops with the WhileSubscribed timeout).
+     */
+    private val locationRefresh: Flow<Nothing> = flow {
+        while (true) {
+            delay(5_000L)
+            refreshLocationContext()
+        }
+    }
+
+    val utilityMapState = merge(state, locationRefresh)
         .onStart {
             if (!hasLoadedInitialData) {
                 hasLoadedInitialData = true
@@ -123,15 +133,6 @@ class UtilityMapViewModel(
                     selectedUtilityId = selection.id,
                     selectionGone = selection.gone
                 )
-            }
-        }
-    }
-
-    private fun startLocationRefresh() {
-        viewModelScope.launch {
-            while (true) {
-                delay(5_000L)
-                refreshLocationContext()
             }
         }
     }

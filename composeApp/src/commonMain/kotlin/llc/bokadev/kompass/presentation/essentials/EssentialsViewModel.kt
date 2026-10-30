@@ -5,8 +5,11 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -70,7 +73,6 @@ class EssentialsViewModel(
     private var loadJob: Job? = null
 
     init {
-        startLocationRefresh()
         // The language is changed from this tab's own header: re-localize what was built from it.
         viewModelScope.launch {
             appPreferences.selectedLanguageFlow.drop(1).collect { lang ->
@@ -83,7 +85,19 @@ class EssentialsViewModel(
         state.update { it.copy(error = null) }
     }
 
-    val essentialsState = state
+    /**
+     * Re-reads the location every 5 s. Merged into [essentialsState], so it polls only while the
+     * screen collects the state (and stops with the WhileSubscribed timeout).
+     */
+    private val locationRefresh: Flow<Nothing> = flow {
+        while (true) {
+            delay(5_000L)
+            val location = currentLocationOrNull()
+            state.update { it.copy(currentLocation = location, sections = sectionsFor(location)) }
+        }
+    }
+
+    val essentialsState = merge(state, locationRefresh)
         .onStart {
             if (!hasLoadedInitialData) {
                 hasLoadedInitialData = true
@@ -173,16 +187,6 @@ class EssentialsViewModel(
     private suspend fun currentLocationOrNull(): GeoPoint? =
         if (!userLocationProvider.hasPermission()) null
         else runCatching { userLocationProvider.getCurrentLocation() }.getOrNull()
-
-    private fun startLocationRefresh() {
-        viewModelScope.launch {
-            while (true) {
-                delay(5_000L)
-                val location = currentLocationOrNull()
-                state.update { it.copy(currentLocation = location, sections = sectionsFor(location)) }
-            }
-        }
-    }
 
     /** Ranked from the device when known, else from Old Town (distances are hidden in that case). */
     private fun sectionsFor(location: GeoPoint?): List<UtilityCategorySection> =

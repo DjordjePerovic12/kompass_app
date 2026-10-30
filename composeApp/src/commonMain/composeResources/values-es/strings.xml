@@ -175,6 +175,8 @@
     <string name="essentials_hide_list">Ocultar lista</string>
     <string name="essentials_recenter">Centrar</string>
     <string name="language_title">Idioma</string>
+    <!-- args: code -->
+    <string name="header_language_description">Idioma: %1$s</string>
     <string name="language_subtitle">Cambia los lugares, las historias y el audio. Lo que aún no está traducido sigue en inglés.</string>
     <string name="language_current">Actual</string>
     <string name="language_use_phone_language">Usar el idioma del teléfono</string>
