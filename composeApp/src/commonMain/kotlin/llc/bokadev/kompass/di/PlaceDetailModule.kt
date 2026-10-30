@@ -1,6 +1,6 @@
 package llc.bokadev.kompass.di
 
-import llc.bokadev.kompass.presentation.screens.placedetail.PlaceDetailViewModel
+import llc.bokadev.kompass.presentation.placedetail.PlaceDetailViewModel
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 

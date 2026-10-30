@@ -6,8 +6,8 @@ import llc.bokadev.kompass.domain.repository.EssentialRepository
 import llc.bokadev.kompass.domain.repository.UtilityRepository
 import llc.bokadev.kompass.domain.usecase.GetEssentialsUseCase
 import llc.bokadev.kompass.domain.usecase.GetUtilitiesUseCase
-import llc.bokadev.kompass.presentation.screens.essentials.EssentialsViewModel
-import llc.bokadev.kompass.presentation.screens.essentials.UtilityMapViewModel
+import llc.bokadev.kompass.presentation.essentials.EssentialsViewModel
+import llc.bokadev.kompass.presentation.essentials.utility_map.UtilityMapViewModel
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 

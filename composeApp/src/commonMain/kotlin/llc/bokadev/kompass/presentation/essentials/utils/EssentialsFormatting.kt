@@ -1,0 +1,87 @@
+package llc.bokadev.kompass.presentation.essentials.utils
+
+import kompass.composeapp.generated.resources.Res
+import kompass.composeapp.generated.resources.essentials_ambulance
+import kompass.composeapp.generated.resources.essentials_fire
+import kompass.composeapp.generated.resources.essentials_general_emergency
+import kompass.composeapp.generated.resources.essentials_police
+import kompass.composeapp.generated.resources.essentials_purpose_getting_around
+import kompass.composeapp.generated.resources.essentials_purpose_local_tips
+import kompass.composeapp.generated.resources.essentials_purpose_practical
+import kompass.composeapp.generated.resources.essentials_purpose_registration
+import llc.bokadev.kompass.domain.model.CityEssential
+import llc.bokadev.kompass.domain.model.EssentialCategory
+import llc.bokadev.kompass.domain.model.UtilityCategory
+import llc.bokadev.kompass.presentation.shared.EssentialGroupKind
+import org.jetbrains.compose.resources.StringResource
+
+/** Known emergency services, so bundled and CMS numbers get translated labels. */
+enum class EmergencyService { GENERAL, POLICE, FIRE, AMBULANCE }
+
+data class EmergencyNumber(val number: String, val service: EmergencyService?, val rawLabel: String)
+
+/** Montenegro's general emergency number (owner-approved, 2026-10-06); always the primary button. */
+val GENERAL_EMERGENCY = EmergencyNumber("112", EmergencyService.GENERAL, "General emergency")
+
+/**
+ * Bundled copy of the CMS emergency entry, so the card renders offline on a fresh install.
+ * Mirrors the CMS today (Police 122, Fire department 123, Ambulance 124).
+ */
+val BUNDLED_EMERGENCY_NUMBERS = listOf(
+    EmergencyNumber("122", EmergencyService.POLICE, "Police"),
+    EmergencyNumber("123", EmergencyService.FIRE, "Fire department"),
+    EmergencyNumber("124", EmergencyService.AMBULANCE, "Ambulance")
+)
+
+private val numberLine = Regex("""^\s*(.+?)\s*[-–—:]\s*(\+?\d[\d ]{1,14})\s*$""")
+
+/**
+ * Parses "Police - 122" style lines from the CMS emergency entry. Lines that aren't
+ * "label - number" are ignored; 112 is skipped because it is always shown as the primary button.
+ */
+fun parseEmergencyNumbers(content: String): List<EmergencyNumber> =
+    content.lines().mapNotNull { line ->
+        val match = numberLine.matchEntire(line) ?: return@mapNotNull null
+        val label = match.groupValues[1].trim()
+        val number = match.groupValues[2].replace(" ", "")
+        EmergencyNumber(number, label.toEmergencyService(), label)
+    }.filter { it.number != GENERAL_EMERGENCY.number }.distinctBy { it.number }
+
+private fun String.toEmergencyService(): EmergencyService? = lowercase().let {
+    when {
+        "police" in it || "polic" in it -> EmergencyService.POLICE
+        "fire" in it -> EmergencyService.FIRE
+        "ambulance" in it || "medical" in it -> EmergencyService.AMBULANCE
+        else -> null
+    }
+}
+
+/** The translated label of a known service; unknown CMS services keep their [EmergencyNumber.rawLabel]. */
+fun EmergencyService.labelRes(): StringResource = when (this) {
+    EmergencyService.GENERAL -> Res.string.essentials_general_emergency
+    EmergencyService.POLICE -> Res.string.essentials_police
+    EmergencyService.FIRE -> Res.string.essentials_fire
+    EmergencyService.AMBULANCE -> Res.string.essentials_ambulance
+}
+
+data class EssentialGroup(val kind: EssentialGroupKind, val modules: List<CityEssential>)
+
+fun EssentialGroupKind.purposeRes(): StringResource = when (this) {
+    EssentialGroupKind.REGISTRATION -> Res.string.essentials_purpose_registration
+    EssentialGroupKind.GETTING_AROUND -> Res.string.essentials_purpose_getting_around
+    EssentialGroupKind.PRACTICAL -> Res.string.essentials_purpose_practical
+    EssentialGroupKind.LOCAL_TIPS -> Res.string.essentials_purpose_local_tips
+}
+
+/** A module worth rendering: it has an answer or at least one action (never a header-only row). */
+fun CityEssential.hasSubstance(lang: String): Boolean =
+    localizedContent(lang).isNotBlank() ||
+        links.any { it.isNotBlank() } ||
+        resolvedLocations(lang).any { it.latitude != null && it.longitude != null }
+
+/** First paragraph of the CMS text, for the priority card summary (verified copy only, never rewritten). */
+fun String.firstParagraph(): String =
+    trim().split(Regex("\\n\\s*\\n")).firstOrNull()?.trim().orEmpty()
+
+/** Categories that get a full summary card (map + nearest list), in order; the rest get compact rows. */
+val SUMMARY_UTILITY_CATEGORIES = listOf(UtilityCategory.ATM, UtilityCategory.PHARMACY)
