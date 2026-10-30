@@ -1,35 +1,44 @@
-This is a Kotlin Multiplatform project targeting Android, iOS.
+# KOmpass
 
-* [/composeApp](./composeApp/src) is for code that will be shared across your Compose Multiplatform applications.
-  It contains several subfolders:
-  - [commonMain](./composeApp/src/commonMain/kotlin) is for code that’s common for all targets.
-  - Other folders are for Kotlin code that will be compiled for only the platform indicated in the folder name.
-    For example, if you want to use Apple’s CoreCrypto for the iOS part of your Kotlin app,
-    the [iosMain](./composeApp/src/iosMain/kotlin) folder would be the right place for such calls.
-    Similarly, if you want to edit the Desktop (JVM) specific part, the [jvmMain](./composeApp/src/jvmMain/kotlin)
-    folder is the appropriate location.
+A pocket guide to Kotor and the Bay, curated by locals. Places, events, local updates, stories and audio guides, City Essentials and a utility map, in English, German, French, Spanish and Turkish.
 
-* [/iosApp](./iosApp/iosApp) contains iOS applications. Even if you’re sharing your UI with Compose Multiplatform,
-  you need this entry point for your iOS app. This is also where you should add SwiftUI code for your project.
+Kotlin Multiplatform with a shared Compose Multiplatform UI for Android and iOS, backed by Supabase.
 
-### Build and Run Android Application
+## Project layout
 
-To build and run the development version of the Android app, use the run configuration from the run widget
-in your IDE’s toolbar or build it directly from the terminal:
-- on macOS/Linux
-  ```shell
-  ./gradlew :composeApp:assembleDebug
-  ```
-- on Windows
-  ```shell
-  .\gradlew.bat :composeApp:assembleDebug
-  ```
+- `androidApp/` — the Android application (entry point, manifest, launcher icons).
+- `composeApp/` — all shared code: UI, ViewModels, domain and data layers, string resources.
+- `iosApp/` — the Xcode project that hosts the shared UI.
 
-### Build and Run iOS Application
+Architecture, conventions and gotchas are in [CLAUDE.md](CLAUDE.md).
 
-To build and run the development version of the iOS app, use the run configuration from the run widget
-in your IDE’s toolbar or open the [/iosApp](./iosApp) directory in Xcode and run it from there.
+## Setup
 
----
+1. Android Studio (its bundled JBR works for Gradle) and Xcode for iOS.
+2. Create `local.properties` next to `settings.gradle.kts`:
 
-Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html)…
+   ```properties
+   sdk.dir=/path/to/Android/sdk
+   SUPABASE_URL=https://<project>.supabase.co
+   SUPABASE_ANON_KEY=<anon key>
+   GOOGLE_MAPS_API_KEY=<Android Maps SDK key>
+   ANALYTICS_BACKEND_BASE_URL=<optional>
+   ```
+
+   For a local backend, see "Local Supabase Development" in CLAUDE.md.
+
+## Build and run
+
+```bash
+./gradlew :androidApp:installDebug
+```
+
+```bash
+./gradlew :composeApp:testAndroidHostTest
+```
+
+For iOS, open `iosApp/iosApp.xcodeproj` in Xcode and run the `iosApp` scheme on a simulator, or build the shared framework with:
+
+```bash
+./gradlew :composeApp:linkDebugFrameworkIosSimulatorArm64
+```

@@ -2,95 +2,98 @@
 
 Pocket tourist guide app for Kotor, Montenegro. All recommendations curated by locals — no pay-to-rank, no tourist traps. Single app, all data in one place.
 
+The code follows the **amplitudo-kmp-compose** skill (source of truth: `~/StudioProjects/amplitudo-claude-tools/plugins/amplitudo-kmp-compose`). When this file and the skill disagree on a convention, the skill wins; this file records what is specific to kompass.
+
 ## Tech Stack
 
 - **Platform:** Kotlin Multiplatform + Compose Multiplatform 1.12.2 (shared UI)
 - **Kotlin:** 2.4.21 (AGP 9.3.1, Gradle 9.7.0 — Kotlin 2.4.21 supports AGP ≤ 9.3.1)
 - **Package:** `llc.bokadev.kompass`
-- **Backend:** Supabase (Postgres, Auth, Storage, REST)
-- **DI:** Koin 4.x (KMP)
-- **Networking:** Ktor Client 3.x
+- **Backend:** Supabase (Postgres, Storage, REST) via the Supabase Kotlin SDK
+- **DI:** Koin 4.x (`viewModelOf`, `singleOf`)
+- **Networking:** Ktor Client 3.x, wrapped in `Resource`
+- **Logging:** Kermit
 - **Images:** Coil 3 (KMP)
-- **Navigation:** Official Compose Navigation Multiplatform
+- **Navigation:** Compose Navigation Multiplatform with typed `Screen` routes
 - **Serialization:** kotlinx.serialization
-- **Architecture:** Clean Architecture + MVI
-- **Target SDK:** Android 37 (compileSdk 37), iOS 17+
+- **Targets:** Android minSdk 26, target/compile SDK 37, JVM 17; iOS 18.2+
 
-## Architecture
-
-```
-composeApp/
-  src/
-    commonMain/
-      kotlin/llc/bokadev/kompass/
-        core/           # Design system tokens, common utils, extensions
-        data/
-          remote/       # Supabase client, DTOs
-          mapper/       # DTO → Domain mappers (extension functions)
-          repository/   # Repository implementations
-        domain/
-          model/        # Domain entities (Place, Event, Experience, etc.)
-          repository/   # Repository interfaces
-          usecase/      # Single-purpose use cases with operator fun invoke()
-        presentation/
-          navigation/   # Nav graphs, route sealed class
-          screens/      # Feature packages: home/, places/, events/, etc.
-            home/
-              HomeScreen.kt           # orchestrator only
-              HomeScreenContent.kt    # all UI, private helpers as private funs
-              HomeViewModel.kt
-              HomeState.kt
-              components/
-                FeaturedPlaceCard.kt  # reusable public composables, one per file
-                CompactPlaceCard.kt
-                EventCard.kt
-                SectionHeader.kt
-        di/             # Koin modules per feature + root appModule
-    androidMain/        # Android Application class, expect/actual implementations
-    iosMain/            # iOS entry point, expect/actual implementations
-androidApp/             # com.android.application: KompassApplication, MainActivity, app manifest, launcher icons
-iosApp/                 # Xcode project, SwiftUI entry
-```
-
-## Screen Structure (MANDATORY for every screen)
-
-Every screen package must contain exactly:
+## Modules
 
 ```
-screens/[name]/
-├── [Name]Screen.kt         # orchestrator: collect state, call VM, delegate to content
-├── [Name]ScreenContent.kt  # pure UI: public composable taking state + lambdas
-├── [Name]ViewModel.kt
-└── components/             # public composables reusable beyond this screen
-    └── SomeCard.kt         # one file per component
+androidApp/   com.android.application: KompassApplication (initKoin), MainActivity, app manifest, launcher icons
+composeApp/   com.android.kotlin.multiplatform.library (namespace llc.bokadev.kompass.shared): all shared code
+iosApp/       Xcode project; iOSApp.swift calls InitKoinKt.doInitKoin and hosts MainViewController
+```
+
+## Architecture (`composeApp/src/commonMain/kotlin/llc/bokadev/kompass/`)
+
+```
+App.kt                  AppEnvironment(language) { KompassTheme { KompassAppNavigation(isFirstLaunch) } }
+core/
+  navigation/           Screen.kt (typed routes), KompassAppNavigation.kt, MainShell.kt (tabs),
+                        destinations/ (one file per screen), utils/ (Navigator, NavigatorImpl,
+                        NavType, NavigatorBridge, ObserveAsEvents)
+  utils/                AppLocale (LocalAppLocale), AppPreferences, StringProvider, networking/
+                        (Resource, NetworkError, safeSupabaseCall, retrieveAPIResponse), formatters
+  audio/, components/, presentation/SnackbarBus
+data/                   remote/ (Supabase client, DTOs), mapper/ (DTO → domain extensions), repository/ (impls)
+domain/                 model/, repository/ (interfaces), usecase/ (operator fun invoke)
+di/                     initKoin, AppModule, one Koin module per feature
+presentation/
+  base/                 BaseViewModel, BaseViewState, BaseEvent, BaseError, BaseContentView
+  <feature>/            one folder per screen (see below); sub-features as snake_case sub-packages
+                        (infocenter/detail, essentials/utility_map, excursions/related_activities)
+  shared/               composables and helpers used by several features: icons/, detail/ (detail
+                        screen building blocks), LamplightHeader, AreaLabel, PlaceCategoryLabels, ...
+ui/theme/               KompassTheme: Color, Type, Shape, Gradient, Theme
+```
+
+## Screen structure (MANDATORY)
+
+Every screen package holds exactly five files, plus optional `components/` and `utils/`:
+
+```
+presentation/<feature>/
+├── <F>Screen.kt          orchestrator: (modifier, viewModel, showSnackBar); collectAsStateWithLifecycle;
+│                         observes snackBarChannel and eventFlow; wraps content in BaseContentView;
+│                         owns screen-lifetime platform wiring (launcher, audio owner key, permissions)
+├── <F>ScreenContent.kt   stateless UI taking state + callbacks; no Koin; private @Preview in KompassTheme
+├── <F>ViewModel.kt       extends BaseViewModel<State, Event>; navigates through the injected Navigator
+├── <F>State.kt           data class extending BaseViewState(isLoading, error: BaseError?)
+├── <F>Event.kt           sealed class : BaseEvent — every user intent (NavigateBack, On<Thing>Click,
+│                         On<Thing>Change) plus one-off hand-offs the ViewModel emits (OpenExternal, ...)
+├── components/           reusable composables, one public composable per file, each with a @Preview
+└── utils/                non-UI helpers used only by this feature
 ```
 
 Rules:
-- `[Name]Screen.kt` — only: `koinViewModel()`, `collectAsState()`, call `[Name]ScreenContent()`
-- `[Name]ScreenContent.kt` — public top-level composable + private helper funs (sections, headers, etc.)
-- `components/` — reusable composables that could be used by other screens or will grow complex. One public `@Composable` per file. No private helpers here — those stay in ScreenContent.
-- Never put UI logic in Screen.kt. Never put VM wiring in ScreenContent.kt.
+- There are no Action files: user intents are Event members dispatched with `viewModel.onEvent(...)`.
+- ViewModels load on first subscription: `state.onStart { if (!hasLoadedInitialData) … }.stateIn(viewModelScope, WhileSubscribed(5_000), …)`.
+- Navigation happens in the ViewModel via `Navigator` (`navigateTo`, `navigateUp`, `switchTab`), never through callbacks. `NavigatorBridge` applies it to the selected tab's NavController.
+- One-off UI hand-offs (open maps/URL/dialer, permission requests, snackbars that need an action such as Undo) are Event members emitted on `eventFlow`; plain-text snackbars go through `snackBarChannel`.
+- `isLoading` means nothing can be shown yet; `error` means nothing usable could be loaded (`BaseError.InlineError(Res.string.x)`). A failed refresh with content on screen is a separate flag (e.g. `refreshFailed`).
+- Screens that show loading/errors inline under their header pass the same content to `BaseContentView`'s `loading`, `error` and main slots (with a one-line comment).
+- ViewModels are registered in the feature's Koin module with `viewModelOf(::X)`; route arguments arrive via `parametersOf` (or `SavedStateHandle` when optional).
+- Every ViewModel has a test in `commonTest/.../presentation/<feature>/` using `FakeNavigator` (testutil). Tear down with `vm.viewModelScope.cancel(); advanceUntilIdle(); Dispatchers.resetMain()`.
 
 ## Theme (`ui/theme/`)
 
-One theme, `KompassTheme`, following the amplitudo-kmp-compose `theme.md` pattern:
-- `Color.kt`: raw color vals named by how they look (`lampYellow`, `nightBlack`, `charcoal`, `boneWhite`, `stoneGray`, ...), `KompassColors`, `LocalKompassColors`, `kompassColors`.
-- `Type.kt`: `KompassTypography` styles named `<font><Weight><size>` (`gloockRegular40`, `geologicaMedium16`, `geologicaRegular14`, `helveticaBold24`, ...). Font families hold every weight file, so `.copy(fontWeight = …)` uses the real font.
+One theme, `KompassTheme`, following the skill's `theme.md` pattern:
+- `Color.kt`: raw color vals named by how they look (`lampYellow`, `nightBlack`, `charcoal`, `boneWhite`, `stoneGray`, ...), `KompassColors`, `LocalKompassColors`.
+- `Type.kt`: `KompassTypography` styles named `<font><Weight><size>` (`gloockRegular40`, `geologicaMedium16`, `helveticaBold24`, ...). Font families hold every weight file, so `.copy(fontWeight = …)` uses the real font.
 - `Shape.kt` (`KompassShapes`, `KompassDimens`), `Gradient.kt` (`Modifier.pageGradientBackground()`), `Theme.kt` (`KompassTheme { }` + `object KompassTheme { colors; typography }`; it also supplies the Material scheme only so Material components keep their look).
 
-In UI code read `KompassTheme.colors.X` / `KompassTheme.typography.X`. Never `Color(0x…)` in `presentation/`; add a token to `Color.kt` instead.
+In UI code read `KompassTheme.colors.X` / `KompassTheme.typography.X`. Never `Color(0x…)` in `presentation/`; add a token to `Color.kt` instead. `.claude/skills/design-system/SKILL.md` holds the design principles; the tokens themselves live in `ui/theme/`.
 
-## MVI Pattern (Amplitudo-style, `core/presentation/mvi`)
+## Strings and language
 
-Every screen follows this structure strictly (see the KMP-CMP-Amplitudo-style skill):
-- `[Screen]State.kt` — `data class` implementing `BaseViewState` (`isLoading` = nothing to show yet, `error: UiText?` = nothing usable could be loaded; a refresh failure with content on screen is a separate flag like `refreshFailed`)
-- `[Screen]Action.kt` — `sealed interface ... : BaseAction`, every user intent, dispatched via `vm.onAction(action)`
-- `[Screen]Event.kt` — `sealed interface ... : BaseEvent`, UI-only one-off effects (snackbars, external hand-offs via `ExternalLaunch`). Use `Nothing` when a screen has none. **Never navigation.**
-- `[Screen]ViewModel.kt` — extends `BaseViewModel<State, Action, Event>(initialState)`, initial load in `onFirstStart()`, navigates by calling the injected `Navigator` (`navigateTo`, `navigateUp`, `switchTab`)
-- `[Screen]Screen.kt` — orchestrator: `koinViewModel()`, `collectAsState()`, collects `events`, owns screen-lifetime wiring (audio owner keys, launcher); **no navigation callbacks**
-- `[Screen]ScreenContent.kt` — stateless UI taking `state` + `onAction`
-- Read screens that load/fail as a whole wrap content in `BaseContentView` (mvi); visitor-facing errors are `UiText`, never exception text
-- `NavigatorBridge` (MainShell) applies `Navigator` commands to the selected tab's controller
+- All UI text lives in `composeResources/values{,-fr,-de,-es,-tr}/strings.xml` (keys `<group>_<field>`, args `%1$s`, documented in an `<!-- args: -->` comment). Read them with `stringResource(Res.string.x)` in composables, the suspend `getString(Res.string.x)` in suspend callbacks, and `StringProvider` in ViewModels. Shared helpers return a `StringResource` rather than a string.
+- Never hardcode visitor-facing English. When adding a key, add it to all five files.
+- The current language comes from `LocalAppLocale.current` (fed by `AppPreferences.selectedLanguageFlow` in `App.kt`). Changing it recomposes in place, so the visitor keeps their tab and back stack.
+- Translatable CMS fields are JSONB `{"en":"...","fr":"...","tr":"...","es":"...","de":"..."}`; always fall back to "en".
+- `core/utils/SearchVocabularyTable.kt` deliberately keeps its own five-language word lists so a search in any language matches; Compose Resources cannot load another locale's string.
+- Long translations: keep single-line controls single-line (`maxLines = 1`, `TextAutoSize`), let titles take `Modifier.weight(1f)`, and check German and French on device.
 
 ## Local Supabase Development
 
@@ -114,62 +117,53 @@ Set `USE_LOCAL_SUPABASE=false` before any production builds.
 
 **CityEssential** — key, category (transport/customs/emergency/tips/practical), title, content (markdown)
 
-**Itinerary** — name, description, days_count, items (ordered place/event references per day with time_of_day and notes)
+**Itinerary** — in the database, not used by the app yet (no domain model).
 
-All translatable fields: JSONB `{"en":"...","fr":"...","tr":"...","es":"...","de":"..."}`. Always fall back to "en" if locale key missing.
+Content gaps to fill in the CMS rather than the app: `sub_category` and `zone` are shown as stored (untranslated), and event filter labels need all five languages.
 
-## Categories & Filters
-
-Top-level: Eat & Drink, See & Visit, Activities, Hidden Gems, Practical. Sub-filters are tag-based (dinner, nightlife, music, seafood, casual, fine dining, etc.)
-
-## Key Features (MVP)
+## Key Features
 
 - GPS-based nearby attractions with category browsing
-- City Essentials (transport, customs, tipping, emergency, local tips)
-- Day-based curated itineraries ("2 days in Kotor")
-- Upcoming Events on home screen
-- Experiences section (bookable, clearly labeled as sponsored)
+- City Essentials (transport, customs, tipping, emergency, local tips) and a utility map
+- Upcoming events and local updates on Home
+- Experiences and "Worth the drive" excursions
+- Local stories (legends & localisms) and audio guides with offline downloads
+- Saved places, local search across all content
 - Multi-language (English, French, Turkish, Spanish, German)
-- Bottom nav: Home, Categories, Events, Experiences, Essentials
+- Bottom nav: Home, Explore, Listen, Saved, Essentials
 
-## Premium (post-MVP)
-
-- Interactive map with all landmarks pinned
-- AI audio guides per landmark (2-3 min, ElevenLabs)
+There is no payment or premium code in the app; the earlier payment and DEEP purchase stacks were removed (recoverable from git history).
 
 ## Commands
 
 ```bash
-./gradlew build
-./gradlew :androidApp:installDebug           # Android
-./gradlew :composeApp:testAndroidHostTest   # Tests (JVM); :composeApp:allTests also runs iOS (needs Xcode 26)
-./gradlew :composeApp:dependencies          # Deps
+./gradlew :androidApp:installDebug                       # Android
+./gradlew :composeApp:testAndroidHostTest                # Tests (JVM)
+./gradlew :composeApp:linkDebugFrameworkIosSimulatorArm64 # iOS framework
+./gradlew :composeApp:allTests                           # also runs iOS tests (needs Xcode 26)
+./gradlew :composeApp:dependencies                       # Deps
 ```
 
 ## Code Rules
 
 - Unit tests required for every ViewModel and repository
 - All DTOs in data/remote/, mapped to domain via extension functions in data/mapper/
-- Never expose Supabase types above data layer
-- All user-visible strings from translations jsonb, never hardcoded English
-- UI strings live in `composeResources/values{,-fr,-de,-es,-tr}/strings.xml` (keys `<group>_<field>`, `%1$s` args named in an `<!-- args: -->` comment); read them with `stringResource(Res.string.x)` in UI and `StringProvider` in ViewModels. The Kotlin `AppStrings` tables in `core/utils/*Strings.kt` remain only until every screen is migrated; never add to them
-- Repository interfaces in domain/, implementations in data/
+- Never expose Supabase types above the data layer; repositories return `Resource` (use `safeSupabaseCall`)
+- Repository interfaces in domain/, implementations in data/; domain/ has no UI text or compose-resources imports
 - Use cases: single-purpose, `operator fun invoke()`
-- Koin modules per feature, registered in root appModule
-- Compose previews required for all reusable components in components/ subfolders
-- Use Supabase Kotlin SDK (`io.github.jan-tennert.supabase`), not raw Ktor
-- GPS permissions: expect/actual, graceful degradation if denied
+- Koin modules per feature, included from `AppModule`
+- Before creating new files or packages, list the paths and get approval
 - Read `.claude/skills/design-system/SKILL.md` before creating ANY UI composable
 
 ## Gotchas
 
-- Compose Navigation multiplatform: check compat before deeplinks or nested graphs
-- Coil 3 KMP: use AsyncImage, configure ImageLoader per platform via expect/actual
-- Supabase Kotlin SDK has KMP support — use it, don't write raw REST calls
-- translations jsonb: always fall back to "en" if current locale missing
-- Kotlin 2.4.21 caps AGP at 9.3.1 — check the KMP compatibility table before bumping AGP
-- Use @Preview (org.jetbrains.compose.ui.tooling.preview.Preview) — unified annotation
-- Never import raw color vals in UI files — always use KompassTheme.colors.X
+- An Android Studio plugin ("Amplitudo Presentation Generator") auto-creates Hilt-style Screen/State/Event/ViewModel stubs in every new `presentation/<feature>` package — including test folders — and stages them in git. They shadow real classes and break the build. After creating folders or merging, check `git status` and `git diff --cached`, and never commit a file containing `HiltViewModel` or `AppTheme`.
+- iOS test executables don't link on Xcode 16.4 (`_LocationEssentials`); verify with `testAndroidHostTest` until Xcode 26 is installed. The iOS app itself builds and runs.
+- iOS status bar style is app-wide (`UIViewControllerBasedStatusBarAppearance = false` in Info.plist); use `StatusBarIconsEffect` / `StatusBarScrim` rather than touching it directly.
+- Android emulator DNS via some routers hangs; start the AVD with `-dns-server 8.8.8.8,1.1.1.1`.
+- Kotlin 2.4.21 caps AGP at 9.3.1 — check the KMP compatibility table before bumping AGP.
+- Coil 3 KMP: use AsyncImage, configure ImageLoader per platform via expect/actual.
+- Use @Preview (org.jetbrains.compose.ui.tooling.preview.Preview) — unified annotation.
 
 ## Related Projects
 
@@ -187,4 +181,4 @@ Top-level: Eat & Drink, See & Visit, Activities, Hidden Gems, Practical. Sub-fil
 ### Adding a new feature / table
 When a new Supabase table or column is added, update BOTH projects:
 1. **kompass-admin:** `src/types/` (new TypeScript interface) + new page in `src/pages/`
-2. **kompass:** `data/remote/dto/` (new DTO) → `data/mapper/` (mapper extension) → `domain/model/` (domain class) → `domain/repository/` (interface) → `data/repository/` (impl) → `domain/usecase/` (use case) → presentation screen
+2. **kompass:** `data/remote/dto/` (DTO) → `data/mapper/` (mapper extension) → `domain/model/` (domain class) → `domain/repository/` (interface) → `data/repository/` (impl returning `Resource`) → `domain/usecase/` (use case) → `presentation/<feature>/` (five-file screen) + `core/navigation/destinations/` + feature Koin module
